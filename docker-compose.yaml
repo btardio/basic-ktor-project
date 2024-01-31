@@ -4,12 +4,14 @@ services:
     container_name: kotlin-ktor-server
     ports:
       - "8888:8888"
+    network_mode: "host"
     environment:
       PORT: 8888
       APP: applications/basic-server/build/libs/basic-server-1.0-SNAPSHOT.jar
   data-analyzer:
     image: kotlin-ktor-starter
     container_name: kotlin-ktor-analyzer
+    network_mode: "host"
     ports:
       - "8887:8887"
     environment:
@@ -18,6 +20,7 @@ services:
   data-collector:
     image: kotlin-ktor-starter
     container_name: kotlin-ktor-collector
+    network_mode: "host"
     ports:
       - "8886:8886"
     environment:
