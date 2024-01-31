@@ -1,3 +1,3 @@
 #!/bin/bash
 ./gradlew build
-docker-compose up
+# docker-compose up
