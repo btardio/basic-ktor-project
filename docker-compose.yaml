@@ -3,26 +3,54 @@ services:
     image: kotlin-ktor-starter
     container_name: kotlin-ktor-server
     ports:
-      - "8888:8888"
-    network_mode: "host"
+      - ${BASIC_SERVER_PORT_MAP}
     environment:
       PORT: 8888
       APP: applications/basic-server/build/libs/basic-server-1.0-SNAPSHOT.jar
   data-analyzer:
     image: kotlin-ktor-starter
     container_name: kotlin-ktor-analyzer
-    network_mode: "host"
     ports:
-      - "8887:8887"
+      - ${DATA_ANALYZER_PORT_MAP}
     environment:
       PORT: 8887
       APP: applications/data-analyzer-server/build/libs/data-analyzer-server-1.0-SNAPSHOT.jar
   data-collector:
     image: kotlin-ktor-starter
     container_name: kotlin-ktor-collector
-    network_mode: "host"
     ports:
-      - "8886:8886"
+      - ${DATA_COLLECTOR_PORT_MAP}
     environment:
       PORT: 8886
       APP: applications/data-collector-server/build/libs/data-collector-server-1.0-SNAPSHOT.jar
+  rabbit:
+    #    network_mode: "host"
+    image: rabbitmq:3.12-alpine
+    ports:
+      - ${RABBIT_15672}
+      - ${RABBIT_15691}
+      - ${RABBIT_15692}
+      - ${RABBIT_4369}
+      - ${RABBIT_5672}
+    environment:
+      - RABBITMQ_NODENAME=${RABBITMQ_NODENAME}
+      - RABBITMQ_NODE_IP_ADDRESS=${RABBITMQ_NODE_IP_ADDRESS}
+      - CLUSTERED=${RABBIT_CLUSTERED}
+      - RABBITMQ_ERLANG_COOKIE=11111111111111111
+      #      - RABBITMQ_CONFIG_FILE=/config/rabbitmq.conf
+    extra_hosts:
+      - ${RABBIT_HOSTA}
+      - ${RABBIT_HOSTB}
+      - ${RABBIT_HOSTC}
+      - ${RABBIT_HOSTD}
+      - ${RABBIT_HOSTE}
+      - ${RABBIT_HOSTF}
+    command: >
+      sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
+             rm -f /etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf &&
+             cp /plugins/rabbitmq_management-*/priv/www/cli/rabbitmqadmin /usr/local/bin/rabbitmqadmin &&
+             chmod +x /usr/local/bin/rabbitmqadmin &&
+             apk add --no-cache python3 &&
+             rabbitmq-server"
+    volumes:
+      - /home/ec2-user/90-rabbitmq.conf:/etc/rabbitmq/conf.d/90-rabbitmq.conf
