@@ -3,4 +3,5 @@
 # sudo /application/gradlew build
 docker build /application/ -t kotlin-ktor-starter
 docker-compose -f /application/docker-compose.yaml down
+source /.env
 docker-compose -f /application/docker-compose.yaml up --detach
