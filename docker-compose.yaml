@@ -1,3 +1,4 @@
+# docker-compose -f /application/docker-compose.yaml --env-file /.env down && docker-compose -f /application/docker-compose.yaml --env-file /.env up --detach && docker container logs application-rabbit-1 --follow
 services:
   basic-server:
     image: kotlin-ktor-starter
@@ -23,6 +24,14 @@ services:
     environment:
       PORT: 8886
       APP: applications/data-collector-server/build/libs/data-collector-server-1.0-SNAPSHOT.jar
+  cassandra:
+    network_mode: "host"
+    image: cassandra:5.0
+    environment:
+      - CASSANDRA_BROADCAST_ADDRESS="${CASSANDRA_BROADCAST_ADDRESS}"
+      - CASSANDRA_SEEDS="${CASSANDRA_SEEDS}"
+      - CASSANDRA_RPC_ADDRESS="${CASSANDRA_RPC_ADDRESS}"
+      - CASSANDRA_LISTEN_ADDRESS="${CASSANDRA_LISTEN_ADDRESS}"
   rabbit:
     network_mode: "host"
     image: rabbitmq:3.12-alpine
