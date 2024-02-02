@@ -35,7 +35,7 @@ services:
     environment:
       - RABBITMQ_NODENAME=${RABBITMQ_NODENAME}
       - RABBITMQ_NODE_IP_ADDRESS=${RABBITMQ_NODE_IP_ADDRESS}
-      - CLUSTERED=${RABBIT_CLUSTERED}
+      - CLUSTERED="${RABBIT_CLUSTERED}"
       - RABBITMQ_ERLANG_COOKIE=11111111111111111
       - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/conf.d/90-rabbitmq.conf
     extra_hosts:
