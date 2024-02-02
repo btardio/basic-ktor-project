@@ -24,26 +24,20 @@ services:
       PORT: 8886
       APP: applications/data-collector-server/build/libs/data-collector-server-1.0-SNAPSHOT.jar
   rabbit:
-    #    network_mode: "host"
+    network_mode: "host"
     image: rabbitmq:3.12-alpine
-    ports:
-      - ${RABBIT_15672}
-      - ${RABBIT_15691}
-      - ${RABBIT_15692}
-      - ${RABBIT_4369}
-      - ${RABBIT_5672}
     environment:
       - RABBITMQ_NODENAME=${RABBITMQ_NODENAME}
-      - RABBITMQ_NODE_IP_ADDRESS=${RABBITMQ_NODE_IP_ADDRESS}
+      - RABBITMQ_NODE_IP_ADDRESS="${RABBITMQ_NODE_IP_ADDRESS}"
       - CLUSTERED="${RABBIT_CLUSTERED}"
       - RABBITMQ_ERLANG_COOKIE=11111111111111111
       - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/conf.d/90-rabbitmq.conf
     extra_hosts:
-      - ${RABBIT_HOSTA}
-      - ${RABBIT_HOSTB}
-      - ${RABBIT_HOSTC}
-      - ${RABBIT_HOSTD}
-      - ${RABBIT_HOSTE}
+      - "${RABBIT_HOSTA}"
+      - "${RABBIT_HOSTB}"
+      - "${RABBIT_HOSTC}"
+      - "${RABBIT_HOSTD}"
+      - "${RABBIT_HOSTE}"
       # - ${RABBIT_HOSTF}
     command: >
       sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
