@@ -44,7 +44,7 @@ services:
       - ${RABBIT_HOSTC}
       - ${RABBIT_HOSTD}
       - ${RABBIT_HOSTE}
-      - ${RABBIT_HOSTF}
+      # - ${RABBIT_HOSTF}
     command: >
       sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
              rm -f /etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf &&
