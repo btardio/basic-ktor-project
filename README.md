@@ -1,75 +1,184 @@
-# Kotlin ktor starter
+# Project K-Means
 
-An [application continuum](https://www.appcontinuum.io/) style example using Kotlin and Ktor
-that includes a single web application with two background workers.
+[//]: # (An app for verifying email addresses in a registration flow, which is)
 
-* Basic web application
-* Data analyzer
-* Data collector
+[//]: # (designed to handle very high throughput.)
 
-### Technology stack
+[//]: # ()
+[//]: # (## Set up)
 
-This codebase is written in a language called [Kotlin](https://kotlinlang.org) that is able to run on the JVM with full
-Java compatibility.
-It uses the [Ktor](https://ktor.io) web framework, and runs on the [Netty](https://netty.io/) web server.
-HTML templates are written using [Freemarker](https://freemarker.apache.org).
-The codebase is tested with [JUnit](https://junit.org/) and uses [Gradle](https://gradle.org) to build a jarfile.
-The [pack cli](https://buildpacks.io/docs/tools/pack/) is used to build a [Docker](https://www.docker.com/) container which is deployed to
-[Google Cloud](https://cloud.google.com/) on Google's Cloud Platform.
+[//]: # ()
+[//]: # (1.  Run docker-compose.)
 
-## Getting Started
+[//]: # ()
+[//]: # (    ```shell)
 
-## Development
+[//]: # (    docker-compose up)
 
-1.  Build a Java Archive (jar) file.
-    ```bash
-    ./gradlew clean build
-    ```
+[//]: # (    ```)
 
-1.  Configure the port that each server runs on.
-    ```bash
-    export PORT=8881
-    ```
+[//]: # ()
+[//]: # (1.  Run migrations)
 
-Run the servers locally using the below examples.
+[//]: # (    ```shell)
 
-### Web application
+[//]: # (    ./gradlew devMigrate testMigrate)
 
-```bash
-java -jar applications/basic-server/build/libs/basic-server-1.0-SNAPSHOT.jar
-```
+[//]: # (    ```)
 
-### Data collector
+[//]: # ()
+[//]: # (## Build and run)
 
-```bash
-java -jar applications/data-collector-server/build/libs/data-collector-server-1.0-SNAPSHOT.jar
-```
+[//]: # (    )
+[//]: # (1.  Use the [Gradle Kotlin plugin]&#40;https://kotlinlang.org/docs/gradle.html#compiler-options&#41;)
 
-### Data analyzer
+[//]: # (    to run tests, build, and fetch dependencies.)
 
-```bash
-java -jar applications/data-analyzer-server/build/libs/data-analyzer-server-1.0-SNAPSHOT.jar
-```
+[//]: # (    For example, to build run)
 
-## Production
+[//]: # (    ```shell)
 
-Building a Docker container and running with Docker.
+[//]: # (    ./gradlew build)
 
-## Buildpacks
+[//]: # (    ```)
 
-1.  Install the [pack](https://buildpacks.io/docs/tools/pack/) CLI.
-    ```bash
-    brew install buildpacks/tap/pack
-    ```
+[//]: # ()
+[//]: # (1.  Run the notification server.)
 
-1.  Build using pack.
-    ```bash
-    pack build kotlin-ktor-starter --builder heroku/buildpacks:20
-    ```
+[//]: # (    ```shell)
 
-1.  Run with docker.
-    ```bash
-    docker run  -e "PORT=8882" -e "APP=applications/basic-server/build/libs/basic-server-1.0-SNAPSHOT.jar" kotlin-ktor-starter
-    ```
+[//]: # (    ./gradlew applications:notification-server:run)
 
-That's a wrap for now.
+[//]: # (    ```)
+
+[//]: # (    )
+[//]: # (    Luckily, Gradle fuzzy-matches task names, so the command can optionally be shortened to)
+
+[//]: # ()
+[//]: # (    ```shell)
+
+[//]: # (    ./gradlew a:n:r)
+
+[//]: # (    ```)
+
+[//]: # ()
+[//]: # (1.  Run the registration server in a separate terminal window.)
+
+[//]: # (    ```shell)
+
+[//]: # (    ./gradlew applications:registration-server:run)
+
+[//]: # (    ```)
+
+[//]: # (    )
+[//]: # (1.  Run the fake Sendgrid server in another separate terminal window.)
+
+[//]: # (    ```shell)
+
+[//]: # (    ./gradlew platform-support:fake-sendgrid:run)
+
+[//]: # (    ```)
+
+[//]: # ()
+[//]: # (## Make requests)
+
+[//]: # ()
+[//]: # (1.  Post to [http://localhost:8081/request-registration]&#40;http://localhost:8081/request-registration&#41;)
+
+[//]: # (    to make a registration request.)
+
+[//]: # (    Include the email address to register in the request body.)
+
+[//]: # (    ```json)
+
+[//]: # (    {)
+
+[//]: # (      "email": "jenny@example.com")
+
+[//]: # (    })
+
+[//]: # (    ```)
+
+[//]: # ()
+[//]: # (    Don't forget to add the content type header.)
+
+[//]: # (    ```text)
+
+[//]: # (    Content-Type: application/json)
+
+[//]: # (    ```)
+
+[//]: # (    )
+[//]: # (1.  Check the logs of the fake Sendgrid server for your confirmation code.)
+
+[//]: # (    Once you receive it, post to [http://localhost:8081/register]&#40;http://localhost:8081/register&#41;)
+
+[//]: # (    to confirm your registration.)
+
+[//]: # (    Include your email address and confirmation code in the request body.)
+
+[//]: # (    ```json)
+
+[//]: # (    {)
+
+[//]: # (        "email": "jenny@example.com",)
+
+[//]: # (        "confirmationCode": "18675309-1234-5678-90ab-cdef00000000")
+
+[//]: # (    })
+
+[//]: # (    ```)
+
+[//]: # ()
+[//]: # (    Don't forget to add the content type header.)
+
+[//]: # (    ```text)
+
+[//]: # (    Content-Type: application/json)
+
+[//]: # (    ```)
+
+[//]: # ()
+[//]: # (See the `requests.http` file for sample requests)
+
+[//]: # ()
+[//]: # (## Benchmarks)
+
+[//]: # ()
+[//]: # (The _benchmark app_ runs a simple benchmark test against the running apps.)
+
+[//]: # ()
+[//]: # (1.  Stop the fake Sendgrid app, then run the benchmark app with)
+
+[//]: # (    ```shell)
+
+[//]: # (    ./gradlew applications:benchmark:run)
+
+[//]: # (    ```)
+
+[//]: # ()
+[//]: # (    This will send some traffic to the notification and registration servers, and will print some basic metrics to the)
+
+[//]: # (    console.)
+
+[//]: # ()
+[//]: # (1.  Once the benchmark is finished, try running it again giving different values for the `REGISTRATION_COUNT`,)
+
+[//]: # (    `REGISTRATION_WORKER_COUNT`, and `REQUEST_WORKER_COUNT` environment variables.)
+
+[//]: # (    )
+[//]: # (1.  After getting comfortable with the environment, try running multiple instances of the notification server and the)
+
+[//]: # (    registration server.)
+
+[//]: # (    Make sure to provide a unique `PORT` environment variable to each instance of the registration server.)
+
+[//]: # ()
+[//]: # (## Consistent hash exchange)
+
+[//]: # ()
+[//]: # (Now that we have our system working with multiple instances, we will implement a [consistent hash exchange]&#40;https://github.com/rabbitmq/rabbitmq-server/tree/master/deps/rabbitmq_consistent_hash_exchange&#41;)
+
+[//]: # (to better distribute load between our registration request consumers.)
+
+[//]: # (Look for the `TODO`s in the codebase to help you get started.)

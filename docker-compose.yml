@@ -1,0 +1,83 @@
+# docker-compose -f /application/docker-compose.yaml --env-file /.env down && docker-compose -f /application/docker-compose.yaml --env-file /.env up --detach && docker container logs application-rabbit-1 --follow
+services:
+  basic-server:
+    image: kotlin-ktor-starter
+    container_name: kotlin-ktor-server
+    ports:
+      - ${BASIC_SERVER_PORT_MAP}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - COLLECTOR_EXCHANGE=${COLLECTOR_EXCHANGE}
+      - COLLECTOR_QUEUE=${COLLECTOR_QUEUE}-a
+      - WEBSERVER_EXCHANGE=${WEBSERVER_EXCHANGE}
+      - WEBSERVER_QUEUE=${WEBSERVER_QUEUE}-a
+      - RABBIT_URL=host.docker.internal
+      - PORT=8888
+      - APP=applications/webserver/build/libs/webserver.jar
+  data-analyzer:
+    image: kotlin-ktor-starter
+    container_name: kotlin-ktor-analyzer
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - ${DATA_ANALYZER_PORT_MAP}
+    environment:
+      - WEBSERVER_EXCHANGE=${WEBSERVER_EXCHANGE}
+      - WEBSERVER_QUEUE=${WEBSERVER_QUEUE}-b
+      - ANALYZER_EXCHANGE=${ANALYZER_EXCHANGE}
+      - ANALYZER_QUEUE=${ANALYZER_QUEUE}-a
+      - RABBIT_URL=127.0.0.1
+      - PORT=8887
+      - APP=applications/analyzer/build/libs/analyzer.jar
+  data-collector:
+    image: kotlin-ktor-starter
+    container_name: kotlin-ktor-collector
+    ports:
+      - ${DATA_COLLECTOR_PORT_MAP}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - ANALYZER_EXCHANGE=${ANALYZER_EXCHANGE}
+      - ANALYZER_QUEUE=${ANALYZER_QUEUE}-b
+      - COLLECTOR_EXCHANGE=${COLLECTOR_EXCHANGE}
+      - COLLECTOR_QUEUE=${COLLECTOR_QUEUE}-b
+      - RABBIT_URL=host.docker.internal
+      - PORT=8886
+      - APP=applications/collector/build/libs/collector.jar
+  cassandra:
+    network_mode: "host"
+    image: cassandra:5.0
+    restart: always
+    environment:
+      - CASSANDRA_BROADCAST_ADDRESS="${CASSANDRA_BROADCAST_ADDRESS}"
+      - CASSANDRA_SEEDS=${CASSANDRA_SEEDS}
+      - CASSANDRA_RPC_ADDRESS="${CASSANDRA_RPC_ADDRESS}"
+      - CASSANDRA_LISTEN_ADDRESS="${CASSANDRA_LISTEN_ADDRESS}"
+  rabbit:
+    network_mode: "host"
+    image: rabbitmq:3.12-alpine
+    restart: always
+    environment:
+      - RABBITMQ_NODENAME=${RABBITMQ_NODENAME}
+      - CLUSTERED="${RABBIT_CLUSTERED}"
+      - RABBITMQ_ERLANG_COOKIE=11111111111111111
+      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/conf.d/90-rabbitmq.conf
+    extra_hosts:
+      - "${RABBIT_HOSTA}"
+      - "${RABBIT_HOSTB}"
+      - "${RABBIT_HOSTC}"
+      - "${RABBIT_HOSTD}"
+      - "${RABBIT_HOSTE}"
+      # - ${RABBIT_HOSTF}
+      - "host.docker.internal:host-gateway"
+    command: >
+      sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
+             rabbitmq-plugins enable rabbitmq_consistent_hash_exchange &&
+             rm -f /etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf &&
+             cp /plugins/rabbitmq_management-*/priv/www/cli/rabbitmqadmin /usr/local/bin/rabbitmqadmin &&
+             chmod +x /usr/local/bin/rabbitmqadmin &&
+             apk add --no-cache python3 &&
+             rabbitmq-server"
+    volumes:
+      - /home/ec2-user/90-rabbitmq.conf:/etc/rabbitmq/conf.d/90-rabbitmq.conf
