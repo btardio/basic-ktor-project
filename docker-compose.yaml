@@ -51,6 +51,7 @@ services:
       # - ${RABBIT_HOSTF}
     command: >
       sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
+             rabbitmq-plugins enable rabbitmq_consistent_hash_exchange &&
              rm -f /etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf &&
              cp /plugins/rabbitmq_management-*/priv/www/cli/rabbitmqadmin /usr/local/bin/rabbitmqadmin &&
              chmod +x /usr/local/bin/rabbitmqadmin &&
