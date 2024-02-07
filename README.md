@@ -10,14 +10,13 @@
 
 ### Local Development
 
+```
 
-    ```shell
+    docker build . -t kotlin-ktor-starter --no-cache
 
-        docker build . -t kotlin-ktor-starter --no-cache
+    docker-compose --env-file ./local.env
 
-        docker-compose --env-file ./local.env
-
-    ```
+```
 
 [//]: # ()
 [//]: # (1.  Run migrations)
