@@ -1,31 +1,23 @@
 # Project K-Means
 
-Local Development
-
-(```shell
-
-docker build . -t kotlin-ktor-starter --no-cache
-
-docker-compose --env-file ./local.env
-
-```)
-
 [//]: # (An app for verifying email addresses in a registration flow, which is)
 
 [//]: # (designed to handle very high throughput.)
 
-[//]: # ()
-[//]: # (## Set up)
 
-[//]: # ()
-[//]: # (1.  Run docker-compose.)
+## Set up
 
-[//]: # ()
-[//]: # (    ```shell)
 
-[//]: # (    docker-compose up)
+### Local Development
 
-[//]: # (    ```)
+
+    ```shell
+
+        docker build . -t kotlin-ktor-starter --no-cache
+
+        docker-compose --env-file ./local.env
+
+    ```
 
 [//]: # ()
 [//]: # (1.  Run migrations)
