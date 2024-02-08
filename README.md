@@ -12,6 +12,10 @@
 
 ```
 
+    docker compose --env-file ./local.env build && docker compose --env-file=./local.env up --detach
+
+    (below is deprecated)
+
     docker build . -t kotlin-ktor-starter --no-cache
 
     docker-compose --env-file ./local.env up -d
