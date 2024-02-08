@@ -14,7 +14,7 @@
 
     docker build . -t kotlin-ktor-starter --no-cache
 
-    docker-compose --env-file ./local.env
+    docker-compose --env-file ./local.env up -d
 
 ```
 

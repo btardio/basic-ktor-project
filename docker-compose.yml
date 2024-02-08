@@ -1,7 +1,10 @@
 # docker-compose -f /application/docker-compose.yaml --env-file /.env down && docker-compose -f /application/docker-compose.yaml --env-file /.env up --detach && docker container logs application-rabbit-1 --follow
 services:
   basic-server:
-    image: kotlin-ktor-starter
+#    image: kotlin-ktor-starter
+    build:
+      context: ./
+      no_cache: true
     container_name: kotlin-ktor-server
     ports:
       - ${BASIC_SERVER_PORT_MAP}
@@ -14,9 +17,12 @@ services:
       - WEBSERVER_QUEUE=${WEBSERVER_QUEUE}-a
       - RABBIT_URL=host.docker.internal
       - PORT=8888
-      - APP=applications/webserver/build/libs/webserver.jar
+      - APP=webserver/build/libs/webserver.jar
   data-analyzer:
-    image: kotlin-ktor-starter
+#    image: kotlin-ktor-starter
+    build:
+      context: ./
+      no_cache: true
     container_name: kotlin-ktor-analyzer
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -29,9 +35,11 @@ services:
       - ANALYZER_QUEUE=${ANALYZER_QUEUE}-a
       - RABBIT_URL=127.0.0.1
       - PORT=8887
-      - APP=applications/analyzer/build/libs/analyzer.jar
+      - APP=analyzer/build/libs/analyzer.jar
   data-collector:
-    image: kotlin-ktor-starter
+    build:
+      context: ./
+      no_cache: true
     container_name: kotlin-ktor-collector
     ports:
       - ${DATA_COLLECTOR_PORT_MAP}
@@ -44,7 +52,7 @@ services:
       - COLLECTOR_QUEUE=${COLLECTOR_QUEUE}-b
       - RABBIT_URL=host.docker.internal
       - PORT=8886
-      - APP=applications/collector/build/libs/collector.jar
+      - APP=collector/build/libs/collector.jar
   cassandra:
     network_mode: "host"
     image: cassandra:5.0
