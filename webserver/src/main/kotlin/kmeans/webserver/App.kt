@@ -1,10 +1,15 @@
 package kmeans.webserver
 
 import com.rabbitmq.client.*
+import kmeans.`env-support`.getEnvInt
 import kmeans.`env-support`.getEnvStr
-
-import org.slf4j.LoggerFactory
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -13,6 +18,8 @@ val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "collector-queue-webserver-ap
 
 val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-webserver-app")
+
+val EMBEDDED_NETTY_PORT = getEnvInt("BASIC_SERVER_PORT_MAP", 8888)
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
@@ -115,6 +122,14 @@ fun main() {
             //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = COLLECTOR_EXCHANGE,
         )
+
+        embeddedServer(Netty, port = EMBEDDED_NETTY_PORT) {
+            routing {
+                get("/") {
+                    call.respondText("response OK")
+                }
+            }
+        }.start(wait = true)
     }
 
     class Csmr(ch: Channel, exchangeName: String) : Consumer {
