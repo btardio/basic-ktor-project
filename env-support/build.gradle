@@ -7,9 +7,9 @@ dependencies {
     implementation 'org.apache.commons:commons-text'
 }
 
-kotlin {
-    jvmToolchain(17)
-}
+//kotlin {
+//    jvmToolchain(17)
+//}
 
 //
 //tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
