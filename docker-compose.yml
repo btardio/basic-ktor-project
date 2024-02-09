@@ -2,7 +2,7 @@
 services:
   apache:
     image: httpd:latest
-    container_name: my-apache-app
+    container_name: httpd
     ports:
       - '8080:80'
     volumes:
@@ -18,10 +18,10 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      - COLLECTOR_EXCHANGE=${COLLECTOR_EXCHANGE}
-      - COLLECTOR_QUEUE=${COLLECTOR_QUEUE}-a
-      - WEBSERVER_EXCHANGE=${WEBSERVER_EXCHANGE}
-      - WEBSERVER_QUEUE=${WEBSERVER_QUEUE}-a
+      - COLLECTOR_EXCHANGE=collector-exchange
+      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-a
+      - WEBSERVER_EXCHANGE=webserver-exchange
+      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-a
       - RABBIT_URL=host.docker.internal
       - PORT=8888
       - APP=webserver/build/libs/webserver.jar
@@ -36,10 +36,10 @@ services:
     ports:
       - ${DATA_ANALYZER_PORT_MAP}
     environment:
-      - WEBSERVER_EXCHANGE=${WEBSERVER_EXCHANGE}
-      - WEBSERVER_QUEUE=${WEBSERVER_QUEUE}-b
-      - ANALYZER_EXCHANGE=${ANALYZER_EXCHANGE}
-      - ANALYZER_QUEUE=${ANALYZER_QUEUE}-a
+      - WEBSERVER_EXCHANGE=webserver-exchange
+      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
+      - ANALYZER_EXCHANGE=analyzer-exchange
+      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
       - RABBIT_URL=127.0.0.1
       - PORT=8887
       - APP=analyzer/build/libs/analyzer.jar
@@ -53,10 +53,10 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      - ANALYZER_EXCHANGE=${ANALYZER_EXCHANGE}
-      - ANALYZER_QUEUE=${ANALYZER_QUEUE}-b
-      - COLLECTOR_EXCHANGE=${COLLECTOR_EXCHANGE}
-      - COLLECTOR_QUEUE=${COLLECTOR_QUEUE}-b
+      - ANALYZER_EXCHANGE=analyzer-exchange
+      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-b
+      - COLLECTOR_EXCHANGE=collector-exchange
+      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-b
       - RABBIT_URL=host.docker.internal
       - PORT=8886
       - APP=collector/build/libs/collector.jar
