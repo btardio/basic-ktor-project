@@ -6,20 +6,20 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kmeans.`env-support`.getEnvInt
 import kmeans.`env-support`.getEnvStr
 
 import org.slf4j.LoggerFactory
 import kotlinx.coroutines.runBlocking
 
-import kmeans.`env-support`.getEnvInt
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
-val COLLECTOR_EXCHANGE = getEnvStr("COLLECTOR_EXCHANGE", "collector-exchange")
-val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "collector-queue-webserver-app")
+val ANALYZER_EXCHANGE = getEnvStr("ANALYZER_EXCHANGE", "collector-exchange")
+val ANALYZER_QUEUE = getEnvStr("ANALYZER_QUEUE", "collector-queue-webserver-app")
 
-val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
-val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-webserver-app")
+val COLLECTOR_EXCHANGE = getEnvStr("COLLECTOR_EXCHANGE", "webserver-exchange")
+val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "webserver-queue-webserver-app")
 
 val EMBEDDED_NETTY_PORT = getEnvInt("DATA_COLLECTOR_PORT_MAP", 8886)
 
@@ -75,14 +75,14 @@ fun main() {
         val ch = conn.createChannel();
 
         ch.exchangeDeclare(
-            COLLECTOR_EXCHANGE,
+            ANALYZER_EXCHANGE,
             "x-consistent-hash",
             false,
             false,
             null
         )
         ch.queueDeclare(
-            COLLECTOR_QUEUE,
+            ANALYZER_QUEUE,
             false,
             false,
             false,
@@ -90,8 +90,8 @@ fun main() {
 
             )
         ch.queueBind(
-            COLLECTOR_QUEUE,
-            COLLECTOR_EXCHANGE,
+            ANALYZER_QUEUE,
+            ANALYZER_EXCHANGE,
             getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
         )
 
@@ -99,14 +99,14 @@ fun main() {
 
 
         ch.exchangeDeclare(
-            WEBSERVER_EXCHANGE,
+            COLLECTOR_EXCHANGE,
             "x-consistent-hash",
             false,
             false,
             null
         )
         ch.queueDeclare(
-            WEBSERVER_QUEUE,
+            COLLECTOR_QUEUE,
             false,
             false,
             false,
@@ -114,8 +114,8 @@ fun main() {
 
             )
         ch.queueBind(
-            WEBSERVER_QUEUE,
-            WEBSERVER_EXCHANGE,
+            COLLECTOR_QUEUE,
+            COLLECTOR_EXCHANGE,
             getEnvStr("ROUNDTRIP_NOTIFICATION_CONSISTENT_HASH_ROUTING", "83")
         )
 
@@ -124,9 +124,9 @@ fun main() {
         listenAndPublish(
             connectionFactory = connectionFactory,
 //        queueName = REGISTRATION_REQUEST_QUEUE,
-            queueName = WEBSERVER_QUEUE,
+            queueName = COLLECTOR_QUEUE,
             //exchangeName = NOTIFICATION_EXCHANGE,
-            exchangeName = COLLECTOR_EXCHANGE,
+            exchangeName = ANALYZER_EXCHANGE,
         )
 
 
