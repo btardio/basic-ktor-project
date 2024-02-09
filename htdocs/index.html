@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>jQuery Demo</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="js/scripts.js"></script>
+
+
+<textarea name="post_name" id="post_name"></textarea>
+
+<input type="button" name="post_button" id="post_button"  value="Post" class="btn btn-info" />
+
+<script>
+$(document).ready(function(){
+// $('#post_button').click(function(){
+//  var post_name = $('#post_name').val();
+  //trim() is used to remover spaces
+//  if($.trim(post_name) != '')
+//  {
+//   $.ajax({
+//    url:"https://worldtimeapi.org/api/timezone/America/Los_Angeles",
+//    method:"GET",
+//    data:"",
+//    dataType:"text",
+//    success:function(data)
+//    {
+//     $('#post_name').val(data);
+//    }
+//   });
+//  }
+// });
+
+ setInterval(function(){//setInterval() method execute on every interval until called clearInterval()
+//  $('#load_posts').load("display.php").fadeIn("slow");
+  
+  $.ajax({
+    url:"https://worldtimeapi.org/api/timezone/America/Los_Angeles",
+    method:"GET",
+    data:"",
+    dataType:"text",
+    success:function(data)
+    {
+     $('#post_name').val(data);
+    }
+   });
+
+
+		 //load() method fetch data from fetch.php page
+ }, 1000);
+
+});
+</script>
+
+</body>
+
+</html>

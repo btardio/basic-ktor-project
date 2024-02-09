@@ -1,5 +1,12 @@
 # docker-compose -f /application/docker-compose.yaml --env-file /.env down && docker-compose -f /application/docker-compose.yaml --env-file /.env up --detach && docker container logs application-rabbit-1 --follow
 services:
+  apache:
+    image: httpd:latest
+    container_name: my-apache-app
+    ports:
+      - '8080:80'
+    volumes:
+      - ./htdocs:/usr/local/apache2/htdocs
   basic-server:
 #    image: kotlin-ktor-starter
     build:
