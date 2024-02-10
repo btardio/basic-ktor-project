@@ -43,6 +43,12 @@ dependencies {
     implementation("io.prometheus:prometheus-metrics-core:1.0.0")
     implementation("io.prometheus:prometheus-metrics-instrumentation-jvm:1.0.0")
     implementation("io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0")
+    implementation('com.netflix.astyanax:astyanax-core:3.10.2')
+    implementation("com.netflix.astyanax:astyanax-thrift:3.10.2")
+    implementation("com.netflix.astyanax:astyanax-cassandra:3.10.2")
+
+
+
 }
 
 

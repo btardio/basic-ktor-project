@@ -43,7 +43,7 @@ services:
       - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
       - ANALYZER_EXCHANGE=analyzer-exchange
       - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
-      - RABBIT_URL=127.0.0.1
+      - RABBIT_URL=host.docker.internal
       - PORT=8887
       - APP=analyzer/build/libs/analyzer.jar
       - AWSHOSTNAME=${HOSTNAME}

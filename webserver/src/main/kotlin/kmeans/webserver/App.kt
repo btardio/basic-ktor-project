@@ -1,15 +1,21 @@
 package kmeans.webserver
 
 import com.rabbitmq.client.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kmeans.`env-support`.getEnvInt
 import kmeans.`env-support`.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import com.netflix.astyanax.*
+import com.netflix.astyanax.connectionpool.NodeDiscoveryType
+import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl
+import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor
+import com.netflix.astyanax.impl.*
+import com.netflix.astyanax.thrift.ThriftFamilyFactory
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -20,6 +26,10 @@ val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-webserver-app")
 
 val EMBEDDED_NETTY_PORT = getEnvInt("BASIC_SERVER_PORT_MAP", 8888)
+
+val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
+
+val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
@@ -55,14 +65,35 @@ suspend fun listenAndPublish(
 fun main() {
 
     runBlocking {
-        val rabbitUrl = "rabbit";
-        //    val rabbitUrl = System.getenv("RABBIT_URL")?.let(::URI)
-//        ?: throw RuntimeException("Please set the RABBIT_URL environment variable")
-//    val databaseUrl = System.getenv("DATABASE_URL")
-//        ?: throw RuntimeException("Please set the DATABASE_URL environment variable")
+
+        val context: AstyanaxContext<Keyspace> = AstyanaxContext.Builder()
+            .forCluster("ClusterName")
+            .forKeyspace("KeyspaceName")
+            .withAstyanaxConfiguration(
+                AstyanaxConfigurationImpl()
+                    .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
+            )
+            .withConnectionPoolConfiguration(
+                ConnectionPoolConfigurationImpl("MyConnectionPool")
+                    .setPort(9042)
+                    .setMaxConnsPerHost(1)
+                    .setSeeds(CASSANDRA_SEEDS.replace("7000", "9042"))
+            )
+            .withConnectionPoolMonitor(CountingConnectionPoolMonitor())
+            .buildKeyspace(ThriftFamilyFactory.getInstance())
+
+        context.start()
+        val keyspace: Keyspace = context.getClient()
+
+
+
+
+
+
 
         val connectionFactory = ConnectionFactory();
-        connectionFactory.setHost("host.docker.internal");
+
+        connectionFactory.setHost(RABBIT_URL);
 
         val conn = connectionFactory.newConnection();
 

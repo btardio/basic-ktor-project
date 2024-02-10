@@ -23,6 +23,10 @@ val ANALYZER_QUEUE = getEnvStr("ANALYZER_QUEUE", "analyzer-queue-analyzer-app")
 
 val EMBEDDED_NETTY_PORT = getEnvInt("DATA_ANALYZER_PORT_MAP", 8887)
 
+val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
+
+val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
+
 private val logger = LoggerFactory.getLogger("kmeans.analyzer.App")
 
 private fun listenForNotificationRequests(
@@ -60,8 +64,34 @@ fun main() {
 
     runBlocking {
 
+        val context: AstyanaxContext<Keyspace> = AstyanaxContext.Builder()
+            .forCluster("ClusterName")
+            .forKeyspace("KeyspaceName")
+            .withAstyanaxConfiguration(
+                AstyanaxConfigurationImpl()
+                    .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
+            )
+            .withConnectionPoolConfiguration(
+                ConnectionPoolConfigurationImpl("MyConnectionPool")
+                    .setPort(9042)
+                    .setMaxConnsPerHost(1)
+                    .setSeeds(CASSANDRA_SEEDS.replace("7000", "9042"))
+            )
+            .withConnectionPoolMonitor(CountingConnectionPoolMonitor())
+            .buildKeyspace(ThriftFamilyFactory.getInstance())
+
+        context.start()
+        val keyspace: Keyspace = context.getClient()
+
+
+
+
+
+
+
         val connectionFactory = ConnectionFactory();
-        connectionFactory.setHost("host.docker.internal");
+
+        connectionFactory.setHost(RABBIT_URL);
 
         val conn = connectionFactory.newConnection();
 
