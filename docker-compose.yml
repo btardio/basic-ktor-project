@@ -12,6 +12,7 @@ services:
     build:
       context: ./
       no_cache: true
+    restart: always
     container_name: kotlin-ktor-server
     ports:
       - ${BASIC_SERVER_PORT_MAP}
@@ -25,11 +26,13 @@ services:
       - RABBIT_URL=host.docker.internal
       - PORT=8888
       - APP=webserver/build/libs/webserver.jar
+      - AWSHOSTNAME=${HOSTNAME}
   data-analyzer:
 #    image: kotlin-ktor-starter
     build:
       context: ./
       no_cache: true
+    restart: always
     container_name: kotlin-ktor-analyzer
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -43,10 +46,12 @@ services:
       - RABBIT_URL=127.0.0.1
       - PORT=8887
       - APP=analyzer/build/libs/analyzer.jar
+      - AWSHOSTNAME=${HOSTNAME}
   data-collector:
     build:
       context: ./
       no_cache: true
+    restart: always
     container_name: kotlin-ktor-collector
     ports:
       - ${DATA_COLLECTOR_PORT_MAP}
@@ -60,6 +65,7 @@ services:
       - RABBIT_URL=host.docker.internal
       - PORT=8886
       - APP=collector/build/libs/collector.jar
+      - AWSHOSTNAME=${HOSTNAME}
   cassandra:
     network_mode: "host"
     image: cassandra:5.0
