@@ -1,21 +1,39 @@
 package kmeans.webserver
 
+
 import com.rabbitmq.client.*
+
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.*
 import kmeans.`env-support`.getEnvInt
 import kmeans.`env-support`.getEnvStr
+import kmeans.solrSupport.SolrStartup.createCollection
+import kmeans.solrSupport.SolrStartup.createSchema
+import kmeans.solrSupport.SolrEntity
+//import kmeans.webserver.SolrStartup.createCollection
+//import kmeans.webserver.SolrStartup.createSchema
 import kotlinx.coroutines.runBlocking
+import org.apache.solr.client.solrj.SolrQuery
+import org.apache.solr.client.solrj.impl.HttpSolrClient
+import org.apache.solr.client.solrj.response.QueryResponse
 import org.slf4j.LoggerFactory
-import com.netflix.astyanax.*
-import com.netflix.astyanax.connectionpool.NodeDiscoveryType
-import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl
-import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor
-import com.netflix.astyanax.impl.*
-import com.netflix.astyanax.thrift.ThriftFamilyFactory
+import java.util.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import java.util.UUID
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -62,31 +80,42 @@ suspend fun listenAndPublish(
 }
 
 
+
 fun main() {
 
     runBlocking {
 
-        val context: AstyanaxContext<Keyspace> = AstyanaxContext.Builder()
-            .forCluster("ClusterName")
-            .forKeyspace("KeyspaceName")
-            .withAstyanaxConfiguration(
-                AstyanaxConfigurationImpl()
-                    .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
-            )
-            .withConnectionPoolConfiguration(
-                ConnectionPoolConfigurationImpl("MyConnectionPool")
-                    .setPort(9042)
-                    .setMaxConnsPerHost(1)
-                    .setSeeds(CASSANDRA_SEEDS.replace("7000", "9042"))
-            )
-            .withConnectionPoolMonitor(CountingConnectionPoolMonitor())
-            .buildKeyspace(ThriftFamilyFactory.getInstance())
+        val solrClient: HttpSolrClient = HttpSolrClient.Builder("http://127.0.0.1:8983/solr/XYZ").build();
 
-        context.start()
-        val keyspace: Keyspace = context.getClient()
+        // sane checks stay
+
+        // we have a collection
+        createCollection(1,1);
+
+        // we have a schema
+        createSchema(solrClient);
+
+        val uuid: UUID = UUID.randomUUID();
+
+        // we can write
+        solrClient.addBean(SolrEntity(uuid, "{}"))
+        solrClient.commit()
+
+//            // not sane            .withCql("CREATE TABLE sanity (uuid varchar, value varchar, PRIMARY KEY (uuid));")
+
+        // we can read
+        val query = SolrQuery()
+        query.set("q", "uuid:" + uuid.toString())
+        val response: QueryResponse = solrClient.query(query)
+
+        if ( response.results.size != 1 ) {
+            throw Exception("Error, not sane.")
+        }
 
 
-
+        for (doc in response.results) {
+            println(doc)
+        }
 
 
 
@@ -157,7 +186,33 @@ fun main() {
         embeddedServer(Netty, port = EMBEDDED_NETTY_PORT) {
             routing {
                 get("/") {
-                    call.respondText("response OK")
+                    call.respondText("~~~response OK")
+                }
+                get("/startKmeans/{numberPoints}") {
+                    val numberPoints = call.parameters["numberPoints"]
+
+
+                    val cf = connectionFactory.newConnection().createChannel()
+
+                    var numPointsAsInt = Integer.parseInt(numberPoints)
+
+
+
+                    var sendingMessage: NewKmeansScheduledJob = NewKmeansScheduledJob(
+                        jobId = UUID.randomUUID(),
+                        status = "started",
+                        numberPoints = numPointsAsInt
+                    );
+
+                    cf.basicPublish(
+                        COLLECTOR_EXCHANGE,
+                        UUID.randomUUID().toString(),
+                        MessageProperties.PERSISTENT_BASIC,
+                        Json.encodeToString<NewKmeansScheduledJob>(sendingMessage).toByteArray()
+                    )
+//                    cf.close()
+
+                    call.respondText("OK, Templeton, scheduling a new kmeans run using " + numberPoints)
                 }
             }
         }.start(wait = true)
@@ -200,3 +255,16 @@ fun main() {
         }
     }
 }
+
+class UUIDSerializer: KSerializer<UUID> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder): UUID = UUID.fromString(decoder.decodeString())
+    override fun serialize(encoder: Encoder, value: UUID) = encoder.encodeString(value.toString())
+}
+@Serializable
+data class NewKmeansScheduledJob(
+    @Serializable(with = UUIDSerializer::class)
+    val jobId: UUID,
+    val status: String,
+    val numberPoints: Int
+)

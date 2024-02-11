@@ -1,17 +1,26 @@
 package kmeans.analyzer
 
 import com.rabbitmq.client.*
-import kmeans.`env-support`.getEnvInt
-import kmeans.`env-support`.getEnvStr
-
-import org.slf4j.LoggerFactory
-import kotlinx.coroutines.runBlocking
-
 import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import kmeans.`env-support`.getEnvInt
+import kmeans.`env-support`.getEnvStr
+import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
+import com.netflix.astyanax.*
+import com.netflix.astyanax.connectionpool.*
+import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl
+import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor
+
+import com.netflix.astyanax.impl.*
+import com.netflix.astyanax.thrift.ThriftFamilyFactory
+import com.netflix.astyanax.serializers.*
+import com.netflix.astyanax.model.*
+
+import com.rabbitmq.client.ConnectionFactory
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -82,7 +91,6 @@ fun main() {
 
         context.start()
         val keyspace: Keyspace = context.getClient()
-
 
 
 

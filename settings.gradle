@@ -25,4 +25,5 @@ rootProject.name = 'kmeans'
 include('collector',
         'analyzer',
         'webserver',
-        'env-support')
+        'env-support',
+        'solrSupport')
