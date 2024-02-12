@@ -99,8 +99,8 @@ services:
       - "${SOLR1_PORTS}"
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
-    networks:
-      - solr
+#    networks:
+#      - solr
     depends_on:
       - zoo1
       - zoo2
@@ -114,8 +114,8 @@ services:
       - "${SOLR2_PORTS}"
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
-    networks:
-      - solr
+#    networks:
+#      - solr
     depends_on:
       - zoo1
       - zoo2
@@ -129,8 +129,8 @@ services:
       - "${SOLR3_PORTS}"
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
-    networks:
-      - solr
+#    networks:
+#      - solr
     depends_on:
       - zoo1
       - zoo2
@@ -151,8 +151,8 @@ services:
       ZOO_SERVERS: ${ZOO_SERVERS}
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-    networks:
-      - solr
+#    networks:
+#      - solr
 
   zoo2:
     image: zookeeper:3.6.2
@@ -169,8 +169,8 @@ services:
       ZOO_SERVERS: ${ZOO_SERVERS}
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-    networks:
-      - solr
+#    networks:
+#      - solr
 
   zoo3:
     image: zookeeper:3.6.2
@@ -187,8 +187,8 @@ services:
       ZOO_SERVERS: ${ZOO_SERVERS}
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-    networks:
-      - solr
-
-networks:
-  solr:
+#    networks:
+#      - solr
+#
+#networks:
+#  solr:
