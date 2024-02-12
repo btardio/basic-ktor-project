@@ -149,6 +149,7 @@ services:
       - "${ZOO1_PORTS}"
       - 7001:7000
       - "${ZOO1_COMMANDS}"
+      - "${ZOOIPA}:102888-103888:2888-3888"
     environment:
       ZOO_MY_ID: ${ZOO1_ID}
       ZOO_SERVERS: ${ZOO_SERVERS}
@@ -166,6 +167,7 @@ services:
       - "${ZOO2_PORTS}"
       - 7002:7000
       - "${ZOO2_COMMANDS}"
+      - "${ZOOIPB}:202888-203888:2888-3888"
     environment:
       ZOO_MY_ID: ${ZOO2_ID}
       ZOO_SERVERS: ${ZOO_SERVERS}
@@ -183,6 +185,7 @@ services:
       - "${ZOO3_PORTS}"
       - 7003:7000
       - "${ZOO3_COMMANDS}"
+      - "${ZOOIPC}:302888-303888:2888-3888"
     environment:
       ZOO_MY_ID: ${ZOO3_ID}
       ZOO_SERVERS: ${ZOO_SERVERS}
