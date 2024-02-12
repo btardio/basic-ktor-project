@@ -5,11 +5,12 @@
 
 sudo rm -f /application/local.env
 
-
-source /root/.bashrc
+export IPADDRA=$IPADDRA
+export IPADDRB=$IPADDRB
+export IPADDRC=$IPADDRC
 
 rm -f /env
-sudo sh /application/environment-aws/$(echo ${IPADDRA})
+sh /application/environment-aws/$(echo ${IPADDRA})
 # cp -f "/application/environment-aws/$IPADDRA" "/env"
 
 echo $IPADDRA
