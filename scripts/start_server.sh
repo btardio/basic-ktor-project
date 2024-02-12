@@ -5,6 +5,8 @@
 
 sudo rm -f /application/local.env
 
-docker-compose -f /application/docker-compose.yml --env-file /.env down
-docker-compose -f /application/docker-compose.yml --env-file /.env build
-docker-compose -f /application/docker-compose.yml --env-file /.env up --detach
+cp /application/environment-aws/$(echo ${IPADDRA}) /env
+
+docker-compose -f /application/docker-compose.yml --env-file /env down
+docker-compose -f /application/docker-compose.yml --env-file /env build
+docker-compose -f /application/docker-compose.yml --env-file /env up --detach
