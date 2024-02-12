@@ -7,7 +7,7 @@ services:
       - '8080:80'
     volumes:
       - ./htdocs:/usr/local/apache2/htdocs
-      - ./htdocs/httpd.conf:/usr/local/apache2/conf/httpd.conf
+#      - ./htdocs/httpd.conf:/usr/local/apache2/conf/httpd.conf
   basic-server:
 #    image: kotlin-ktor-starter
     build:
@@ -99,9 +99,9 @@ services:
     image: solr:8.7.0
     container_name: solr1
     ports:
-      - "8981:8983"
+      - "${SOLR1_PORTS}"
     environment:
-      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+      - ZK_HOST=${SOLR_ZK_HOST}
     networks:
       - solr
     depends_on:
@@ -113,9 +113,9 @@ services:
     image: solr:8.7.0
     container_name: solr2
     ports:
-      - "8982:8983"
+      - "${SOLR2_PORTS}"
     environment:
-      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+      - ZK_HOST=${SOLR_ZK_HOST}
     networks:
       - solr
     depends_on:
@@ -127,9 +127,9 @@ services:
     image: solr:8.7.0
     container_name: solr3
     ports:
-      - "8983:8983"
+      - "${SOLR3_PORTS}"
     environment:
-      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+      - ZK_HOST=${SOLR_ZK_HOST}
     networks:
       - solr
     depends_on:
@@ -143,11 +143,12 @@ services:
     restart: always
     hostname: zoo1
     ports:
-      - 2181:2181
+      - "${ZOO1_PORTS}"
       - 7001:7000
+      - "${ZOO1_COMMANDS}"
     environment:
-      ZOO_MY_ID: 1
-      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_MY_ID: ${ZOO1_ID}
+      ZOO_SERVERS: ${ZOO_SERVERS}
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
     networks:
@@ -159,11 +160,12 @@ services:
     restart: always
     hostname: zoo2
     ports:
-      - 2182:2181
+      - "${ZOO2_PORTS}"
       - 7002:7000
+      - "${ZOO2_COMMANDS}"
     environment:
-      ZOO_MY_ID: 2
-      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_MY_ID: ${ZOO2_ID}
+      ZOO_SERVERS: ${ZOO_SERVERS}
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
     networks:
@@ -175,11 +177,12 @@ services:
     restart: always
     hostname: zoo3
     ports:
-      - 2183:2181
+      - "${ZOO3_PORTS}"
       - 7003:7000
+      - "${ZOO3_COMMANDS}"
     environment:
-      ZOO_MY_ID: 3
-      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_MY_ID: ${ZOO3_ID}
+      ZOO_SERVERS: ${ZOO_SERVERS}
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
     networks:
