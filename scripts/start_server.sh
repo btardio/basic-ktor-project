@@ -3,13 +3,16 @@
 # sudo /application/gradlew build
 #docker build  /application/ -t kotlin-ktor-starter --no-cache
 
-sudo rm -f /application/local.env
+source /root/.bashrc
+
+rm -f /application/local.env
 
 export IPADDRA=$IPADDRA
 export IPADDRB=$IPADDRB
 export IPADDRC=$IPADDRC
 
 rm -f /env
+
 sh /application/environment-aws/$(echo ${IPADDRA})
 # cp -f "/application/environment-aws/$IPADDRA" "/env"
 
