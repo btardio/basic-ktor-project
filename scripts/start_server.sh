@@ -9,13 +9,10 @@ sudo rm -f /application/local.env
 source /root/.bashrc
 
 rm -f /env
-cp --force /application/environment-aws/$(echo ${IPADDRA}) /env
+sudo sh /application/environment-aws/$(echo ${IPADDRA})
 # cp -f "/application/environment-aws/$IPADDRA" "/env"
 
 echo $IPADDRA
-
-outfile=`cat /env`
-echo $outfile
 
 docker-compose -f /application/docker-compose.yml --env-file /env down
 docker-compose -f /application/docker-compose.yml --env-file /env build
