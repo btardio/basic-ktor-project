@@ -3,7 +3,7 @@
 # sudo /application/gradlew build
 #docker build  /application/ -t kotlin-ktor-starter --no-cache
 
-source /root/.bashrc
+source /ipaddr
 
 rm -f /application/local.env
 
