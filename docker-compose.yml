@@ -155,37 +155,37 @@ services:
 #    networks:
 #      - solr
 
-  zoo2:
-    image: zookeeper:3.6.2
-    container_name: zoo2
-    hostname: zoo2
-    ports:
-      - "${ZOO2_PORTS}"
-      - 7002:7000
-      - "${ZOO2_COMMANDS}"
-      - "${ZOOIPB}:22888-23888:2888-3888"
-    environment:
-      ZOO_MY_ID: ${ZOO2_ID}
-      ZOO_SERVERS: ${ZOO_SERVERS}
-      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
-      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-#    networks:
-#      - solr
-
-  zoo3:
-    image: zookeeper:3.6.2
-    container_name: zoo3
-    hostname: zoo3
-    ports:
-      - "${ZOO3_PORTS}"
-      - 7003:7000
-      - "${ZOO3_COMMANDS}"
-      - "${ZOOIPC}:32888-33888:2888-3888"
-    environment:
-      ZOO_MY_ID: ${ZOO3_ID}
-      ZOO_SERVERS: ${ZOO_SERVERS}
-      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
-      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+#  zoo2:
+#    image: zookeeper:3.6.2
+#    container_name: zoo2
+#    hostname: zoo2
+#    ports:
+#      - "${ZOO2_PORTS}"
+#      - 7002:7000
+#      - "${ZOO2_COMMANDS}"
+#      - "${ZOOIPB}:22888-23888:2888-3888"
+#    environment:
+#      ZOO_MY_ID: ${ZOO2_ID}
+#      ZOO_SERVERS: ${ZOO_SERVERS}
+#      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+#      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+##    networks:
+##      - solr
+#
+#  zoo3:
+#    image: zookeeper:3.6.2
+#    container_name: zoo3
+#    hostname: zoo3
+#    ports:
+#      - "${ZOO3_PORTS}"
+#      - 7003:7000
+#      - "${ZOO3_COMMANDS}"
+#      - "${ZOOIPC}:32888-33888:2888-3888"
+#    environment:
+#      ZOO_MY_ID: ${ZOO3_ID}
+#      ZOO_SERVERS: ${ZOO_SERVERS}
+#      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+#      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
 #    networks:
 #      - solr
 #
