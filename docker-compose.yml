@@ -97,6 +97,7 @@ services:
 
   solr1:
     image: solr:8.7.0
+    restart: always
     container_name: solr1
     ports:
       - "${SOLR1_PORTS}"
@@ -111,6 +112,7 @@ services:
 
   solr2:
     image: solr:8.7.0
+    restart: always
     container_name: solr2
     ports:
       - "${SOLR2_PORTS}"
@@ -125,6 +127,7 @@ services:
 
   solr3:
     image: solr:8.7.0
+    restart: always
     container_name: solr3
     ports:
       - "${SOLR3_PORTS}"
