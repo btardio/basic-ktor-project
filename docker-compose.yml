@@ -1,69 +1,101 @@
 # docker-compose -f /application/docker-compose.yaml --env-file /.env down && docker-compose -f /application/docker-compose.yaml --env-file /.env up --detach && docker container logs application-rabbit-1 --follow
 services:
-#  apache:
-#    image: httpd:2.4
-#    container_name: httpd
-#    ports:
-#      - '8080:80'
-#    volumes:
-#      - ./htdocs:/usr/local/apache2/htdocs
-#  basic-server:
+  apache:
+    image: httpd:2.4
+    container_name: httpd
+    ports:
+      - '8181:80'
+    volumes:
+      - ./httpd/htdocs:/usr/local/apache2/htdocs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  httpdproxy:
+    image: httpd:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./httpd-proxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  basic-server:
+    image: gradle:jdk17
+
 #    build:
 #      context: ./
 #      no_cache: true
-#    restart: always
-#    container_name: kotlin-ktor-server
-#    ports:
+    restart: always
+    container_name: kotlin-ktor-server
+    ports:
+      - 8123:8123
 #      - ${BASIC_SERVER_PORT_MAP}
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-#    environment:
-#      - COLLECTOR_EXCHANGE=collector-exchange
-#      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-a
-#      - WEBSERVER_EXCHANGE=webserver-exchange
-#      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-a
-#      - RABBIT_URL=host.docker.internal
-#      - PORT=8888
-#      - APP=webserver/build/libs/webserver.jar
-#      - AWSHOSTNAME=${HOSTNAME}
-#  data-analyzer:
-#    build:
-#      context: ./
-#      no_cache: true
-#    restart: always
-#    container_name: kotlin-ktor-analyzer
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-#    ports:
-#      - ${DATA_ANALYZER_PORT_MAP}
-#    environment:
-#      - WEBSERVER_EXCHANGE=webserver-exchange
-#      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
-#      - ANALYZER_EXCHANGE=analyzer-exchange
-#      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
-#      - RABBIT_URL=host.docker.internal
-#      - PORT=8887
-#      - APP=analyzer/build/libs/analyzer.jar
-#      - AWSHOSTNAME=${HOSTNAME}
-#  data-collector:
-#    build:
-#      context: ./
-#      no_cache: true
-#    restart: always
-#    container_name: kotlin-ktor-collector
-#    ports:
-#      - ${DATA_COLLECTOR_PORT_MAP}
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-#    environment:
-#      - ANALYZER_EXCHANGE=analyzer-exchange
-#      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-b
-#      - COLLECTOR_EXCHANGE=collector-exchange
-#      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-b
-#      - RABBIT_URL=host.docker.internal
-#      - PORT=8886
-#      - APP=collector/build/libs/collector.jar
-#      - AWSHOSTNAME=${HOSTNAME}
+    hostname: webserver
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - COLLECTOR_EXCHANGE=collector-exchange
+      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-a
+      - WEBSERVER_EXCHANGE=webserver-exchange
+      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-a
+      - RABBIT_URL=host.docker.internal
+      - PORT=8888
+      - APP=webserver/build/libs/webserver.jar
+      - AWSHOSTNAME=${HOSTNAME}
+    command: >
+      sh -c "cd /webserver && ./gradlew clean && 
+      ./gradlew build && while true; do echo 'ACK'; sleep 1; done"
+    # NOTE: for aws remove the infinite loop and run the jar
+    volumes:
+      - ./:/webserver
+# note : how to develop this ---
+#
+# docker compose --env-file=./local.env up --detach
+# docker container exec -it kotlin-ktor-server /bin/bash
+# ./gradlew clean && ./gradlew build w && java -jar /webserver/webserver/build/libs/webserver.jar
+#
+#
+#
+# docker compose
+#  java -jar ./webserver/build/libs/webserver.jar"& &&
+# ./gradlew clean && ./gradlew build w && docker run -it --network=host -v ./webserver/build/libs/webserver.jar:/a.jar gradle:jdk17 java -jar /a.jar
+  #./gradlew clean && ./gradlew build w && java -jar /webserver/webserver/build/libs/webserver.jar
+  data-analyzer:
+    build:
+      context: ./
+      no_cache: true
+    restart: always
+    container_name: kotlin-ktor-analyzer
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - ${DATA_ANALYZER_PORT_MAP}
+    environment:
+      - WEBSERVER_EXCHANGE=webserver-exchange
+      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
+      - ANALYZER_EXCHANGE=analyzer-exchange
+      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
+      - RABBIT_URL=host.docker.internal
+      - PORT=8887
+      - APP=analyzer/build/libs/analyzer.jar
+      - AWSHOSTNAME=${HOSTNAME}
+  data-collector:
+    build:
+      context: ./
+      no_cache: true
+    restart: always
+    container_name: kotlin-ktor-collector
+    ports:
+      - ${DATA_COLLECTOR_PORT_MAP}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - ANALYZER_EXCHANGE=analyzer-exchange
+      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-b
+      - COLLECTOR_EXCHANGE=collector-exchange
+      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-b
+      - RABBIT_URL=host.docker.internal
+      - PORT=8886
+      - APP=collector/build/libs/collector.jar
+      - AWSHOSTNAME=${HOSTNAME}
   rabbit:
     network_mode: "host"
     image: rabbitmq:3.12-alpine
@@ -79,6 +111,7 @@ services:
       - "${RABBIT_HOSTC}"
       - "${RABBIT_HOSTD}"
       - "${RABBIT_HOSTE}"
+      # - ${RABBIT_HOSTF}
       - "host.docker.internal:host-gateway"
     command: >
       sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
@@ -93,87 +126,90 @@ services:
 
   solr1:
     image: solr:8.7.0
-    network_mode: "host"
-    restart: always
     container_name: solr1
+    ports:
+      - "8981:8983"
     environment:
-      - ZK_HOST=${SOLR_ZK_HOST}
-      - SOLR_HOST=${IPADDRA}
-      - SOLR_PORT=8981
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - zooAws
+      - zoo1
+      - zoo2
+      - zoo3
 
   solr2:
     image: solr:8.7.0
-    network_mode: "host"
-    restart: always
     container_name: solr2
+    ports:
+      - "8982:8983"
     environment:
-      - ZK_HOST=${SOLR_ZK_HOST}
-      - SOLR_HOST=${IPADDRB}
-      - SOLR_PORT=8982
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - zooAws
+      - zoo1
+      - zoo2
+      - zoo3
 
   solr3:
     image: solr:8.7.0
-    network_mode: "host"
-    restart: always
     container_name: solr3
+    ports:
+      - "8983:8983"
     environment:
-      - ZK_HOST=${SOLR_ZK_HOST}
-      - SOLR_HOST=${IPADDRC}
-      - SOLR_PORT=8983
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - zooAws
+      - zoo1
+      - zoo2
+      - zoo3
 
-  zooAws:
+  zoo1:
     image: zookeeper:3.6.2
-    network_mode: "host"
     container_name: zoo1
     restart: always
     hostname: zoo1
+    ports:
+      - 2181:2181
+      - 7001:7000
     environment:
-      ZOO_MY_ID: ${ZOO1_ID}
-      ZOO_SERVERS: ${ZOO_SERVERS}
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-#    networks:
-#      - solr
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-#  zoo2:
-#    image: zookeeper:3.6.2
-#    container_name: zoo2
-#    hostname: zoo2
-#    ports:
-#      - "${ZOO2_PORTS}"
-#      - 7002:7000
-#      - "${ZOO2_COMMANDS}"
-#      - "${ZOOIPB}:22888-23888:2888-3888"
-#    environment:
-#      ZOO_MY_ID: ${ZOO2_ID}
-#      ZOO_SERVERS: ${ZOO_SERVERS}
-#      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
-#      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-##    networks:
-##      - solr
-#
-#  zoo3:
-#    image: zookeeper:3.6.2
-#    container_name: zoo3
-#    hostname: zoo3
-#    ports:
-#      - "${ZOO3_PORTS}"
-#      - 7003:7000
-#      - "${ZOO3_COMMANDS}"
-#      - "${ZOOIPC}:32888-33888:2888-3888"
-#    environment:
-#      ZOO_MY_ID: ${ZOO3_ID}
-#      ZOO_SERVERS: ${ZOO_SERVERS}
-#      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
-#      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-#    networks:
-#      - solr
-#
-#networks:
-#  solr:
+  zoo2:
+    image: zookeeper:3.6.2
+    container_name: zoo2
+    restart: always
+    hostname: zoo2
+    ports:
+      - 2182:2181
+      - 7002:7000
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  zoo3:
+    image: zookeeper:3.6.2
+    container_name: zoo3
+    restart: always
+    hostname: zoo3
+    ports:
+      - 2183:2181
+      - 7003:7000
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

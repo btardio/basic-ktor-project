@@ -20,7 +20,7 @@ public class SolrStartup {
 	// note: delete all {'delete': {'query': '*:*'}}
 
 	static public void createCollection(int numShards, int numReplicas) throws SolrServerException, IOException {
-		try (SolrClient solr = new CloudSolrClient.Builder().withZkHost("127.0.0.1:2181").build()) {
+		try (SolrClient solr = new CloudSolrClient.Builder().withZkHost("zoo1:2181").build()) {
 			List<String> existingCollectionNames = CollectionAdminRequest.listCollections(solr);
 			if (!existingCollectionNames.contains("XYZ")) {
 				solr.request(CollectionAdminRequest.createCollection("XYZ", numShards, numReplicas));

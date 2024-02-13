@@ -43,11 +43,11 @@ val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "collector-queue-webserver-ap
 val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-webserver-app")
 
-val EMBEDDED_NETTY_PORT = getEnvInt("BASIC_SERVER_PORT_MAP", 8888)
+//val EMBEDDED_NETTY_PORT = getEnvInt("BASIC_SERVER_PORT_MAP", 8888)
 
 val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
 
-val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
+val RABBIT_URL = getEnvStr("RABBIT_URL", "rabbit")
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
@@ -85,7 +85,7 @@ fun main() {
 
     runBlocking {
 
-        val solrClient: HttpSolrClient = HttpSolrClient.Builder("http://127.0.0.1:8983/solr/XYZ").build();
+        val solrClient: HttpSolrClient = HttpSolrClient.Builder("http://solr1:8983/solr/XYZ").build();
 
         // sane checks stay
 
@@ -183,7 +183,7 @@ fun main() {
             exchangeName = COLLECTOR_EXCHANGE,
         )
 
-        embeddedServer(Netty, port = EMBEDDED_NETTY_PORT) {
+        embeddedServer(Netty, port = 8123) {
             routing {
                 get("/") {
                     call.respondText("~~~response OK")
