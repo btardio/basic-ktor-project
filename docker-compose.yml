@@ -129,8 +129,6 @@ services:
 #      - solr
     depends_on:
       - zoo1
-      - zoo2
-      - zoo3
 
   zoo1:
     image: zookeeper:3.6.2
