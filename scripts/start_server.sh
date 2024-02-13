@@ -18,6 +18,18 @@ sh /application/environment-aws/$(echo ${IPADDRA})
 
 echo $IPADDRA
 
+docker container stop httpd
+docker container stop zoo3
+docker container stop application-rabbit-1
+docker container stop kotlin-ktor-analyzer
+docker container stop zoo2
+docker container stop kotlin-ktor-collector
+docker container stop zoo1
+docker container stop kotlin-ktor-server
+docker container stop solr2
+docker container stop solr3
+docker container stop solr1
+
 docker-compose -f /application/docker-compose.yml --env-file /env down
 docker-compose -f /application/docker-compose.yml --env-file /env build
 docker-compose -f /application/docker-compose.yml --env-file /env up --detach
