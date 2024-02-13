@@ -93,44 +93,15 @@ services:
 #
   solr1:
     image: solr:8.7.0
+    network_mode: "host"
     restart: always
     container_name: solr1
-    ports:
-      - "${SOLR1_PORTS}"
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
-#    networks:
-#      - solr
     depends_on:
-      - zoo1
+      - zooAws
 
-  solr2:
-    image: solr:8.7.0
-    restart: always
-    container_name: solr2
-    ports:
-      - "${SOLR2_PORTS}"
-    environment:
-      - ZK_HOST=${SOLR_ZK_HOST}
-#    networks:
-#      - solr
-    depends_on:
-      - zoo1
-
-  solr3:
-    image: solr:8.7.0
-    restart: always
-    container_name: solr3
-    ports:
-      - "${SOLR3_PORTS}"
-    environment:
-      - ZK_HOST=${SOLR_ZK_HOST}
-#    networks:
-#      - solr
-    depends_on:
-      - zoo1
-
-  zoo1:
+  zooAws:
     image: zookeeper:3.6.2
     network_mode: "host"
     container_name: zoo1
