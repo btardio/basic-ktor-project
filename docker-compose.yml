@@ -64,33 +64,33 @@ services:
 #      - PORT=8886
 #      - APP=collector/build/libs/collector.jar
 #      - AWSHOSTNAME=${HOSTNAME}
-#  rabbit:
-#    network_mode: "host"
-#    image: rabbitmq:3.12-alpine
-#    restart: always
-#    environment:
-#      - RABBITMQ_NODENAME=${RABBITMQ_NODENAME}
-#      - CLUSTERED="${RABBIT_CLUSTERED}"
-#      - RABBITMQ_ERLANG_COOKIE=11111111111111111
-#      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/conf.d/90-rabbitmq.conf
-#    extra_hosts:
-#      - "${RABBIT_HOSTA}"
-#      - "${RABBIT_HOSTB}"
-#      - "${RABBIT_HOSTC}"
-#      - "${RABBIT_HOSTD}"
-#      - "${RABBIT_HOSTE}"
-#      - "host.docker.internal:host-gateway"
-#    command: >
-#      sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
-#             rabbitmq-plugins enable rabbitmq_consistent_hash_exchange &&
-#             rm -f /etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf &&
-#             cp /plugins/rabbitmq_management-*/priv/www/cli/rabbitmqadmin /usr/local/bin/rabbitmqadmin &&
-#             chmod +x /usr/local/bin/rabbitmqadmin &&
-#             apk add --no-cache python3 &&
-#             rabbitmq-server"
-#    volumes:
-#      - /home/ec2-user/90-rabbitmq.conf:/etc/rabbitmq/conf.d/90-rabbitmq.conf
-#
+  rabbit:
+    network_mode: "host"
+    image: rabbitmq:3.12-alpine
+    restart: always
+    environment:
+      - RABBITMQ_NODENAME=${RABBITMQ_NODENAME}
+      - CLUSTERED="${RABBIT_CLUSTERED}"
+      - RABBITMQ_ERLANG_COOKIE=11111111111111111
+      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/conf.d/90-rabbitmq.conf
+    extra_hosts:
+      - "${RABBIT_HOSTA}"
+      - "${RABBIT_HOSTB}"
+      - "${RABBIT_HOSTC}"
+      - "${RABBIT_HOSTD}"
+      - "${RABBIT_HOSTE}"
+      - "host.docker.internal:host-gateway"
+    command: >
+      sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
+             rabbitmq-plugins enable rabbitmq_consistent_hash_exchange &&
+             rm -f /etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf &&
+             cp /plugins/rabbitmq_management-*/priv/www/cli/rabbitmqadmin /usr/local/bin/rabbitmqadmin &&
+             chmod +x /usr/local/bin/rabbitmqadmin &&
+             apk add --no-cache python3 &&
+             rabbitmq-server"
+    volumes:
+      - /home/ec2-user/90-rabbitmq.conf:/etc/rabbitmq/conf.d/90-rabbitmq.conf
+
   solr1:
     image: solr:8.7.0
     network_mode: "host"
