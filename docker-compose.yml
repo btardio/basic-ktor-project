@@ -99,6 +99,7 @@ services:
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
       - SOLR_HOST=${IPADDRA}
+      - SOLR_PORT=8981
     depends_on:
       - zooAws
 
@@ -110,6 +111,7 @@ services:
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
       - SOLR_HOST=${IPADDRB}
+      - SOLR_PORT=8982
     depends_on:
       - zooAws
 
@@ -121,6 +123,7 @@ services:
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
       - SOLR_HOST=${IPADDRC}
+      - SOLR_PORT=8983
     depends_on:
       - zooAws
 
