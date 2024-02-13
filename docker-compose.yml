@@ -98,6 +98,29 @@ services:
     container_name: solr1
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
+      - SOLR_HOST=${IPADDRA}
+    depends_on:
+      - zooAws
+
+  solr2:
+    image: solr:8.7.0
+    network_mode: "host"
+    restart: always
+    container_name: solr2
+    environment:
+      - ZK_HOST=${SOLR_ZK_HOST}
+      - SOLR_HOST=${IPADDRB}
+    depends_on:
+      - zooAws
+
+  solr3:
+    image: solr:8.7.0
+    network_mode: "host"
+    restart: always
+    container_name: solr3
+    environment:
+      - ZK_HOST=${SOLR_ZK_HOST}
+      - SOLR_HOST=${IPADDRC}
     depends_on:
       - zooAws
 
@@ -107,11 +130,6 @@ services:
     container_name: zoo1
     restart: always
     hostname: zoo1
-#    ports:
-#      - "${ZOO1_PORTS}"
-#      - 7001:7000
-#      - "${ZOO1_COMMANDS}"
-#      - "${ZOOIPA}:12888-13888:2888-3888"
     environment:
       ZOO_MY_ID: ${ZOO1_ID}
       ZOO_SERVERS: ${ZOO_SERVERS}
