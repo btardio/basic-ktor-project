@@ -78,9 +78,7 @@ services:
       - APP=analyzer/build/libs/analyzer.jar
       - AWSHOSTNAME=${HOSTNAME}
   data-collector:
-    build:
-      context: ./
-      no_cache: true
+    image: gradle:jdk17
     restart: always
     container_name: kotlin-ktor-collector
     ports:
@@ -96,6 +94,18 @@ services:
       - PORT=8886
       - APP=collector/build/libs/collector.jar
       - AWSHOSTNAME=${HOSTNAME}
+    command: >
+      sh -c "cd /collector && ./gradlew clean && 
+      ./gradlew build && while true; do echo 'ACK'; sleep 1; done"
+    # NOTE: for aws remove the infinite loop and run the jar
+    volumes:
+      - ./:/collector
+  # note : how to develop this ---
+  #
+  # docker compose --env-file=./local.env up --detach
+  # docker container exec -it kotlin-ktor-collector /bin/bash
+  # ./gradlew clean && ./gradlew build c && java -jar /collector/collector/build/libs/collector.jar
+  #
   rabbit:
     network_mode: "host"
     image: rabbitmq:3.12-alpine

@@ -1,46 +1,44 @@
 package kmeans.webserver
 
 
+//import kmeans.webserver.SolrStartup.createCollection
+//import kmeans.webserver.SolrStartup.createSchema
 import com.rabbitmq.client.*
-
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
-import kmeans.`env-support`.getEnvInt
 import kmeans.`env-support`.getEnvStr
-import kmeans.solrSupport.SolrStartup.createCollection
-import kmeans.solrSupport.SolrStartup.createSchema
 import kmeans.solrSupport.SolrEntity
-//import kmeans.webserver.SolrStartup.createCollection
-//import kmeans.webserver.SolrStartup.createSchema
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kotlinx.coroutines.runBlocking
-import org.apache.solr.client.solrj.SolrQuery
-import org.apache.solr.client.solrj.impl.HttpSolrClient
-import org.apache.solr.client.solrj.response.QueryResponse
-import org.slf4j.LoggerFactory
-import java.util.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import java.util.UUID
+import org.apache.solr.client.solrj.SolrQuery
+import org.apache.solr.client.solrj.impl.HttpSolrClient
+import org.apache.solr.client.solrj.response.QueryResponse
+import org.slf4j.LoggerFactory
+import java.sql.Timestamp
+import java.util.*
+
+import kmeans.solrSupport.SolrStartup.*
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
 val COLLECTOR_EXCHANGE = getEnvStr("COLLECTOR_EXCHANGE", "collector-exchange")
+
 val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "collector-queue-webserver-app")
 
 val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
+
+
+
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-webserver-app")
 
 //val EMBEDDED_NETTY_PORT = getEnvInt("BASIC_SERVER_PORT_MAP", 8888)
@@ -84,41 +82,51 @@ suspend fun listenAndPublish(
 fun main() {
 
     runBlocking {
-
-        val solrClient: HttpSolrClient = HttpSolrClient.Builder("http://solr1:8983/solr/XYZ").build();
-
-        // sane checks stay
-
-        // we have a collection
-        createCollection(1,1);
-
-        // we have a schema
-        createSchema(solrClient);
-
-        val uuid: UUID = UUID.randomUUID();
-
-        // we can write
-        solrClient.addBean(SolrEntity(uuid, "{}"))
-        solrClient.commit()
-
-//            // not sane            .withCql("CREATE TABLE sanity (uuid varchar, value varchar, PRIMARY KEY (uuid));")
-
-        // we can read
-        val query = SolrQuery()
-        query.set("q", "uuid:" + uuid.toString())
-        val response: QueryResponse = solrClient.query(query)
-
-        if ( response.results.size != 1 ) {
-            throw Exception("Error, not sane.")
-        }
-
-
-        for (doc in response.results) {
-            println(doc)
-        }
-
-
-
+        solrInitialize()
+//
+//        var solrClient: HttpSolrClient = HttpSolrClient.Builder("http://solr1:8983/solr/sanesystem").build();
+//
+//        // sane checks stay
+//
+//        // we have a collection
+//        createCollection(1,1, "sanesystem")
+//
+//        // we have a schema
+//        createSchema(solrClient)
+//
+//        val uuid: UUID = UUID.randomUUID()
+//
+//        val currentTime = Date().getTime().toString()
+//
+//        // we can write
+//        solrClient.addBean(
+//            SolrEntity(
+//                currentTime,
+//                currentTime,
+//                "{" + Date().toString() + "}"
+//            )
+//        )
+//        solrClient.commit()
+//
+////            // not sane            .withCql("CREATE TABLE sanity (uuid varchar, value varchar, PRIMARY KEY (uuid));")
+//
+//        // we can read
+//        val query = SolrQuery()
+//        query.set("q", "schedule_uuid:" + currentTime)
+//        val response: QueryResponse = solrClient.query(query)
+//
+//        if ( response.results.size != 1 ) {
+//            throw Exception("Error, not sane.")
+//        }
+//
+//
+//        createCollection(3,1, "coordinates")
+//        solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/coordinates").build()
+//        createSchema(solrClient);
+//
+//        createCollection(3,1, "schedules");
+//        solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build()
+//        createSchema(solrClient);
 
         val connectionFactory = ConnectionFactory();
 
@@ -135,19 +143,19 @@ fun main() {
             false,
             null
         )
-        ch.queueDeclare(
-            COLLECTOR_QUEUE,
-            false,
-            false,
-            false,
-            null,
-
-            )
-        ch.queueBind(
-            COLLECTOR_QUEUE,
-            COLLECTOR_EXCHANGE,
-            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
-        )
+//        ch.queueDeclare(
+//            COLLECTOR_QUEUE,
+//            false,
+//            false,
+//            false,
+//            null,
+//
+//            )
+//        ch.queueBind(
+//            COLLECTOR_QUEUE,
+//            COLLECTOR_EXCHANGE,
+//            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
+//        )
 
 
 
@@ -175,13 +183,13 @@ fun main() {
 
 
 
-        listenAndPublish(
-            connectionFactory = connectionFactory,
-//        queueName = REGISTRATION_REQUEST_QUEUE,
-            queueName = WEBSERVER_QUEUE,
-            //exchangeName = NOTIFICATION_EXCHANGE,
-            exchangeName = COLLECTOR_EXCHANGE,
-        )
+//        listenAndPublish(
+//            connectionFactory = connectionFactory,
+////        queueName = REGISTRATION_REQUEST_QUEUE,
+//            queueName = WEBSERVER_QUEUE,
+//            //exchangeName = NOTIFICATION_EXCHANGE,
+//            exchangeName = COLLECTOR_EXCHANGE,
+//        )
 
         embeddedServer(Netty, port = 8123) {
             routing {
@@ -196,23 +204,62 @@ fun main() {
 
                     var numPointsAsInt = Integer.parseInt(numberPoints)
 
+                    var coordinateList = SolrEntityCoordinate()
 
+                    var scheduledRun = SolrEntityScheduledRun(coordinateList)
 
-                    var sendingMessage: NewKmeansScheduledJob = NewKmeansScheduledJob(
-                        jobId = UUID.randomUUID(),
-                        status = "started",
-                        numberPoints = numPointsAsInt
-                    );
+                    scheduledRun.setStartTime(Timestamp(Date().time))
+                    scheduledRun.setNumberPoints(numPointsAsInt)
+                    scheduledRun.setStatus("started");
+                    coordinateList.setSchedule_uuid(scheduledRun.getSchedule_uuid())
+
+                    var sendingMessage: RabbitMessageStartRun = RabbitMessageStartRun(scheduledRun, coordinateList);
 
                     cf.basicPublish(
                         COLLECTOR_EXCHANGE,
                         UUID.randomUUID().toString(),
                         MessageProperties.PERSISTENT_BASIC,
-                        Json.encodeToString<NewKmeansScheduledJob>(sendingMessage).toByteArray()
+                        ObjectMapper().writeValueAsString(sendingMessage).toByteArray()
                     )
+                    cf.close()
 //                    cf.close()
 
-                    call.respondText("OK, Templeton, scheduling a new kmeans run using " + numberPoints)
+
+                    // save schedule run, create collection
+
+
+                    // save schedule run, create collection
+                    var solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();
+                    solrClient.addBean(
+                        SolrEntity(
+                            scheduledRun.getSchedule_uuid(),
+                            scheduledRun.getCoordinate_uuid(),
+                            ObjectMapper().writeValueAsString(scheduledRun)
+                        )
+                    )
+                    solrClient.commit()
+
+                    // save coordinate
+                    solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/coordinates").build();
+                    solrClient.addBean(
+                        SolrEntity(
+                            scheduledRun.getSchedule_uuid(),
+                            scheduledRun.getCoordinate_uuid(),
+                            ObjectMapper().writeValueAsString(coordinateList)
+                        )
+                    )
+                    solrClient.commit()
+
+
+                    // save coodrinates, use collection coordinates
+
+
+
+
+
+
+                    call.respondText("OK, Templeton, scheduling a new kmeans run using " + numberPoints + "<BR>" +
+                    "Your schedule run ID: " + scheduledRun.getSchedule_uuid())
                 }
             }
         }.start(wait = true)
@@ -261,10 +308,3 @@ class UUIDSerializer: KSerializer<UUID> {
     override fun deserialize(decoder: Decoder): UUID = UUID.fromString(decoder.decodeString())
     override fun serialize(encoder: Encoder, value: UUID) = encoder.encodeString(value.toString())
 }
-@Serializable
-data class NewKmeansScheduledJob(
-    @Serializable(with = UUIDSerializer::class)
-    val jobId: UUID,
-    val status: String,
-    val numberPoints: Int
-)

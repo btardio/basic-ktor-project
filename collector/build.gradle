@@ -34,6 +34,9 @@ application {
 dependencies {
     implementation 'org.apache.commons:commons-text'
     implementation(project(":env-support"))
+    implementation(project(":solrSupport"))
+//    implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("ch.qos.logback:logback-classic:1.4.14")
     implementation("com.zaxxer:HikariCP:5.1.0")
@@ -46,6 +49,7 @@ dependencies {
     implementation('com.netflix.astyanax:astyanax-core:3.10.2')
     implementation("com.netflix.astyanax:astyanax-thrift:3.10.2")
     implementation("com.netflix.astyanax:astyanax-cassandra:3.10.2")
+
 }
 
 

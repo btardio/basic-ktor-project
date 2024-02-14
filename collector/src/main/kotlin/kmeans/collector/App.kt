@@ -19,6 +19,8 @@ import kmeans.`env-support`.getEnvInt
 import kmeans.`env-support`.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import kmeans.solrSupport.SolrStartup.*
+
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -45,9 +47,10 @@ private fun listenForNotificationRequests(
 
     channel.basicConsume(queueName,
         false,
-        CollectorCsmr(channel, exchangeName)
+        CollectorCsmr(channel, exchangeName, connectionFactory)
     );
 }
+
 
 
 suspend fun listenAndPublish(
@@ -69,29 +72,9 @@ fun main() {
 
     runBlocking {
 
-        val context: AstyanaxContext<Keyspace> = AstyanaxContext.Builder()
-            .forCluster("ClusterName")
-            .forKeyspace("KeyspaceName")
-            .withAstyanaxConfiguration(
-                AstyanaxConfigurationImpl()
-                    .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
-            )
-            .withConnectionPoolConfiguration(
-                ConnectionPoolConfigurationImpl("MyConnectionPool")
-                    .setPort(9042)
-                    .setMaxConnsPerHost(1)
-                    .setSeeds(CASSANDRA_SEEDS.replace("7000", "9042"))
-            )
-            .withConnectionPoolMonitor(CountingConnectionPoolMonitor())
-            .buildKeyspace(ThriftFamilyFactory.getInstance())
-
-        context.start()
-        val keyspace: Keyspace = context.getClient()
 
 
-
-
-
+        solrInitialize()
 
 
         val connectionFactory = ConnectionFactory();
@@ -168,40 +151,4 @@ fun main() {
 
     }
 
-    class Csmr(ch: Channel, exchangeName: String) : Consumer {
-
-        val ch: Channel = ch
-        val exchange: String = exchangeName
-
-        override fun handleConsumeOk(consumerTag: String?) {
-
-        }
-
-        override fun handleCancelOk(consumerTag: String?) {
-
-        }
-
-        override fun handleCancel(consumerTag: String?) {
-
-        }
-
-        override fun handleShutdownSignal(consumerTag: String?, sig: ShutdownSignalException?) {
-            sig?.let {
-//            throw it
-            }
-        }
-
-        override fun handleRecoverOk(consumerTag: String?) {
-
-        }
-
-        override fun handleDelivery(
-            consumerTag: String?,
-            envelope: Envelope?,
-            properties: AMQP.BasicProperties?,
-            body: ByteArray?
-        ) {
-
-        }
-    }
 }

@@ -1,6 +1,8 @@
 package kmeans.analyzer
 
 import com.rabbitmq.client.*
+import java.sql.Timestamp
+import java.util.*
 
 
 private fun listenForNotificationRequests(
@@ -13,11 +15,11 @@ private fun listenForNotificationRequests(
     channel.basicConsume(
         queueName,
         false,
-        AnalyzerCsmr(channel, exchangeName)
+        AnalyzerCsmr(channel, exchangeName, connectionFactory)
     );
 }
 
-class AnalyzerCsmr(ch: Channel, exchangeName: String) : Consumer {
+class AnalyzerCsmr(ch: Channel, exchangeName: String, connectionFactory: ConnectionFactory) : Consumer {
 
     val ch: Channel = ch
     val exchange: String = exchangeName
@@ -50,6 +52,35 @@ class AnalyzerCsmr(ch: Channel, exchangeName: String) : Consumer {
         properties: AMQP.BasicProperties?,
         body: ByteArray?
     ) {
+        println("received" + body.toString())
 
+//
+//
+//        val cf = connectionFactory.newConnection().createChannel()
+//
+//        var numPointsAsInt = Integer.parseInt(numberPoints)
+//
+//        var coordinateList = SolrEntityCoordinate()
+//
+//        var scheduledRun = SolrEntityScheduledRun(coordinateList)
+//
+//        scheduledRun.setStartTime(Timestamp(Date().time))
+//        scheduledRun.setNumberPoints(numPointsAsInt)
+//        scheduledRun.setStatus("started");
+//        coordinateList.setSchedule_uuid(scheduledRun.getSchedule_uuid())
+//
+//        var sendingMessage: RabbitMessageStartRun = RabbitMessageStartRun(scheduledRun, coordinateList);
+//
+//        cf.basicPublish(
+//            COLLECTOR_EXCHANGE,
+//            UUID.randomUUID().toString(),
+//            MessageProperties.PERSISTENT_BASIC,
+//            ObjectMapper().writeValueAsString(sendingMessage).toByteArray()
+//        )
+//        cf.close()
+
+        if (envelope != null) {
+            ch.basicAck(envelope.getDeliveryTag(), false)
+        };
     }
 }
