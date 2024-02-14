@@ -56,7 +56,7 @@ public class CollectorCsmr implements Consumer {
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 //			println("received" + String(body, StandardCharsets.UTF_8))
 //
 		if (body != null) {
