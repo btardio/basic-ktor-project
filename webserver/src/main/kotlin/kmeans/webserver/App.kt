@@ -9,10 +9,11 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.*
 import kmeans.`env-support`.getEnvStr
 import kmeans.solrSupport.SolrEntity
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kmeans.solrSupport.SolrEntityCoordinateJsonData
+import kmeans.solrSupport.SolrEntityScheduledRunJsonData
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -20,11 +21,8 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.impl.HttpSolrClient
-import org.apache.solr.client.solrj.response.QueryResponse
 import org.slf4j.LoggerFactory
-import java.sql.Timestamp
 import java.util.*
 
 import kmeans.solrSupport.SolrStartup.*
@@ -204,16 +202,26 @@ fun main() {
 
                     var numPointsAsInt = Integer.parseInt(numberPoints)
 
-                    var coordinateList = SolrEntityCoordinate()
+                    var coordinateList = SolrEntityCoordinateJsonData()
 
-                    var scheduledRun = SolrEntityScheduledRun(coordinateList)
+                    var scheduledRun = SolrEntityScheduledRunJsonData()
+                    scheduledRun.setNumberPoints(10)
+                    scheduledRun.setStatus("collector")
 
-                    scheduledRun.setStartTime(Timestamp(Date().time))
-                    scheduledRun.setNumberPoints(numPointsAsInt)
-                    scheduledRun.setStatus("started");
-                    coordinateList.setSchedule_uuid(scheduledRun.getSchedule_uuid())
+                    try {
+                        scheduledRun.setNumberPoints(Integer.valueOf(numberPoints))
+                    } catch (e: Exception) {
 
-                    var sendingMessage: RabbitMessageStartRun = RabbitMessageStartRun(scheduledRun, coordinateList);
+                    }
+
+//                    scheduledRun.setStartTime(Timestamp(Date().time))
+//                    scheduledRun.setNumberPoints(numPointsAsInt)
+//                    scheduledRun.setStatus("started");
+                    //coordinateList.setSchedule_uuid(scheduledRun.getSchedule_uuid())
+                    val scheduleUUID = UUID.randomUUID();
+                    val coordinateUUID = UUID.randomUUID()
+                    var sendingMessage: kmeans.rabbitSupport.RabbitMessageStartRun =
+                        kmeans.rabbitSupport.RabbitMessageStartRun(scheduleUUID.toString(), coordinateUUID.toString());
 
                     cf.basicPublish(
                         COLLECTOR_EXCHANGE,
@@ -232,8 +240,8 @@ fun main() {
                     var solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();
                     solrClient.addBean(
                         SolrEntity(
-                            scheduledRun.getSchedule_uuid(),
-                            scheduledRun.getCoordinate_uuid(),
+                            scheduleUUID,
+                            coordinateUUID,
                             ObjectMapper().writeValueAsString(scheduledRun)
                         )
                     )
@@ -243,8 +251,8 @@ fun main() {
                     solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/coordinates").build();
                     solrClient.addBean(
                         SolrEntity(
-                            scheduledRun.getSchedule_uuid(),
-                            scheduledRun.getCoordinate_uuid(),
+                            scheduleUUID,
+                            coordinateUUID,
                             ObjectMapper().writeValueAsString(coordinateList)
                         )
                     )
@@ -259,7 +267,7 @@ fun main() {
 
 
                     call.respondText("OK, Templeton, scheduling a new kmeans run using " + numberPoints + "<BR>" +
-                    "Your schedule run ID: " + scheduledRun.getSchedule_uuid())
+                    "Your schedule run ID: " + scheduleUUID.toString())
                 }
             }
         }.start(wait = true)

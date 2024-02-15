@@ -1,14 +1,24 @@
-package kmeans.webserver;
+package kmeans.solrSupport;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
 public class Coordinate {
+	@JsonProperty("x")
 	Double x;
+	@JsonProperty("y")
 	Double y;
+	@JsonProperty("z")
 	Double z;
+
+	public Coordinate(Double x, Double y, Double z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
 
 	public Double getX() {
 		return x;

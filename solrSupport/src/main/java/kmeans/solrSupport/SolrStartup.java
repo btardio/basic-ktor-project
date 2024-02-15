@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 
 public class SolrStartup {
@@ -72,6 +71,7 @@ public class SolrStartup {
 		} catch( BaseHttpSolrClient.RemoteExecutionException e ) {
 			LoggerFactory.getLogger(SolrStartup.class).info("Failed creating schema, continuing." + "\n" + e.getMessage());
 		}
+
 	}
 
 	public static void solrInitialize() throws Exception {

@@ -28,7 +28,7 @@ Enter number of points:
 $(document).ready(function(){
 
   $('#startKmeans').click(function(){
-    $.get("startKmeans/" + $("#numberPoints").val(), function(data, status){
+    $.get("/netty/startKmeans/" + $("#numberPoints").val(), function(data, status){
       alert(data);
     });
 

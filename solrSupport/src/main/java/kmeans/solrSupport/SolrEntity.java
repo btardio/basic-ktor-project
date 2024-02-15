@@ -4,7 +4,6 @@ import org.apache.solr.client.solrj.beans.Field;
 
 import java.util.UUID;
 
-
 public class SolrEntity {
 
 	@Field("schedule_uuid")
@@ -21,6 +20,10 @@ public class SolrEntity {
 				", coordinate_uuid='" + coordinate_uuid + '\'' +
 				", jsonData='" + jsonData + '\'' +
 				'}';
+	}
+
+	public SolrEntity(){
+		super();
 	}
 
 	public SolrEntity(String schedule_uuid, String coordinate_uuid, String jsonData) {
@@ -59,6 +62,7 @@ public class SolrEntity {
 	public String getSchedule_uuid() {
 		return this.schedule_uuid;
 	}
+
 
 	public String getJsonData() {
 		return this.jsonData;

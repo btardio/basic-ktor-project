@@ -50,7 +50,7 @@ services:
 #
 # docker compose --env-file=./local.env up --detach
 # docker container exec -it kotlin-ktor-server /bin/bash
-# ./gradlew clean && ./gradlew build w && java -jar /webserver/webserver/build/libs/webserver.jar
+# ./gradlew clean && ./gradlew build && java -jar /webserver/webserver/build/libs/webserver.jar
 #
 #
 #
@@ -104,7 +104,7 @@ services:
   #
   # docker compose --env-file=./local.env up --detach
   # docker container exec -it kotlin-ktor-collector /bin/bash
-  # ./gradlew clean && ./gradlew build c && java -jar /collector/collector/build/libs/collector.jar
+  # ./gradlew clean && ./gradlew build  && java -jar /collector/collector/build/libs/collector.jar
   #
   rabbit:
     network_mode: "host"

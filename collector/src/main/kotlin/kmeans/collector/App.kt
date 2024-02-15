@@ -1,13 +1,5 @@
 package kmeans.collector
 
-import com.netflix.astyanax.*
-import com.netflix.astyanax.connectionpool.*
-import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl
-import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor
-import com.netflix.astyanax.impl.*
-import com.netflix.astyanax.model.*
-import com.netflix.astyanax.serializers.*
-import com.netflix.astyanax.thrift.ThriftFamilyFactory
 import com.rabbitmq.client.*
 import com.rabbitmq.client.ConnectionFactory
 import io.ktor.server.application.*
