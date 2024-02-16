@@ -109,12 +109,19 @@ public class SolrStartup {
 			throw new Exception("Error, not sane.");
 		}
 
-		createCollection(3,1, "coordinates");
-		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates").build();
+		createCollection(3,1, "coordinates_after_webserver");
+		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_webserver").build();
+		createSchema(solrClient);
+
+		createCollection(3,1, "coordinates_after_collector");
+		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
 		createSchema(solrClient);
 
 		createCollection(3,1, "schedules");
 		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();
 		createSchema(solrClient);
+
+
+
 	}
 }

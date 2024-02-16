@@ -13,11 +13,13 @@ import kmeans.rabbitSupport.RabbitMessageStartRun;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import kmeans.solrSupport.AnyMapper;
 import kmeans.solrSupport.Coordinate;
 import kmeans.solrSupport.SolrEntity;
 import kmeans.solrSupport.SolrEntityCoordinateJsonData;
@@ -28,8 +30,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 
 
 public class CollectorCsmr implements Consumer {
@@ -93,11 +93,12 @@ public class CollectorCsmr implements Consumer {
 			log.error(rabbitMessageStartRun.toString());
 
 
-
 			// get coordinates entry in solr
 			SolrQuery query = new SolrQuery();
+
+			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
-			SolrClient solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates").build();
+			SolrClient solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_webserver").build();
 			QueryResponse response = null;
 			//log.error(String.valueOf(response));
 			try {
@@ -107,9 +108,9 @@ public class CollectorCsmr implements Consumer {
 			}
 
 			// if its not fuond it will be
-			if ( response.getResults().getNumFound() != 1L ) {
+			if (response.getResults().getNumFound() != 1L) {
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
-				if ( numTries < 100 ) {
+				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
 					cfA.basicPublish(
 							COLLECTOR_EXCHANGE,
@@ -118,28 +119,32 @@ public class CollectorCsmr implements Consumer {
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
 				}
-				} else {
+			} else {
 
-				log.error(String.valueOf(response.getResults()));
+				SolrEntityCoordinateJsonData coordinates =
+						objectMapper.readValue(
+								response.getResults().get(0).getFieldValue("jsonData").toString(),
+								SolrEntityCoordinateJsonData.class);
+
+				log.error(coordinates.toString());
 
 				SolrEntityCoordinateJsonData coordinateList = new SolrEntityCoordinateJsonData();
 				Random r = new Random();
+
+				List<Coordinate> listOfNewCoordinates = new ArrayList<>();
+
+				for ( int i = 0; i < coordinates.getNumPoints(); i ++ ){
+					listOfNewCoordinates.add(new Coordinate(
+							100 * r.nextDouble(),
+							100 * r.nextDouble(),
+							100 * r.nextDouble()));
+				}
+
 //				double randomValue 100 * r.nextDouble()
-				coordinateList.setCoordinates(List.of(
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0),
-						new Coordinate(100 * r.nextDouble(), 100 * r.nextDouble(), 3.0)
-				));
+				coordinateList.setCoordinates(listOfNewCoordinates);
 
 				// save coordinate
-				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates").build();
+				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -151,7 +156,7 @@ public class CollectorCsmr implements Consumer {
 					solrClient.commit();
 				} catch (SolrServerException e) {
 					int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
-					if ( numTries < 100 ) {
+					if (numTries < 100) {
 						rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
 						cfA.basicPublish(
 								COLLECTOR_EXCHANGE,
@@ -167,7 +172,8 @@ public class CollectorCsmr implements Consumer {
 					}
 					if (envelope != null) {
 						this.ch.basicAck(envelope.getDeliveryTag(), false);
-					};
+					}
+					;
 					return;
 				}
 
@@ -196,13 +202,10 @@ public class CollectorCsmr implements Consumer {
 			}
 
 
-
 			if (envelope != null) {
 				this.ch.basicAck(envelope.getDeliveryTag(), false);
-			};
-
-
-
+			}
+			;
 
 
 		}

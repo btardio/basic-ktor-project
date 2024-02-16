@@ -27,6 +27,7 @@ services:
     container_name: kotlin-ktor-server
     ports:
       - 8123:8123
+      - 5000:5005
 #      - ${BASIC_SERVER_PORT_MAP}
     hostname: webserver
     extra_hosts:
@@ -50,7 +51,8 @@ services:
 #
 # docker compose --env-file=./local.env up --detach
 # docker container exec -it kotlin-ktor-server /bin/bash
-# ./gradlew clean && ./gradlew build && java -jar /webserver/webserver/build/libs/webserver.jar
+
+#  ./gradlew clean && ./gradlew build  && java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /webserver/webserver/build/libs/webserver.jar
 #
 #
 #
@@ -83,6 +85,7 @@ services:
     container_name: kotlin-ktor-collector
     ports:
       - ${DATA_COLLECTOR_PORT_MAP}
+      - 5001:5005
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -104,7 +107,7 @@ services:
   #
   # docker compose --env-file=./local.env up --detach
   # docker container exec -it kotlin-ktor-collector /bin/bash
-  # ./gradlew clean && ./gradlew build  && java -jar /collector/collector/build/libs/collector.jar
+  # ./gradlew clean && ./gradlew build  && java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /collector/collector/build/libs/collector.jar
   #
   rabbit:
     network_mode: "host"

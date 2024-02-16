@@ -197,12 +197,23 @@ fun main() {
                 get("/startKmeans/{numberPoints}") {
                     val numberPoints = call.parameters["numberPoints"]
 
-
+                    println(numberPoints);
+                    println(numberPoints);
+                    println(numberPoints);
+                    println(numberPoints);
+                    println(numberPoints);
+                    println(numberPoints);
+                    println(numberPoints);
+                    println(numberPoints);
+                    println(numberPoints);
                     val cf = connectionFactory.newConnection().createChannel()
 
                     var numPointsAsInt = Integer.parseInt(numberPoints)
 
+                    // todo: add a field for number of coordinates
                     var coordinateList = SolrEntityCoordinateJsonData()
+                    coordinateList.setNumPoints(numberPoints);
+
 
                     var scheduledRun = SolrEntityScheduledRunJsonData()
                     scheduledRun.setNumberPoints(10)
@@ -248,7 +259,7 @@ fun main() {
                     solrClient.commit()
 
                     // save coordinate
-                    solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/coordinates").build();
+                    solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_webserver").build();
                     solrClient.addBean(
                         SolrEntity(
                             scheduleUUID,
