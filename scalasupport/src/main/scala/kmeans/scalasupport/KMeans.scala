@@ -1,4 +1,4 @@
-package kmeans.analyzer
+package kmeans.scalasupport
 
 import scala.annotation.tailrec
 //import scala.collection.{Map, Seq, mutable}

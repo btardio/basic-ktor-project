@@ -1,0 +1,5 @@
+plugins {
+    id 'buildlogic.scala-common-conventions'
+
+    id 'java-library'
+}

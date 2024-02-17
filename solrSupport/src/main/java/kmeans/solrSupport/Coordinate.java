@@ -16,6 +16,15 @@ public class Coordinate {
 
 	}
 
+	@Override
+	public String toString() {
+		return "Coordinate{" +
+				"x=" + x +
+				", y=" + y +
+				", z=" + z +
+				'}';
+	}
+
 	public Coordinate(Double x, Double y, Double z) {
 		this.x = x;
 		this.y = y;

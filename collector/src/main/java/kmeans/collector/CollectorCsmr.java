@@ -135,12 +135,11 @@ public class CollectorCsmr implements Consumer {
 
 				for ( int i = 0; i < coordinates.getNumPoints(); i ++ ){
 					listOfNewCoordinates.add(new Coordinate(
-							100 * r.nextDouble(),
-							100 * r.nextDouble(),
-							100 * r.nextDouble()));
+							r.nextDouble(),
+							r.nextDouble(),
+							r.nextDouble()));
 				}
 
-//				double randomValue 100 * r.nextDouble()
 				coordinateList.setCoordinates(listOfNewCoordinates);
 
 				// save coordinate

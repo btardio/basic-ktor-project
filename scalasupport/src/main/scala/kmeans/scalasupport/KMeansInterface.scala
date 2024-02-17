@@ -1,5 +1,4 @@
-package kmeans.analyzer
-
+package kmeans.scalasupport
 
 //import scala.collection.{Map, Seq}
 //import scala.collection.parallel.{Map, Seq}

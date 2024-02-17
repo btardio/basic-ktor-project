@@ -5,7 +5,10 @@
  */
 
 plugins {
+    id 'java'
+//    id 'scala'
     id 'buildlogic.kotlin-application-conventions'
+//    id 'buildlogic.scala-application-conventions'
 }
 
 tasks {
@@ -30,11 +33,26 @@ application {
     // Define the main class for the application.
     mainClass = 'kmeans.analyzer.AppKt'
 }
-
+//
+//sourceSets {
+//    main {
+//        scala {
+//            srcDirs = ['src/main/scala']
+//        }
+//        java {
+//            srcDirs = ['src/main/java', 'src/main/scala', ]
+//        }
+//        kotlin {
+//            srcDirs = [ 'src/main/kotlin', 'src/main/java' ]
+//        }
+//    }
+//}
 dependencies {
+//    implementation 'org.scala-lang:scala3-library_3:3.0.0'
     implementation 'org.apache.commons:commons-text'
     implementation(project(":env-support"))
     implementation(project(":solrSupport"))
+    implementation(project(":scalasupport"))
     implementation project(path: ':rabbitSupport')
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("ch.qos.logback:logback-classic:1.4.14")

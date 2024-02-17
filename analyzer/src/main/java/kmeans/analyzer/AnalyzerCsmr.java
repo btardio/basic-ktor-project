@@ -19,11 +19,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
-
+import kmeans.scalasupport.IndexedColorFilter;
 import kmeans.solrSupport.AnyMapper;
 import kmeans.solrSupport.Coordinate;
 import kmeans.solrSupport.SolrEntity;
 import kmeans.solrSupport.SolrEntityCoordinateJsonData;
+//import kmeans.scalasupport.IndexedColorFilter;
+//import kmeans.analyzer.IndexedColorFilter;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -47,6 +49,10 @@ public class AnalyzerCsmr  implements Consumer {
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
 	}
+
+//	java.util.List<Coordinate> convert(Object seq) {
+//		return null;
+//	}
 
 	@Override
 	public void handleConsumeOk(String consumerTag) {
@@ -129,7 +135,57 @@ public class AnalyzerCsmr  implements Consumer {
 
 				log.error(coordinates.toString());
 
-				SolrEntityCoordinateJsonData coordinateList = new SolrEntityCoordinateJsonData();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				IndexedColorFilter icf = new IndexedColorFilter(coordinates.getCoordinates());
+
+				log.error(icf.getResult().toString());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				//Path f = new kmeans.analyzer.Path();
+				//log.error(f.process().apply("som input")); //prints processed
+
+						//new IndexedColorFilter(coordinateList.getCoordinates()).getResult());
+
 //				Random r = new Random();
 //
 //				List<Coordinate> listOfNewCoordinates = new ArrayList<>();

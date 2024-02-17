@@ -22,7 +22,8 @@ plugins {
 
 rootProject.name = 'kmeans'
 
-include('collector',
+include('scalasupport',
+        'collector',
         'analyzer',
         'webserver',
         'env-support',

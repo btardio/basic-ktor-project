@@ -1,4 +1,16 @@
-package kmeans.scalasupport
+import kmeans.KMeans
+
+
+/**
+ * NOTE: Not my own work, attributed to  Prof. Viktor Kuncack
+ * http://www.coursera.org/learn/scala-parallel-programming?specialization=scala
+ * @param initialImage
+ * @param colorCount
+ * @param initStrategy
+ * @param convStrategy
+ */
+
+
 
 /** The value of every pixel is represented as a 32 bit integer. */
 type RGBA = Int
@@ -33,3 +45,19 @@ class Img(val width: Int, val height: Int, private val data: Array[RGBA]):
   def this(w: Int, h: Int) = this(w, h, new Array(w * h))
   def apply(x: Int, y: Int): RGBA = data(y * width + x)
   def update(x: Int, y: Int, c: RGBA): Unit = data(y * width + x) = c
+
+
+class IndexedColorFilter(initialImage: Img,
+                         var colorCount: Int,
+                         initStrategy: InitialSelectionStrategy,
+                         convStrategy: ConvergenceStrategy) extends KMeans:
+
+  private var steps = 0
+  colorCount = 11
+  val points = imageToPoints(initialImage).par
+
+
+  private def imageToPoints(img: Img): Seq[Point] =
+    for x <- 0 until img.width; y <- 0 until img.height yield
+      val rgba = img(x, y)
+      Point(red(rgba), green(rgba), blue(rgba))
