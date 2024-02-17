@@ -1,0 +1,68 @@
+
+plugins {
+
+    id 'java'
+    id 'scala'
+    id 'buildlogic.kotlin-application-conventions'
+    id 'buildlogic.scala-application-conventions'
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-text'
+    implementation 'org.scala-lang:scala3-library_3:3.0.0'
+    implementation 'org.apache.commons:commons-text'
+    implementation(project(":env-support"))
+    implementation(project(":solrSupport"))
+    implementation project(path: ':rabbitSupport')
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("com.rabbitmq:amqp-client:5.20.0")
+    implementation("io.ktor:ktor-server-core:2.3.8")
+    implementation("io.ktor:ktor-server-netty:2.3.8")
+    implementation("io.prometheus:prometheus-metrics-core:1.0.0")
+    implementation("io.prometheus:prometheus-metrics-instrumentation-jvm:1.0.0")
+    implementation("io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0")
+    implementation("org.apache.solr:solr-solrj:8.4.1")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.8")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
+    implementation("org.projectlombok:lombok:1.18.30")
+}
+
+//kotlin {
+//    jvmToolchain(17)
+//}
+
+//
+//tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+//    sourceCompatibility = JavaVersion.VERSION_17
+//    targetCompatibility = JavaVersion.VERSION_17
+//
+//    kotlinOptions {
+//        jvmTarget = '17'
+//        apiVersion = '1.1'
+//        languageVersion = '1.1'
+//    }
+//}
+//
+//java {
+//    toolchain {
+//        languageVersion.set(JavaLanguageVersion.of(17))
+//    }
+//}
+//
+//
+//kotlin {
+//    jvmToolchain {
+//        languageVersion.set(JavaLanguageVersion.of(17))
+//    }
+//    // Or shorter:
+//    jvmToolchain(17)
+//    // For example:
+//    jvmToolchain(17)
+//}
+
+//application {
+//    // Define the main class for the application.
+//    mainClass = 'kmeans.app.AppKt'
+//}
