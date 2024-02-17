@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
 public class Coordinate {
 	@JsonProperty("x")
 	Double x;
@@ -13,6 +11,10 @@ public class Coordinate {
 	Double y;
 	@JsonProperty("z")
 	Double z;
+
+	public Coordinate() {
+
+	}
 
 	public Coordinate(Double x, Double y, Double z) {
 		this.x = x;

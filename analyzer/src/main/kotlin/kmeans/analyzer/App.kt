@@ -10,20 +10,12 @@ import kmeans.`env-support`.getEnvInt
 import kmeans.`env-support`.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import com.netflix.astyanax.*
-import com.netflix.astyanax.connectionpool.*
-import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl
-import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor
-
-import com.netflix.astyanax.impl.*
-import com.netflix.astyanax.thrift.ThriftFamilyFactory
-import com.netflix.astyanax.serializers.*
-import com.netflix.astyanax.model.*
 
 import com.rabbitmq.client.ConnectionFactory
 import kmeans.solrSupport.SolrStartup.*
 
 // WebServer -> Collector -> Analyzer -> WebServer
+
 
 val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-analyzer-app")
@@ -87,26 +79,26 @@ fun main() {
 
         val ch = conn.createChannel();
 
-        ch.exchangeDeclare(
-            WEBSERVER_EXCHANGE,
-            "x-consistent-hash",
-            false,
-            false,
-            null
-        )
-        ch.queueDeclare(
-            WEBSERVER_QUEUE,
-            false,
-            false,
-            false,
-            null,
-
-            )
-        ch.queueBind(
-            WEBSERVER_QUEUE,
-            WEBSERVER_EXCHANGE,
-            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
-        )
+//        ch.exchangeDeclare(
+//            WEBSERVER_EXCHANGE,
+//            "x-consistent-hash",
+//            false,
+//            false,
+//            null
+//        )
+//        ch.queueDeclare(
+//            WEBSERVER_QUEUE,
+//            false,
+//            false,
+//            false,
+//            null,
+//
+//            )
+//        ch.queueBind(
+//            WEBSERVER_QUEUE,
+//            WEBSERVER_EXCHANGE,
+//            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
+//        )
 
 
 

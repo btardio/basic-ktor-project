@@ -19,6 +19,7 @@ import kmeans.solrSupport.SolrStartup.*
 val ANALYZER_EXCHANGE = getEnvStr("ANALYZER_EXCHANGE", "collector-exchange")
 val ANALYZER_QUEUE = getEnvStr("ANALYZER_QUEUE", "collector-queue-webserver-app")
 
+// TODO: are these needed?
 val COLLECTOR_EXCHANGE = getEnvStr("COLLECTOR_EXCHANGE", "webserver-exchange")
 val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "webserver-queue-webserver-app")
 
@@ -84,19 +85,19 @@ fun main() {
             false,
             null
         )
-        ch.queueDeclare(
-            ANALYZER_QUEUE,
-            false,
-            false,
-            false,
-            null,
-
-            )
-        ch.queueBind(
-            ANALYZER_QUEUE,
-            ANALYZER_EXCHANGE,
-            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
-        )
+//        ch.queueDeclare(
+//            ANALYZER_QUEUE,
+//            false,
+//            false,
+//            false,
+//            null,
+//
+//            )
+//        ch.queueBind(
+//            ANALYZER_QUEUE,
+//            ANALYZER_EXCHANGE,
+//            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
+//        )
 
 
 

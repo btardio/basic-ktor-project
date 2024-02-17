@@ -61,14 +61,13 @@ services:
 # ./gradlew clean && ./gradlew build w && docker run -it --network=host -v ./webserver/build/libs/webserver.jar:/a.jar gradle:jdk17 java -jar /a.jar
   #./gradlew clean && ./gradlew build w && java -jar /webserver/webserver/build/libs/webserver.jar
   data-analyzer:
-    build:
-      context: ./
-      no_cache: true
+    image: gradle:jdk17
     restart: always
     container_name: kotlin-ktor-analyzer
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
+      - 5003:5005
       - ${DATA_ANALYZER_PORT_MAP}
     environment:
       - WEBSERVER_EXCHANGE=webserver-exchange
@@ -79,6 +78,20 @@ services:
       - PORT=8887
       - APP=analyzer/build/libs/analyzer.jar
       - AWSHOSTNAME=${HOSTNAME}
+    command: >
+      sh -c "cd /analyzer && ./gradlew clean && 
+      ./gradlew build && while true; do echo 'ACK'; sleep 1; done"
+    volumes:
+      - ./:/analyzer
+        # note : how to develop this ---
+        #
+        # docker compose --env-file=./local.env up --detach
+        # docker container exec -it kotlin-ktor-analyzer /bin/bash
+        # ./gradlew clean && ./gradlew build  && java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /analyzer/analyzer/build/libs/analyzer.jar
+        #
+
+
+
   data-collector:
     image: gradle:jdk17
     restart: always
