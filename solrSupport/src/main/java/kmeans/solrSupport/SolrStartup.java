@@ -117,6 +117,10 @@ public class SolrStartup {
 		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
 		createSchema(solrClient);
 
+		createCollection(3,1, "coordinates_after_analyzer");
+		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build();
+		createSchema(solrClient);
+
 		createCollection(3,1, "schedules");
 		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();
 		createSchema(solrClient);

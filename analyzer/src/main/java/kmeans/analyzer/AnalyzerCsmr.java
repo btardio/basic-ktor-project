@@ -133,47 +133,70 @@ public class AnalyzerCsmr  implements Consumer {
 								response.getResults().get(0).getFieldValue("jsonData").toString(),
 								SolrEntityCoordinateJsonData.class);
 
-				log.error(coordinates.toString());
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 				IndexedColorFilter icf = new IndexedColorFilter(coordinates.getCoordinates());
 
-				log.error(icf.getResult().toString());
+				SolrEntityCoordinateJsonData coordinateList = new SolrEntityCoordinateJsonData();
+
+				coordinateList.setCoordinates(icf.getResult());
+
+				// save coordinate
+				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build();
+				try {
+					solrClient.addBean(
+							new SolrEntity(
+									rabbitMessageStartRun.getSolrEntityScheduledRun_UUID(),
+									rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID(),
+									new ObjectMapper().writeValueAsString(coordinateList)
+							)
+					);
+					solrClient.commit();
+				} catch (SolrServerException e) {
+
+					// exceptions put back on the exchange
+
+					int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
+					if (numTries < 100) {
+						rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
+						cfA.basicPublish(
+								ANALYZER_EXCHANGE,
+								UUID.randomUUID().toString(),
+								MessageProperties.PERSISTENT_BASIC,
+								objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
+						);
+					}
+					try {
+						cfA.close();
+					} catch (TimeoutException ee) {
+
+					}
+					if (envelope != null) {
+						this.ch.basicAck(envelope.getDeliveryTag(), false);
+					};
+					return;
+				}
 
 
 
+				// publish to webserver exchange
+				cfA.basicPublish(
+						exchangeName,
+						UUID.randomUUID().toString(),
+						MessageProperties.PERSISTENT_BASIC,
+						objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
+				);
+			}
+
+			try {
+				cfA.close();
+			} catch (TimeoutException e) {
+
+			}
 
 
-
-
-
-
-
-
-
+			if (envelope != null) {
+				this.ch.basicAck(envelope.getDeliveryTag(), false);
+			}
+			;
 
 
 
@@ -233,36 +256,36 @@ public class AnalyzerCsmr  implements Consumer {
 //					;
 //					return;
 //				}
-
-
-				// do some processing with the coordinates
-
-				response.getResults().get(0).get("jsonData");
-
-				// save back to solr
-
-
-				// signal that we're done and next goes
-
-				cfA.basicPublish(
-						exchangeName,
-						UUID.randomUUID().toString(),
-						MessageProperties.PERSISTENT_BASIC,
-						objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
-				);
-			}
-
-			try {
-				cfA.close();
-			} catch (TimeoutException e) {
-
-			}
-
-
-			if (envelope != null) {
-				this.ch.basicAck(envelope.getDeliveryTag(), false);
-			}
-			;
+//
+//
+//				// do some processing with the coordinates
+//
+//				response.getResults().get(0).get("jsonData");
+//
+//				// save back to solr
+//
+//
+//				// signal that we're done and next goes
+//
+//				cfA.basicPublish(
+//						exchangeName,
+//						UUID.randomUUID().toString(),
+//						MessageProperties.PERSISTENT_BASIC,
+//						objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
+//				);
+//			}
+//
+//			try {
+//				cfA.close();
+//			} catch (TimeoutException e) {
+//
+//			}
+//
+//
+//			if (envelope != null) {
+//				this.ch.basicAck(envelope.getDeliveryTag(), false);
+//			}
+//			;
 
 
 		}
