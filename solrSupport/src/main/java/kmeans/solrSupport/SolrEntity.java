@@ -1,7 +1,9 @@
 package kmeans.solrSupport;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.solr.client.solrj.beans.Field;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class SolrEntity {
@@ -12,14 +14,24 @@ public class SolrEntity {
 	String coordinate_uuid;
 	@Field("jsonData")
 	String jsonData;
+	@Field("timestamp")
+	long timestamp = new Date().getTime();
 
 	@Override
 	public String toString() {
 		return "SolrEntity{" +
-				", schedule_uuid='" + schedule_uuid + '\'' +
+				"schedule_uuid='" + schedule_uuid + '\'' +
 				", coordinate_uuid='" + coordinate_uuid + '\'' +
 				", jsonData='" + jsonData + '\'' +
+				", timestamp=" + timestamp +
 				'}';
+	}
+
+	public SolrEntity(String schedule_uuid, String coordinate_uuid, String jsonData, long timestamp) {
+		this.schedule_uuid = schedule_uuid;
+		this.coordinate_uuid = coordinate_uuid;
+		this.jsonData = jsonData;
+		this.timestamp = timestamp;
 	}
 
 	public SolrEntity(){

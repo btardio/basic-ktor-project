@@ -3,7 +3,10 @@ package kmeans.webserver
 
 //import kmeans.webserver.SolrStartup.createCollection
 //import kmeans.webserver.SolrStartup.createSchema
-import com.rabbitmq.client.*
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.rabbitmq.client.ConnectionFactory
+import com.rabbitmq.client.MessageProperties
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -11,15 +14,22 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kmeans.`env-support`.getEnvStr
 import kmeans.solrSupport.SolrEntity
-import com.fasterxml.jackson.databind.ObjectMapper;
 import kmeans.solrSupport.SolrEntityCoordinateJsonData
 import kmeans.solrSupport.SolrEntityScheduledRunJsonData
+import kmeans.solrSupport.SolrStartup.solrInitialize
 import kotlinx.coroutines.runBlocking
+import org.apache.solr.client.solrj.SolrClient
+import org.apache.solr.client.solrj.SolrQuery
+import org.apache.solr.client.solrj.SolrServerException
 import org.apache.solr.client.solrj.impl.HttpSolrClient
+import org.apache.solr.client.solrj.response.QueryResponse
 import org.slf4j.LoggerFactory
 import java.util.*
 
-import kmeans.solrSupport.SolrStartup.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import org.apache.solr.common.SolrDocument
+import kotlin.jvm.optionals.getOrElse
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -28,7 +38,6 @@ val COLLECTOR_EXCHANGE = getEnvStr("COLLECTOR_EXCHANGE", "collector-exchange")
 val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "collector-queue-webserver-app")
 
 val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
-
 
 
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-webserver-app")
@@ -47,7 +56,8 @@ private fun listenForNotificationRequests(
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
-    channel.basicConsume(queueName,
+    channel.basicConsume(
+        queueName,
         false,
         WebserverCsmr(channel, connectionFactory)
     );
@@ -68,6 +78,9 @@ suspend fun listenAndPublish(
 }
 
 
+private operator fun SolrDocument.component1(): SolrDocument {
+    return this;
+}
 
 fun main() {
 
@@ -146,8 +159,6 @@ fun main() {
 //            COLLECTOR_EXCHANGE,
 //            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
 //        )
-
-
 
 
         ch.exchangeDeclare(
@@ -259,13 +270,51 @@ fun main() {
                     // save coodrinates, use collection coordinates
 
 
+                    call.respondText(
+                        "OK, Templeton, scheduling a new kmeans run using " + numberPoints + "<BR>" +
+                                "Your schedule run ID: " + scheduleUUID.toString()
+                    )
 
-
-
-
-                    call.respondText("OK, Templeton, scheduling a new kmeans run using " + numberPoints + "<BR>" +
-                    "Your schedule run ID: " + scheduleUUID.toString())
                 }
+                get("/getAllSchedules") {
+
+
+                    // get coordinates entry in solr
+                    val query = SolrQuery()
+
+                    query.set("q", "*:*")
+                    query.set("fq", "timestamp:[" + Date().time.minus(600000L) + " TO " + Date().time + "]")
+                    query.set("rows", "1000")
+                    val solrClient: SolrClient =
+                        HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build()
+                    var response: QueryResponse? = null
+                    try {
+                        response = solrClient.query(query)
+
+                        if (response != null) {
+                            call.respondText(ObjectMapper().writeValueAsString(response.getResults().map {
+                                SolrEntity(
+                                    Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
+                                    Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }.toString(),
+                                    Optional.ofNullable(it.getFieldValue("jsonData")).getOrElse { "" }.toString(),
+                                    (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }.toString()).toLong()
+                                )
+                            }
+                            ))
+                        }
+                    } catch (e: SolrServerException) {
+
+                    }
+
+
+                }
+                get("/getFinishedSchedule/{scheduleId}") {
+
+                }
+
+                // todo : select only json data, this will contain number of coordinates to make
+
+                // todo : select only json data, this will contain number of coordinates to make
 
                 // todo: add ajax endpoint for all running jobs and their status
 

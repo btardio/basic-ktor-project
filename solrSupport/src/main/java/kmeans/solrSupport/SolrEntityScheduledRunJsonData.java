@@ -2,6 +2,7 @@ package kmeans.solrSupport;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class SolrEntityScheduledRunJsonData {
@@ -35,6 +36,7 @@ public class SolrEntityScheduledRunJsonData {
 //
 	@JsonProperty("status")
 	String status;
+
 //
 //
 //	public SolrEntityScheduledRunJsonData(SolrEntityCoordinateJsonData coordinates) {

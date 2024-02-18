@@ -71,6 +71,18 @@ public class SolrStartup {
 		} catch( BaseHttpSolrClient.RemoteExecutionException e ) {
 			LoggerFactory.getLogger(SolrStartup.class).info("Failed creating schema, continuing." + "\n" + e.getMessage());
 		}
+		try {
+			Map<String, Object> fieldAttributes = new HashMap<>();
+
+			fieldAttributes.put("name", "timestamp");
+			fieldAttributes.put("type", "plong");
+			fieldAttributes.put("stored", "true");
+
+			SchemaRequest.AddField addFieldUpdateSchemaRequestJsonData = new SchemaRequest.AddField(fieldAttributes);
+			addFieldUpdateSchemaRequestJsonData.process(client);
+		} catch( BaseHttpSolrClient.RemoteExecutionException e ) {
+			LoggerFactory.getLogger(SolrStartup.class).info("Failed creating schema, continuing." + "\n" + e.getMessage());
+		}
 
 	}
 
