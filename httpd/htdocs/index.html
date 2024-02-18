@@ -4,7 +4,7 @@
 <head>
 
   <title>jQuery Demo</title>
-
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 <!--  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
 <!--  <link rel="stylesheet" href="css/style.css">-->
 </head>
@@ -14,14 +14,22 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="js/scripts.js"></script>
 
+<div>Schedules: </div>
 
-<textarea name="post_name" id="post_name"></textarea>
+<div name="post_name" id="post_name">Schedules</div>
 
-<input type="button" name="post_button" id="post_button"  value="Post" class="btn btn-info" />
+<br>
+<!--<input type="button" name="post_button" id="post_button"  value="Post" class="btn btn-info" />-->
 
 Enter number of points:
 <input type="text" id="numberPoints" name="numberPoints">
 <button id="startKmeans" type="button" class="btn btn-primary">Click me to start kmeans.</button>
+
+
+<h2>Greetings</h2>
+<div class="container">
+  <div  id="schedules" class="inner">Hello</div>
+</div>
 
 <!--<form method="post" action="http://127.0.0.1/startKmeans/"-->
 <script>
@@ -52,26 +60,73 @@ $(document).ready(function(){
 //  }
 // });
 
- setInterval(function(){//setInterval() method execute on every interval until called clearInterval()
+  function scrubData(data) {
+    return jQuery.parseJSON(data).map(item => {
+      return {
+        ...item,
+        jsonData: jQuery.parseJSON(item.jsonData)
+      }
+    }).filter(item => {
+      return item.jsonData.status == 'finished'
+    });
+  }
+
+
+  setInterval(function(){//setInterval() method execute on every interval until called clearInterval()
 //  $('#load_posts').load("display.php").fadeIn("slow");
   
   $.ajax({
-    url:"https://worldtimeapi.org/api/timezone/America/Los_Angeles",
+    url:"/netty/getAllSchedules",
     method:"GET",
     data:"",
     dataType:"text",
     success:function(data)
     {
-     $('#post_name').val(data);
+      console.log(scrubData(data));
+      $( "#schedules" ).empty();
+      scrubData(data).forEach(item => {
+
+        $.get("/netty/getFinishedSchedule/" + item.coordinate_uuid, function(data, status){
+
+        }).then((data) => {
+          console.log(jQuery.parseJSON(data));
+          $( "#schedules" ).append( "" +
+                  '<div class="card">' +
+                  '<div class="card-header">' +
+                  'Schedule ID : ' +
+                  item.schedule_uuid +
+                  '</div>' +
+                  '<div class="card-body">' +
+                  '<h5 class="card-title">Indexed Image</h5>' +
+                  '<p class="card-text">' +
+                  jQuery.parseJSON(data).map(coordinates => {
+                    return coordinates.map(coordinate => {
+                      console.log(coordinate);
+                      return "(" + coordinate.x + "," + coordinate.y + "," + coordinate.z + ")";
+                    })
+                  }) +
+                  '</p>' +
+                  '</div>' +
+                  '</div>');
+        });
+        console.log(item);
+
+
+        //console.log('rewq')
+        //$('#post_name').appendChild($('<div id="111">hello</div>'));
+      })
+      //.append()
+     //$('#post_name').textContent(jQuery.parseJSON(data).toString());
     }
    });
 
 
 		 //load() method fetch data from fetch.php page
- }, 1000);
+ }, 5000);
 
 });
 </script>
+
 <!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>-->
 <!--<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>-->
 <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>-->

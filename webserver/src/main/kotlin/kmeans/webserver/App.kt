@@ -23,12 +23,9 @@ import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.SolrServerException
 import org.apache.solr.client.solrj.impl.HttpSolrClient
 import org.apache.solr.client.solrj.response.QueryResponse
+import org.apache.solr.common.SolrDocument
 import org.slf4j.LoggerFactory
 import java.util.*
-
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
-import org.apache.solr.common.SolrDocument
 import kotlin.jvm.optionals.getOrElse
 
 // WebServer -> Collector -> Analyzer -> WebServer
@@ -295,9 +292,11 @@ fun main() {
                             call.respondText(ObjectMapper().writeValueAsString(response.getResults().map {
                                 SolrEntity(
                                     Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
-                                    Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }.toString(),
+                                    Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
+                                        .toString(),
                                     Optional.ofNullable(it.getFieldValue("jsonData")).getOrElse { "" }.toString(),
-                                    (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }.toString()).toLong()
+                                    (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
+                                        .toString()).toLong()
                                 )
                             }
                             ))
@@ -308,8 +307,42 @@ fun main() {
 
 
                 }
-                get("/getFinishedSchedule/{scheduleId}") {
+                get("/getFinishedSchedule/{coordinateId}") {
 
+                    // get coordinates entry in solr
+                    val query = SolrQuery()
+
+                    query.set("q", "coordinate_uuid:" + call.parameters["coordinateId"])
+                    val solrClient: SolrClient =
+                        HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build()
+
+                    try {
+//                        var response: QueryResponse? = null
+//                        response = solrClient.query(query)
+
+
+                            call.respondText(ObjectMapper().writeValueAsString(solrClient.query(query).getResults().map {
+                                SolrEntity(
+                                    Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
+                                    Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
+                                        .toString(),
+                                    Optional.ofNullable(it.getFieldValue("jsonData")).getOrElse { "" }.toString(),
+                                    (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
+                                        .toString()).toLong()
+                                )
+                            }.map {
+                                ObjectMapper().readValue<SolrEntityCoordinateJsonData>(
+                                    it.jsonData,
+                                    SolrEntityCoordinateJsonData::class.java
+                                );
+                            }.map {
+                                it.coordinates
+                            }
+                            ))
+
+                    } catch (e: SolrServerException) {
+
+                    }
                 }
 
                 // todo : select only json data, this will contain number of coordinates to make
