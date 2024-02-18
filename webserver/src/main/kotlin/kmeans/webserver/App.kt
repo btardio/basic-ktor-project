@@ -15,12 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kmeans.solrSupport.SolrEntityCoordinateJsonData
 import kmeans.solrSupport.SolrEntityScheduledRunJsonData
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import org.apache.solr.client.solrj.impl.HttpSolrClient
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -49,14 +43,13 @@ private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
-    queueName: String,
-    exchangeName: String
+    queueName: String
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
     channel.basicConsume(queueName,
         false,
-        WebserverCsmr(channel, exchangeName)
+        WebserverCsmr(channel, connectionFactory)
     );
 }
 
@@ -64,14 +57,13 @@ private fun listenForNotificationRequests(
 suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
-    exchangeName: String,
+    exchangeName: String?,
 ) {
 
     logger.info("listening for notifications " + queueName)
     listenForNotificationRequests(
         connectionFactory,
-        queueName,
-        exchangeName
+        queueName
     )
 }
 
@@ -181,13 +173,13 @@ fun main() {
 
 
 
-//        listenAndPublish(
-//            connectionFactory = connectionFactory,
-////        queueName = REGISTRATION_REQUEST_QUEUE,
-//            queueName = WEBSERVER_QUEUE,
-//            //exchangeName = NOTIFICATION_EXCHANGE,
-//            exchangeName = COLLECTOR_EXCHANGE,
-//        )
+        listenAndPublish(
+            connectionFactory = connectionFactory,
+//        queueName = REGISTRATION_REQUEST_QUEUE,
+            queueName = WEBSERVER_QUEUE,
+            //exchangeName = NOTIFICATION_EXCHANGE,
+            exchangeName = null,
+        )
 
         embeddedServer(Netty, port = 8123) {
             routing {
@@ -197,15 +189,6 @@ fun main() {
                 get("/startKmeans/{numberPoints}") {
                     val numberPoints = call.parameters["numberPoints"]
 
-                    println(numberPoints);
-                    println(numberPoints);
-                    println(numberPoints);
-                    println(numberPoints);
-                    println(numberPoints);
-                    println(numberPoints);
-                    println(numberPoints);
-                    println(numberPoints);
-                    println(numberPoints);
                     val cf = connectionFactory.newConnection().createChannel()
 
                     var numPointsAsInt = Integer.parseInt(numberPoints)
@@ -214,13 +197,16 @@ fun main() {
                     var coordinateList = SolrEntityCoordinateJsonData()
                     coordinateList.setNumPoints(numberPoints);
 
-
                     var scheduledRun = SolrEntityScheduledRunJsonData()
-                    scheduledRun.setNumberPoints(10)
-                    scheduledRun.setStatus("collector")
 
                     try {
-                        scheduledRun.setNumberPoints(Integer.valueOf(numberPoints))
+                        if (numberPoints != null) {
+                            scheduledRun.setNumberPoints(numberPoints.toInt())
+                            scheduledRun.setNumberPoints(Integer.valueOf(numberPoints))
+                        }
+                        scheduledRun.setStatus("started")
+
+
                     } catch (e: Exception) {
 
                     }
@@ -280,50 +266,17 @@ fun main() {
                     call.respondText("OK, Templeton, scheduling a new kmeans run using " + numberPoints + "<BR>" +
                     "Your schedule run ID: " + scheduleUUID.toString())
                 }
+
+                // todo: add ajax endpoint for all running jobs and their status
+
+
+                // todo: add click a done job and return the points
+
+
+                // todo: add start a job given a picture
+
             }
         }.start(wait = true)
     }
 
-    class Csmr(ch: Channel, exchangeName: String) : Consumer {
-
-        val ch: Channel = ch
-        val exchange: String = exchangeName
-
-        override fun handleConsumeOk(consumerTag: String?) {
-
-        }
-
-        override fun handleCancelOk(consumerTag: String?) {
-
-        }
-
-        override fun handleCancel(consumerTag: String?) {
-
-        }
-
-        override fun handleShutdownSignal(consumerTag: String?, sig: ShutdownSignalException?) {
-            sig?.let {
-//            throw it
-            }
-        }
-
-        override fun handleRecoverOk(consumerTag: String?) {
-
-        }
-
-        override fun handleDelivery(
-            consumerTag: String?,
-            envelope: Envelope?,
-            properties: AMQP.BasicProperties?,
-            body: ByteArray?
-        ) {
-
-        }
-    }
-}
-
-class UUIDSerializer: KSerializer<UUID> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
-    override fun deserialize(decoder: Decoder): UUID = UUID.fromString(decoder.decodeString())
-    override fun serialize(encoder: Encoder, value: UUID) = encoder.encodeString(value.toString())
 }
