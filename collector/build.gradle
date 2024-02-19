@@ -36,6 +36,7 @@ dependencies {
     implementation(project(":env-support"))
     implementation(project(":solrSupport"))
     implementation project(path: ':rabbitSupport')
+    implementation("org.apache.commons:commons-lang3:3.14.0")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
 //    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
