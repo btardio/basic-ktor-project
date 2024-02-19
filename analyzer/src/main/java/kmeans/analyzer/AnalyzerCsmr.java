@@ -14,15 +14,12 @@ import kmeans.rabbitSupport.RabbitMessageStartRun;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import kmeans.scalasupport.IndexedColorFilter;
-import kmeans.solrSupport.AnyMapper;
-import kmeans.solrSupport.Coordinate;
 import kmeans.solrSupport.SolrEntity;
+
 import kmeans.solrSupport.SolrEntityCoordinateJsonData;
 //import kmeans.scalasupport.IndexedColorFilter;
 //import kmeans.analyzer.IndexedColorFilter;
@@ -128,9 +125,12 @@ public class AnalyzerCsmr  implements Consumer {
 				}
 			} else {
 
+
+				assert(((List)response.getResults().get(0).getFieldValue("jsonData")).size() == 1);
+
 				SolrEntityCoordinateJsonData coordinates =
 						objectMapper.readValue(
-								response.getResults().get(0).getFieldValue("jsonData").toString(),
+								((List)response.getResults().get(0).getFieldValue("jsonData")).get(0).toString(),
 								SolrEntityCoordinateJsonData.class);
 
 				IndexedColorFilter icf = new IndexedColorFilter(coordinates.getCoordinates());

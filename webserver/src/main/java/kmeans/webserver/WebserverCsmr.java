@@ -10,8 +10,8 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.MessageProperties;
 import com.rabbitmq.client.ShutdownSignalException;
 import kmeans.rabbitSupport.RabbitMessageStartRun;
-import kmeans.solrSupport.SolrEntityScheduledRunJsonData;
 import kmeans.solrSupport.SolrEntity;
+import kmeans.solrSupport.SolrEntityScheduledRunJsonData;
 import kmeans.solrSupport.SolrEntityCoordinateJsonData;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -130,7 +130,7 @@ public class WebserverCsmr implements Consumer {
 				scheduledRunJson.setStatus("finished");
 				scheduledRunJson.setNumberPoints(coordinates.getNumPoints());
 
-// save schedule run, create collection
+				// save schedule run, create collection
 				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();
 				try {
 					solrClient.addBean(

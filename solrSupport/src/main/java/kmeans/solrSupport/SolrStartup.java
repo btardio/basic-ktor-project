@@ -63,8 +63,11 @@ public class SolrStartup {
 			Map<String, Object> fieldAttributes = new HashMap<>();
 
 			fieldAttributes.put("name", "jsonData");
-			fieldAttributes.put("type", "string");
+			fieldAttributes.put("type", "text");
 			fieldAttributes.put("stored", "true");
+			fieldAttributes.put("indexed", "false");
+			fieldAttributes.put("docValues", "false");
+
 
 			SchemaRequest.AddField addFieldUpdateSchemaRequestJsonData = new SchemaRequest.AddField(fieldAttributes);
 			addFieldUpdateSchemaRequestJsonData.process(client);

@@ -11,18 +11,18 @@ import com.rabbitmq.client.ShutdownSignalException;
 
 import kmeans.rabbitSupport.RabbitMessageStartRun;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
-import kmeans.solrSupport.AnyMapper;
 import kmeans.solrSupport.Coordinate;
+
 import kmeans.solrSupport.SolrEntity;
 import kmeans.solrSupport.SolrEntityCoordinateJsonData;
+import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -31,6 +31,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
+import java.io.InputStream;
 
 public class CollectorCsmr implements Consumer {
 
@@ -121,24 +123,57 @@ public class CollectorCsmr implements Consumer {
 				}
 			} else {
 
+				assert(((List)response.getResults().get(0).getFieldValue("jsonData")).size() == 1);
+
 				SolrEntityCoordinateJsonData coordinates =
 						objectMapper.readValue(
-								response.getResults().get(0).getFieldValue("jsonData").toString(),
+								((List)response.getResults().get(0).getFieldValue("jsonData")).get(0).toString(),
 								SolrEntityCoordinateJsonData.class);
 
-				log.error(coordinates.toString());
+
 
 				SolrEntityCoordinateJsonData coordinateList = new SolrEntityCoordinateJsonData();
-				Random r = new Random();
 
 				List<Coordinate> listOfNewCoordinates = new ArrayList<>();
+//
+//				for ( int i = 0; i < coordinates.getNumPoints(); i ++ ){
+//					listOfNewCoordinates.add(new Coordinate(
+//							r.nextDouble(),
+//							r.nextDouble(),
+//							r.nextDouble()));
+//				}
 
-				for ( int i = 0; i < coordinates.getNumPoints(); i ++ ){
-					listOfNewCoordinates.add(new Coordinate(
-							r.nextDouble(),
-							r.nextDouble(),
-							r.nextDouble()));
+
+				//// start image to xyz
+
+				BufferedImage image = null;
+
+				// goal of this evening : instead of random, read a thumbnail url using java client and convert png to 0 to 1 double rgb format
+				try {
+					log.error("findhere");
+					image = ImageIO.read(new URL("http://apache/small.png"));
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
 				}
+
+				int height = image.getHeight();
+				int width = image.getWidth();
+
+
+
+				for ( int i = 0; i < height; i++ ) {
+					for ( int j = 0 ; j < width; j++ ) {
+						int javaRGB = image.getRGB(i, j);
+						Double javaRed = (double) ((javaRGB >> 16) & 0xFF);
+						Double javaGreen = (double) ((javaRGB >> 8) & 0xFF);
+						Double javaBlue = (double) ((javaRGB >> 0) & 0xFF);
+						listOfNewCoordinates.add(new Coordinate(
+								javaRed / 255D,
+								javaGreen / 255D,
+								javaBlue / 255D));
+					}
+				}
+				// end image to xyz
 
 				coordinateList.setCoordinates(listOfNewCoordinates);
 

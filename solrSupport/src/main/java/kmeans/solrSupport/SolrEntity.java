@@ -1,6 +1,5 @@
 package kmeans.solrSupport;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.solr.client.solrj.beans.Field;
 
 import java.util.Date;
