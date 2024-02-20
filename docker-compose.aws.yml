@@ -37,44 +37,50 @@ services:
       - PORT=8888
       - APP=webserver/build/libs/webserver.jar
       - AWSHOSTNAME=${HOSTNAME}
-#  data-analyzer:
-#    build:
-#      context: ./
-#      no_cache: true
-#    restart: always
-#    container_name: kotlin-ktor-analyzer
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-#    ports:
-#      - ${DATA_ANALYZER_PORT_MAP}
-#    environment:
-#      - WEBSERVER_EXCHANGE=webserver-exchange
-#      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
-#      - ANALYZER_EXCHANGE=analyzer-exchange
-#      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
-#      - RABBIT_URL=host.docker.internal
-#      - PORT=8887
-#      - APP=analyzer/build/libs/analyzer.jar
-#      - AWSHOSTNAME=${HOSTNAME}
-#  data-collector:
-#    build:
-#      context: ./
-#      no_cache: true
-#    restart: always
-#    container_name: kotlin-ktor-collector
-#    ports:
-#      - ${DATA_COLLECTOR_PORT_MAP}
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-#    environment:
-#      - ANALYZER_EXCHANGE=analyzer-exchange
-#      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-b
-#      - COLLECTOR_EXCHANGE=collector-exchange
-#      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-b
-#      - RABBIT_URL=host.docker.internal
-#      - PORT=8886
-#      - APP=collector/build/libs/collector.jar
-#      - AWSHOSTNAME=${HOSTNAME}
+      - ZOO_LOCAL=${ZOO_LOCAL}
+      - SOLR_CONNECT_IP=${SOLR_CONNECT_IP}
+  data-analyzer:
+    build:
+      context: ./
+      no_cache: true
+    restart: always
+    container_name: kotlin-ktor-analyzer
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - ${DATA_ANALYZER_PORT_MAP}
+    environment:
+      - WEBSERVER_EXCHANGE=webserver-exchange
+      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
+      - ANALYZER_EXCHANGE=analyzer-exchange
+      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
+      - RABBIT_URL=host.docker.internal
+      - PORT=8887
+      - APP=analyzer/build/libs/analyzer.jar
+      - AWSHOSTNAME=${HOSTNAME}
+      - ZOO_LOCAL=${ZOO_LOCAL}
+      - SOLR_CONNECT_IP=${SOLR_CONNECT_IP}
+  data-collector:
+    build:
+      context: ./
+      no_cache: true
+    restart: always
+    container_name: kotlin-ktor-collector
+    ports:
+      - ${DATA_COLLECTOR_PORT_MAP}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - ANALYZER_EXCHANGE=analyzer-exchange
+      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-b
+      - COLLECTOR_EXCHANGE=collector-exchange
+      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-b
+      - RABBIT_URL=host.docker.internal
+      - PORT=8886
+      - APP=collector/build/libs/collector.jar
+      - AWSHOSTNAME=${HOSTNAME}
+      - ZOO_LOCAL=${ZOO_LOCAL}
+      - SOLR_CONNECT_IP=${SOLR_CONNECT_IP}
   rabbit:
     network_mode: "host"
     image: rabbitmq:3.12-alpine
