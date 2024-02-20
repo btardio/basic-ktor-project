@@ -78,21 +78,21 @@ public class CollectorCsmr implements Consumer {
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		log.error(new String(body, StandardCharsets.UTF_8));
+		//log.error(new String(body, StandardCharsets.UTF_8));
 
 		if (body != null) {
 
 			// read the message
 
 			RabbitMessageStartRun rabbitMessageStartRun = objectMapper.readValue(body, RabbitMessageStartRun.class);
-			log.error(rabbitMessageStartRun.toString());
+			//log.error(rabbitMessageStartRun.toString());
 			Channel cfA = null;
 			try {
 				cfA = this.connectionFactory.newConnection().createChannel();
 			} catch (TimeoutException e) {
 				throw new RuntimeException(e);
 			}
-			log.error(rabbitMessageStartRun.toString());
+			//log.error(rabbitMessageStartRun.toString());
 
 
 			// get coordinates entry in solr
@@ -156,7 +156,7 @@ public class CollectorCsmr implements Consumer {
 
 				for ( int i = 0; i < height; i++ ) {
 					for ( int j = 0 ; j < width; j++ ) {
-						int javaRGB = image.getRGB(i, j);
+						int javaRGB = image.getRGB(j, i);
 						Double javaRed = (double) ((javaRGB >> 16) & 0xFF);
 						Double javaGreen = (double) ((javaRGB >> 8) & 0xFF);
 						Double javaBlue = (double) ((javaRGB >> 0) & 0xFF);

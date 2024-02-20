@@ -30,10 +30,10 @@ class IndexedColorFilter(initialImage: java.util.List[Coordinate]) extends KMean
     Point(coordinate.getX(), coordinate.getY(), coordinate.getZ() )
   }).toList
   val means = initializeIndex(colorCount, points)
-  println("gets here111")
+
 
   val newMeans = kMeans(points, means, 0.1)
-  println("gets here")
+
   /* And these are the results exposed */
   def getStatus() = s"Converged after $steps steps."
   def getResult(): java.util.List[Coordinate] = indexedImage(initialImage, newMeans).map(p => {

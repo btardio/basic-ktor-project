@@ -80,21 +80,21 @@ public class AnalyzerCsmr  implements Consumer {
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		log.error(new String(body, StandardCharsets.UTF_8));
+		//log.error(new String(body, StandardCharsets.UTF_8));
 
 		if (body != null) {
 
 			// read the message
 
 			RabbitMessageStartRun rabbitMessageStartRun = objectMapper.readValue(body, RabbitMessageStartRun.class);
-			log.error(rabbitMessageStartRun.toString());
+			//log.error(rabbitMessageStartRun.toString());
 			Channel cfA = null;
 			try {
 				cfA = this.connectionFactory.newConnection().createChannel();
 			} catch (TimeoutException e) {
 				throw new RuntimeException(e);
 			}
-			log.error(rabbitMessageStartRun.toString());
+			//log.error(rabbitMessageStartRun.toString());
 
 
 			// get coordinates entry in solr
