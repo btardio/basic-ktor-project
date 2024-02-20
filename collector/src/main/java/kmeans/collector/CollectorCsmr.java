@@ -37,6 +37,8 @@ import java.io.InputStream;
 public class CollectorCsmr implements Consumer {
 
 	public static final String COLLECTOR_EXCHANGE = System.getenv("COLLECTOR_EXCHANGE").isEmpty() ? "webserver-exchange" : System.getenv("COLLECTOR_EXCHANGE");
+	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 	private final Channel ch;
 	private final String exchangeName;
 	private final ConnectionFactory connectionFactory;
@@ -100,7 +102,7 @@ public class CollectorCsmr implements Consumer {
 
 			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
-			SolrClient solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_webserver").build();
+			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_webserver").build();
 			QueryResponse response = null;
 			//log.error(String.valueOf(response));
 			try {
@@ -174,7 +176,7 @@ public class CollectorCsmr implements Consumer {
 				coordinateList.setHeight(height);
 
 				// save coordinate
-				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
+				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
 				try {
 					solrClient.addBean(
 							new SolrEntity(

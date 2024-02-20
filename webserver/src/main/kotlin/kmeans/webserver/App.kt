@@ -36,13 +36,13 @@ val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "collector-queue-webserver-ap
 
 val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
 
-
+val SOLR_CONNECT_IP = getEnvStr("SOLR_CONNECT_IP", "solr1:8983")
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-webserver-app")
 
 //val EMBEDDED_NETTY_PORT = getEnvInt("BASIC_SERVER_PORT_MAP", 8888)
 
 val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
-
+val ZOO_LOCAL = getEnvStr("ZOO_LOCAL", "zoo1:2181")
 val RABBIT_URL = getEnvStr("RABBIT_URL", "rabbit")
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
@@ -82,9 +82,9 @@ private operator fun SolrDocument.component1(): SolrDocument {
 fun main() {
 
     runBlocking {
-        solrInitialize()
+        solrInitialize(ZOO_LOCAL)
 //
-//        var solrClient: HttpSolrClient = HttpSolrClient.Builder("http://solr1:8983/solr/sanesystem").build();
+//        var solrClient: HttpSolrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/sanesystem").build();
 //
 //        // sane checks stay
 //
@@ -121,11 +121,11 @@ fun main() {
 //
 //
 //        createCollection(3,1, "coordinates")
-//        solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/coordinates").build()
+//        solrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates").build()
 //        createSchema(solrClient);
 //
 //        createCollection(3,1, "schedules");
-//        solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build()
+//        solrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build()
 //        createSchema(solrClient);
 
         val connectionFactory = ConnectionFactory();
@@ -242,7 +242,7 @@ fun main() {
 
 
                     // save schedule run, create collection
-                    var solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();
+                    var solrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
                     solrClient.addBean(
                         SolrEntity(
                             scheduleUUID,
@@ -253,7 +253,7 @@ fun main() {
                     solrClient.commit()
 
                     // save coordinate
-                    solrClient = HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_webserver").build();
+                    solrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_webserver").build();
                     solrClient.addBean(
                         SolrEntity(
                             scheduleUUID,
@@ -283,7 +283,7 @@ fun main() {
                     query.set("fq", "timestamp:[" + Date().time.minus(600000L) + " TO " + Date().time + "]")
                     query.set("rows", "1000")
                     val solrClient: SolrClient =
-                        HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build()
+                        HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build()
                     var response: QueryResponse? = null
                     try {
                         response = solrClient.query(query)
@@ -315,7 +315,7 @@ fun main() {
 
                     query.set("q", "coordinate_uuid:" + call.parameters["coordinateId"])
                     val solrClient: SolrClient =
-                        HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build()
+                        HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build()
 
                     try {
 //                        var response: QueryResponse? = null

@@ -35,6 +35,11 @@ import org.slf4j.LoggerFactory;
 public class AnalyzerCsmr  implements Consumer {
 	public static final String ANALYZER_EXCHANGE = System.getenv("ANALYZER_EXCHANGE").isEmpty() ?
 			"analyzer-exchange" : System.getenv("ANALYZER_EXCHANGE");
+
+	// TODO change the connect ip to round robin
+	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
+
 	private final Channel ch;
 	private final String exchangeName;
 	private final ConnectionFactory connectionFactory;
@@ -102,7 +107,7 @@ public class AnalyzerCsmr  implements Consumer {
 
 			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
-			SolrClient solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
+			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
 			QueryResponse response = null;
 			//log.error(String.valueOf(response));
 			try {
@@ -143,7 +148,7 @@ public class AnalyzerCsmr  implements Consumer {
 				coordinateList.setHeight(coordinates.getHeight());
 
 				// save coordinate
-				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build();
+				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build();
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -227,7 +232,7 @@ public class AnalyzerCsmr  implements Consumer {
 //				coordinateList.setCoordinates(listOfNewCoordinates);
 //
 //				// save coordinate
-//				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
+//				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
 //				try {
 //					solrClient.addBean(
 //							new SolrEntity(

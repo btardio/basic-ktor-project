@@ -26,7 +26,7 @@ val ANALYZER_QUEUE = getEnvStr("ANALYZER_QUEUE", "analyzer-queue-analyzer-app")
 val EMBEDDED_NETTY_PORT = getEnvInt("DATA_ANALYZER_PORT_MAP", 8887)
 
 val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
-
+val ZOO_LOCAL = getEnvStr("ZOO_LOCAL", "zoo1:2181")
 val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
 
 private val logger = LoggerFactory.getLogger("kmeans.analyzer.App")
@@ -66,7 +66,7 @@ fun main() {
 
     runBlocking {
 
-        solrInitialize()
+        solrInitialize(ZOO_LOCAL)
 
 
 

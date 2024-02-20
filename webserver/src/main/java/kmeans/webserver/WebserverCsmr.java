@@ -31,6 +31,10 @@ import java.util.concurrent.TimeoutException;
 public class WebserverCsmr implements Consumer {
 	public static final String WEBSERVER_EXCHANGE = System.getenv("WEBSERVER_EXCHANGE").isEmpty() ?
 			"webserver-exchange" : System.getenv("WEBSERVER_EXCHANGE");
+
+	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
+
 	private final Channel ch;
 
 	private final ConnectionFactory connectionFactory;
@@ -97,7 +101,7 @@ public class WebserverCsmr implements Consumer {
 
 			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
-			SolrClient solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build();
+			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build();
 			QueryResponse response = null;
 			//log.error(String.valueOf(response));
 			try {
@@ -138,7 +142,7 @@ public class WebserverCsmr implements Consumer {
 
 
 				// save schedule run, create collection
-				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();
+				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -212,7 +216,7 @@ public class WebserverCsmr implements Consumer {
 //				coordinateList.setCoordinates(listOfNewCoordinates);
 //
 //				// save coordinate
-//				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
+//				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
 //				try {
 //					solrClient.addBean(
 //							new SolrEntity(

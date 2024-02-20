@@ -20,11 +20,12 @@ import java.util.Map;
 
 
 public class SolrStartup {
-
+	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 	// note: delete all {'delete': {'query': '*:*'}}
 
-	static public void createCollection(int numShards, int numReplicas, String collectionName) throws SolrServerException, IOException {
-		try (SolrClient solr = new CloudSolrClient.Builder().withZkHost("zoo1:2181").build()) {
+	static public void createCollection(int numShards, int numReplicas, String collectionName, String zooHost) throws SolrServerException, IOException {
+		try (SolrClient solr = new CloudSolrClient.Builder().withZkHost(zooHost).build()) {
 			List<String> existingCollectionNames = CollectionAdminRequest.listCollections(solr);
 			if (!existingCollectionNames.contains(collectionName)) {
 				solr.request(CollectionAdminRequest.createCollection(collectionName, numShards, numReplicas));
@@ -89,14 +90,14 @@ public class SolrStartup {
 
 	}
 
-	public static void solrInitialize() throws Exception {
+	public static void solrInitialize(String zooHost) throws Exception {
 
-		HttpSolrClient solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/sanesystem").build();
+		HttpSolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/sanesystem").build();
 
 		// sane checks stay
 
 		// we have a collection
-		createCollection(1,1, "sanesystem");
+		createCollection(1,1, "sanesystem", zooHost);
 
 		// we have a schema
 		createSchema(solrClient);
@@ -124,20 +125,20 @@ public class SolrStartup {
 			throw new Exception("Error, not sane.");
 		}
 
-		createCollection(3,1, "coordinates_after_webserver");
-		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_webserver").build();
+		createCollection(3,1, "coordinates_after_webserver", zooHost);
+		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_webserver").build();
 		createSchema(solrClient);
 
-		createCollection(3,1, "coordinates_after_collector");
-		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
+		createCollection(3,1, "coordinates_after_collector", zooHost);
+		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
 		createSchema(solrClient);
 
-		createCollection(3,1, "coordinates_after_analyzer");
-		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build();
+		createCollection(3,1, "coordinates_after_analyzer", zooHost);
+		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build();
 		createSchema(solrClient);
 
-		createCollection(3,1, "schedules");
-		solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();
+		createCollection(3,1, "schedules", zooHost);
+		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
 		createSchema(solrClient);
 
 

@@ -26,7 +26,7 @@ val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "webserver-queue-webserver-ap
 val EMBEDDED_NETTY_PORT = getEnvInt("DATA_COLLECTOR_PORT_MAP", 8886)
 
 val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
-
+val ZOO_LOCAL = getEnvStr("ZOO_LOCAL", "zoo1:2181")
 val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
@@ -67,7 +67,7 @@ fun main() {
 
 
 
-        solrInitialize()
+        solrInitialize(ZOO_LOCAL)
 
 
         val connectionFactory = ConnectionFactory();
