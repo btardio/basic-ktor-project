@@ -7,6 +7,16 @@ services:
       - '8181:80'
     volumes:
       - /application/httpd/htdocs:/usr/local/apache2/htdocs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  httpdproxy:
+    image: httpd:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./httpd-proxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   basic-server:
     build:
       context: ./
