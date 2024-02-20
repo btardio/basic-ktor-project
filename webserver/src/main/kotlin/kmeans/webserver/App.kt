@@ -194,23 +194,23 @@ fun main() {
                 get("/") {
                     call.respondText("~~~response OK")
                 }
-                get("/startKmeans/{numberPoints}") {
-                    val numberPoints = call.parameters["numberPoints"]
+                get("/startKmeans/{filename}") {
+                    val filename = call.parameters["filename"]
 
                     val cf = connectionFactory.newConnection().createChannel()
 
-                    var numPointsAsInt = Integer.parseInt(numberPoints)
-
                     // todo: add a field for number of coordinates
                     var coordinateList = SolrEntityCoordinateJsonData()
-                    coordinateList.setNumPoints(numberPoints);
+                    coordinateList.setNumPoints(0);
+
 
                     var scheduledRun = SolrEntityScheduledRunJsonData()
+                    scheduledRun.setNumberPoints(0)
 
                     try {
-                        if (numberPoints != null) {
-                            scheduledRun.setNumberPoints(numberPoints.toInt())
-                            scheduledRun.setNumberPoints(Integer.valueOf(numberPoints))
+                        if (filename != null) {
+                            coordinateList.setFilename(filename);
+                            scheduledRun.setFilename(filename);
                         }
                         scheduledRun.setStatus("started")
 
@@ -268,7 +268,7 @@ fun main() {
 
 
                     call.respondText(
-                        "OK, Templeton, scheduling a new kmeans run using " + numberPoints + "<BR>" +
+                        "OK, Templeton, scheduling a new kmeans run using " + filename + "<BR>" +
                                 "Your schedule run ID: " + scheduleUUID.toString()
                     )
 
@@ -294,7 +294,7 @@ fun main() {
                                     Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
                                     Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
                                         .toString(),
-                                    Optional.ofNullable(it.getFieldValue("jsonData")).getOrElse { "" }.toString(),
+                                    "{}",
                                     (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
                                         .toString()).toLong()
                                 )
@@ -304,6 +304,7 @@ fun main() {
                     } catch (e: SolrServerException) {
 
                     }
+
 
 
                 }
@@ -322,11 +323,12 @@ fun main() {
 
 
                             call.respondText(ObjectMapper().writeValueAsString(solrClient.query(query).getResults().map {
+                                assert( (it.getFieldValue("jsonData") as List<String>).size == 1)
                                 SolrEntity(
                                     Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
                                     Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
                                         .toString(),
-                                    Optional.ofNullable(it.getFieldValue("jsonData")).getOrElse { "" }.toString(),
+                                    Optional.ofNullable((it.getFieldValue("jsonData") as List<String>).get(0)).getOrElse { "" }.toString(),
                                     (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
                                         .toString()).toLong()
                                 )
@@ -345,6 +347,83 @@ fun main() {
                     }
                 }
 
+
+
+
+                get("/getFinishedScheduleHeight/{coordinateId}") {
+
+                    // get coordinates entry in solr
+                    val query = SolrQuery()
+
+                    query.set("q", "coordinate_uuid:" + call.parameters["coordinateId"])
+                    val solrClient: SolrClient =
+                        HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build()
+
+                    try {
+
+                        call.respondText(ObjectMapper().writeValueAsString(solrClient.query(query).getResults().map {
+                            assert( (it.getFieldValue("jsonData") as List<String>).size == 1)
+                            SolrEntity(
+                                Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
+                                Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
+                                    .toString(),
+                                Optional.ofNullable((it.getFieldValue("jsonData") as List<String>).get(0)).getOrElse { "" }.toString(),
+                                (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
+                                    .toString()).toLong()
+                            )
+                        }.map {
+                            ObjectMapper().readValue<SolrEntityCoordinateJsonData>(
+                                it.jsonData,
+                                SolrEntityCoordinateJsonData::class.java
+                            );
+                        }.map {
+                            it.height
+                        }
+                        ))
+
+                    } catch (e: SolrServerException) {
+
+                    }
+                }
+
+
+
+
+                get("/getFinishedScheduleWidth/{coordinateId}") {
+
+                    // get coordinates entry in solr
+                    val query = SolrQuery()
+
+                    query.set("q", "coordinate_uuid:" + call.parameters["coordinateId"])
+                    val solrClient: SolrClient =
+                        HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build()
+
+                    try {
+
+                        call.respondText(ObjectMapper().writeValueAsString(solrClient.query(query).getResults().map {
+                            assert( (it.getFieldValue("jsonData") as List<String>).size == 1)
+                            SolrEntity(
+                                Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
+                                Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
+                                    .toString(),
+                                Optional.ofNullable((it.getFieldValue("jsonData") as List<String>).get(0)).getOrElse { "" }.toString(),
+                                (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
+                                    .toString()).toLong()
+                            )
+                        }.map {
+                            ObjectMapper().readValue<SolrEntityCoordinateJsonData>(
+                                it.jsonData,
+                                SolrEntityCoordinateJsonData::class.java
+                            );
+                        }.map {
+                            it.width
+                        }
+                        ))
+
+                    } catch (e: SolrServerException) {
+
+                    }
+                }
                 // todo : select only json data, this will contain number of coordinates to make
 
                 // todo : select only json data, this will contain number of coordinates to make

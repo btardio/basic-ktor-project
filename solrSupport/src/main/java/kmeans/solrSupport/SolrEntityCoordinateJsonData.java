@@ -8,11 +8,38 @@ import java.util.UUID;
 
 public class SolrEntityCoordinateJsonData {
 
+	@JsonProperty("numPoints")
+	int numPoints = 0;
+
+	@JsonProperty("filename")
+	String filename;
+
+
+	@JsonProperty("height")
+	Integer height = 0;
+
+	@JsonProperty("width")
+	Integer width = 0;
+
+
 	@JsonProperty("coordinates")
 	List<Coordinate> coordinates = new ArrayList<>();
 
-	@JsonProperty("numPoints")
-	int numPoints = 0;
+	public Integer getHeight() {
+		return height;
+	}
+
+	public void setHeight(Integer height) {
+		this.height = height;
+	}
+
+	public Integer getWidth() {
+		return width;
+	}
+
+	public void setWidth(Integer width) {
+		this.width = width;
+	}
 
 	public int getNumPoints() {
 		return numPoints;
@@ -28,6 +55,14 @@ public class SolrEntityCoordinateJsonData {
 		} catch ( NumberFormatException e) {
 			this.numPoints = 0;
 		}
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
 	}
 
 	public List<Coordinate> getCoordinates() {

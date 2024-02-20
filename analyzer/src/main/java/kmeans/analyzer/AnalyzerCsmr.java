@@ -138,6 +138,9 @@ public class AnalyzerCsmr  implements Consumer {
 				SolrEntityCoordinateJsonData coordinateList = new SolrEntityCoordinateJsonData();
 
 				coordinateList.setCoordinates(icf.getResult());
+				coordinateList.setFilename(coordinates.getFilename());
+				coordinateList.setWidth(coordinates.getWidth());
+				coordinateList.setHeight(coordinates.getHeight());
 
 				// save coordinate
 				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build();

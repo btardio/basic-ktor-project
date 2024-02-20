@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -119,9 +120,11 @@ public class WebserverCsmr implements Consumer {
 				}
 			} else {
 
+				assert(((List)response.getResults().get(0).getFieldValue("jsonData")).size() == 1);
+
 				SolrEntityCoordinateJsonData coordinates =
 						objectMapper.readValue(
-								response.getResults().get(0).getFieldValue("jsonData").toString(),
+								((List)response.getResults().get(0).getFieldValue("jsonData")).get(0).toString(),
 								SolrEntityCoordinateJsonData.class);
 
 				// write in the schedule table that status is "done"
@@ -129,6 +132,7 @@ public class WebserverCsmr implements Consumer {
 				SolrEntityScheduledRunJsonData scheduledRunJson = new SolrEntityScheduledRunJsonData();
 				scheduledRunJson.setStatus("finished");
 				scheduledRunJson.setNumberPoints(coordinates.getNumPoints());
+
 
 				// save schedule run, create collection
 				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/schedules").build();

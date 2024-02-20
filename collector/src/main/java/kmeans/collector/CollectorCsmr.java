@@ -135,13 +135,7 @@ public class CollectorCsmr implements Consumer {
 				SolrEntityCoordinateJsonData coordinateList = new SolrEntityCoordinateJsonData();
 
 				List<Coordinate> listOfNewCoordinates = new ArrayList<>();
-//
-//				for ( int i = 0; i < coordinates.getNumPoints(); i ++ ){
-//					listOfNewCoordinates.add(new Coordinate(
-//							r.nextDouble(),
-//							r.nextDouble(),
-//							r.nextDouble()));
-//				}
+
 
 
 				//// start image to xyz
@@ -150,8 +144,7 @@ public class CollectorCsmr implements Consumer {
 
 				// goal of this evening : instead of random, read a thumbnail url using java client and convert png to 0 to 1 double rgb format
 				try {
-					log.error("findhere");
-					image = ImageIO.read(new URL("http://apache/small.png"));
+					image = ImageIO.read(new URL("http://apache/" + coordinates.getFilename()));
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
@@ -176,6 +169,9 @@ public class CollectorCsmr implements Consumer {
 				// end image to xyz
 
 				coordinateList.setCoordinates(listOfNewCoordinates);
+				coordinateList.setFilename(coordinates.getFilename());
+				coordinateList.setWidth(width);
+				coordinateList.setHeight(height);
 
 				// save coordinate
 				solrClient = new HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_collector").build();
