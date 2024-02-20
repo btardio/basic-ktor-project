@@ -189,7 +189,7 @@ fun main() {
             exchangeName = null,
         )
 
-        embeddedServer(Netty, port = 8123) {
+        embeddedServer(Netty, port = 8888) {
             routing {
                 get("/") {
                     call.respondText("~~~response OK")

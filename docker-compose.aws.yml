@@ -22,6 +22,7 @@ services:
       context: ./
       no_cache: true
     restart: always
+    hostname: webserver
     container_name: kotlin-ktor-server
     ports:
       - ${BASIC_SERVER_PORT_MAP}

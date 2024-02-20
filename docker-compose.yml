@@ -26,7 +26,7 @@ services:
     restart: always
     container_name: kotlin-ktor-server
     ports:
-      - 8123:8123
+      - 8888:8888
       - 5000:5005
 #      - ${BASIC_SERVER_PORT_MAP}
     hostname: webserver
