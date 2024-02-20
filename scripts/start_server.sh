@@ -42,6 +42,6 @@ docker container rm solr2
 docker container rm solr3
 docker container rm solr1
 
-docker-compose -f /application/docker-compose.yml --env-file /env down
-docker-compose -f /application/docker-compose.yml --env-file /env build
-docker-compose -f /application/docker-compose.yml --env-file /env up --detach
+docker-compose -f /application/docker-compose.aws.yml --env-file /env down
+docker-compose -f /application/docker-compose.aws.yml --env-file /env build
+docker-compose -f /application/docker-compose.aws.yml --env-file /env up --detach
