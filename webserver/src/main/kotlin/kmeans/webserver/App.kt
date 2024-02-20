@@ -294,7 +294,7 @@ fun main() {
                                     Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
                                     Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
                                         .toString(),
-                                    "{}",
+                                    Optional.ofNullable((it.getFieldValue("jsonData") as List<String>).get(0)).getOrElse { "" }.toString(),
                                     (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
                                         .toString()).toLong()
                                 )
@@ -349,81 +349,6 @@ fun main() {
 
 
 
-
-                get("/getFinishedScheduleHeight/{coordinateId}") {
-
-                    // get coordinates entry in solr
-                    val query = SolrQuery()
-
-                    query.set("q", "coordinate_uuid:" + call.parameters["coordinateId"])
-                    val solrClient: SolrClient =
-                        HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build()
-
-                    try {
-
-                        call.respondText(ObjectMapper().writeValueAsString(solrClient.query(query).getResults().map {
-                            assert( (it.getFieldValue("jsonData") as List<String>).size == 1)
-                            SolrEntity(
-                                Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
-                                Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
-                                    .toString(),
-                                Optional.ofNullable((it.getFieldValue("jsonData") as List<String>).get(0)).getOrElse { "" }.toString(),
-                                (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
-                                    .toString()).toLong()
-                            )
-                        }.map {
-                            ObjectMapper().readValue<SolrEntityCoordinateJsonData>(
-                                it.jsonData,
-                                SolrEntityCoordinateJsonData::class.java
-                            );
-                        }.map {
-                            it.height
-                        }
-                        ))
-
-                    } catch (e: SolrServerException) {
-
-                    }
-                }
-
-
-
-
-                get("/getFinishedScheduleWidth/{coordinateId}") {
-
-                    // get coordinates entry in solr
-                    val query = SolrQuery()
-
-                    query.set("q", "coordinate_uuid:" + call.parameters["coordinateId"])
-                    val solrClient: SolrClient =
-                        HttpSolrClient.Builder("http://solr1:8983/solr/coordinates_after_analyzer").build()
-
-                    try {
-
-                        call.respondText(ObjectMapper().writeValueAsString(solrClient.query(query).getResults().map {
-                            assert( (it.getFieldValue("jsonData") as List<String>).size == 1)
-                            SolrEntity(
-                                Optional.ofNullable(it.getFieldValue("schedule_uuid")).getOrElse { "" }.toString(),
-                                Optional.ofNullable(it.getFieldValue("coordinate_uuid")).getOrElse { "" }
-                                    .toString(),
-                                Optional.ofNullable((it.getFieldValue("jsonData") as List<String>).get(0)).getOrElse { "" }.toString(),
-                                (Optional.ofNullable(it.getFieldValue("timestamp")).getOrElse { "-1" }
-                                    .toString()).toLong()
-                            )
-                        }.map {
-                            ObjectMapper().readValue<SolrEntityCoordinateJsonData>(
-                                it.jsonData,
-                                SolrEntityCoordinateJsonData::class.java
-                            );
-                        }.map {
-                            it.width
-                        }
-                        ))
-
-                    } catch (e: SolrServerException) {
-
-                    }
-                }
                 // todo : select only json data, this will contain number of coordinates to make
 
                 // todo : select only json data, this will contain number of coordinates to make

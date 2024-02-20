@@ -131,7 +131,10 @@ public class WebserverCsmr implements Consumer {
 
 				SolrEntityScheduledRunJsonData scheduledRunJson = new SolrEntityScheduledRunJsonData();
 				scheduledRunJson.setStatus("finished");
+				scheduledRunJson.setHeight(coordinates.getHeight());
+				scheduledRunJson.setWidth(coordinates.getWidth());
 				scheduledRunJson.setNumberPoints(coordinates.getNumPoints());
+				scheduledRunJson.setFilename(coordinates.getFilename());
 
 
 				// save schedule run, create collection
