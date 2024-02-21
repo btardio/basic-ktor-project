@@ -5,7 +5,6 @@
 
 source /ipaddr
 
-rm -f /application/local.env
 
 export IPADDRA=$IPADDRA
 export IPADDRB=$IPADDRB

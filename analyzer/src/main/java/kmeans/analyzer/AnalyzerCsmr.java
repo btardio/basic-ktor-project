@@ -28,6 +28,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.common.SolrException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,8 +113,17 @@ public class AnalyzerCsmr  implements Consumer {
 			//log.error(String.valueOf(response));
 			try {
 				response = solrClient.query(query);
-			} catch (SolrServerException e) {
-				log.error("Error, unexpected.");
+			} catch (SolrServerException | SolrException e) {
+				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
+				if (numTries < 100) {
+					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
+					cfA.basicPublish(
+							ANALYZER_EXCHANGE,
+							UUID.randomUUID().toString(),
+							MessageProperties.PERSISTENT_BASIC,
+							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
+					);
+				}
 			}
 
 			// if its not fuond it will be
