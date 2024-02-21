@@ -31,6 +31,19 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+      - uses: actions/checkout@v2
+          # Step 2
+          - name: Set up JDK 17
+          uses: actions/setup-java@v2
+          with:
+            java-version: '17'
+            distribution: 'adopt'
+        # Step 3
+      - name: Build Application and Run unit Test
+        run: gradle build
+      - name: Send build files
+        run: |
+          aws s3 sync build s3://mybuildfiles --delete
      # Step 2
       - name: Create CodeDeploy Deployment
         id: deploy
