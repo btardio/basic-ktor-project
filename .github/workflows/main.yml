@@ -42,7 +42,7 @@ jobs:
         run: gradle build
       - name: Send build files
         run: |
-          aws s3 sync build s3://mybuildfiles --delete
+          aws s3 sync /home/runner/work/basic-ktor-project s3://mybuildfiles --delete
 
   continuous-deployment:
     runs-on: ubuntu-latest
