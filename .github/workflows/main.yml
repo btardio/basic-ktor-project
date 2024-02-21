@@ -18,14 +18,13 @@ jobs:
       # Step 3
 #      - name: Build Application and Run unit Test
 #        run: gradle build
-
-  continuous-deployment:
+  build-jar:
     runs-on: ubuntu-latest
-    needs: [continuous-integration]
+    needs: [ continuous-integration ]
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2
-     # Step 1
+      # Step 1
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -44,7 +43,20 @@ jobs:
       - name: Send build files
         run: |
           aws s3 sync build s3://mybuildfiles --delete
-     # Step 2
+
+  continuous-deployment:
+    runs-on: ubuntu-latest
+    needs: [build-jar]
+    if: github.ref == 'refs/heads/master'
+    steps:
+     # Step 1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      # Step 2
       - name: Create CodeDeploy Deployment
         id: deploy
         run: |
