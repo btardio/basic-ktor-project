@@ -162,7 +162,7 @@ public class WebserverCsmr implements Consumer {
 							)
 					);
 					solrClient.commit();
-				} catch (SolrServerException e) {
+				} catch (SolrServerException | SolrException e) {
 
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,

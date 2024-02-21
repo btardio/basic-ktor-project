@@ -22,6 +22,28 @@ import java.util.Map;
 public class SolrStartup {
 	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
 			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
+
+
+	public static final Integer COORDINATES_AFTER_WEBSERVER_SHARDS = System.getenv("COORDINATES_AFTER_WEBSERVER_SHARDS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			3 : Integer.valueOf(System.getenv("COORDINATES_AFTER_WEBSERVER_SHARDS"));
+	public static final Integer COORDINATES_AFTER_WEBSERVER_REPLICAS = System.getenv("COORDINATES_AFTER_WEBSERVER_REPLICAS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			1 : Integer.valueOf(System.getenv("COORDINATES_AFTER_WEBSERVER_REPLICAS"));
+	public static final Integer COORDINATES_AFTER_COLLECTOR_SHARDS = System.getenv("COORDINATES_AFTER_COLLECTOR_SHARDS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			3 : Integer.valueOf(System.getenv("COORDINATES_AFTER_COLLECTOR_SHARDS"));
+	public static final Integer COORDINATES_AFTER_COLLECTOR_REPLICAS = System.getenv("COORDINATES_AFTER_COLLECTOR_REPLICAS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			1 : Integer.valueOf(System.getenv("COORDINATES_AFTER_COLLECTOR_REPLICAS"));
+	public static final Integer COORDINATES_AFTER_ANALYZER_SHARDS = System.getenv("COORDINATES_AFTER_ANALYZER_SHARDS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			3 : Integer.valueOf(System.getenv("COORDINATES_AFTER_ANALYZER_SHARDS"));
+	public static final Integer COORDINATES_AFTER_ANALYZER_REPLICAS = System.getenv("COORDINATES_AFTER_ANALYZER_REPLICAS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			1 : Integer.valueOf(System.getenv("COORDINATES_AFTER_ANALYZER_REPLICAS"));
+	public static final Integer SCHEDULES_SHARDS = System.getenv("SCHEDULES_SHARDS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			3 : Integer.valueOf(System.getenv("SCHEDULES_SHARDS"));
+	public static final Integer SCHEDULES_REPLICAS = System.getenv("SCHEDULES_REPLICAS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+			1 : Integer.valueOf(System.getenv("SCHEDULES_REPLICAS"));
+	
+	
+	
+	
 	// note: delete all {'delete': {'query': '*:*'}}
 
 	static public void createCollection(int numShards, int numReplicas, String collectionName, String zooHost) throws SolrServerException, IOException {
@@ -125,19 +147,19 @@ public class SolrStartup {
 			throw new Exception("Error, not sane.");
 		}
 
-		createCollection(3,1, "coordinates_after_webserver", zooHost);
+		createCollection(COORDINATES_AFTER_WEBSERVER_SHARDS,COORDINATES_AFTER_WEBSERVER_REPLICAS, "coordinates_after_webserver", zooHost);
 		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_webserver").build();
 		createSchema(solrClient);
 
-		createCollection(3,1, "coordinates_after_collector", zooHost);
+		createCollection(COORDINATES_AFTER_COLLECTOR_SHARDS,COORDINATES_AFTER_COLLECTOR_REPLICAS, "coordinates_after_collector", zooHost);
 		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
 		createSchema(solrClient);
 
-		createCollection(3,1, "coordinates_after_analyzer", zooHost);
+		createCollection(COORDINATES_AFTER_ANALYZER_SHARDS,COORDINATES_AFTER_ANALYZER_REPLICAS, "coordinates_after_analyzer", zooHost);
 		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build();
 		createSchema(solrClient);
 
-		createCollection(3,1, "schedules", zooHost);
+		createCollection(SCHEDULES_SHARDS,SCHEDULES_REPLICAS, "schedules", zooHost);
 		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
 		createSchema(solrClient);
 

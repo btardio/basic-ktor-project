@@ -197,7 +197,7 @@ public class CollectorCsmr implements Consumer {
 							)
 					);
 					solrClient.commit();
-				} catch (SolrServerException e) {
+				} catch (SolrServerException | SolrException e) {
 					int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 					if (numTries < 100) {
 						rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);

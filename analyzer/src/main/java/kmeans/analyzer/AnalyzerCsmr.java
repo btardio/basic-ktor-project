@@ -168,7 +168,7 @@ public class AnalyzerCsmr  implements Consumer {
 							)
 					);
 					solrClient.commit();
-				} catch (SolrServerException e) {
+				} catch (SolrServerException | SolrException e) {
 
 					// exceptions put back on the exchange
 
