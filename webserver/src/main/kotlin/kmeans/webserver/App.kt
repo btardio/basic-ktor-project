@@ -12,6 +12,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.prometheus.metrics.core.metrics.Counter
+import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.`env-support`.getEnvStr
 import kmeans.solrSupport.SolrEntity
 import kmeans.solrSupport.SolrEntityCoordinateJsonData
@@ -79,9 +81,21 @@ private operator fun SolrDocument.component1(): SolrDocument {
     return this;
 }
 
+val counter: Counter = Counter.builder()
+    .name("my_count_total")
+    .help("example counter")
+    .labelNames("status")
+    .register()
+
 fun main() {
 
     runBlocking {
+
+        val server: HTTPServer = HTTPServer.builder()
+            .port(Integer.valueOf("65409"))
+            .buildAndStart()
+
+
         solrInitialize(ZOO_LOCAL)
 //
 //        var solrClient: HttpSolrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/sanesystem").build();

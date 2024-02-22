@@ -7,6 +7,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.prometheus.metrics.core.metrics.Counter
+import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.`env-support`.getEnvInt
 import kmeans.`env-support`.getEnvStr
 import kotlinx.coroutines.runBlocking
@@ -60,11 +62,19 @@ suspend fun listenAndPublish(
     )
 }
 
+val counter: Counter = Counter.builder()
+    .name("my_count_total")
+    .help("example counter")
+    .labelNames("status")
+    .register()
 
 fun main() {
 
     runBlocking {
 
+        val server: HTTPServer = HTTPServer.builder()
+            .port(Integer.valueOf("65403"))
+            .buildAndStart()
 
 
         solrInitialize(ZOO_LOCAL)

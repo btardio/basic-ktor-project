@@ -12,6 +12,8 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
 import com.rabbitmq.client.ConnectionFactory
+import io.prometheus.metrics.core.metrics.Counter
+import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.solrSupport.SolrStartup.*
 
 // WebServer -> Collector -> Analyzer -> WebServer
@@ -60,11 +62,21 @@ suspend fun listenAndPublish(
     )
 }
 
+val counter: Counter = Counter.builder()
+    .name("my_count_total")
+    .help("example counter")
+    .labelNames("status")
+    .register()
 
 fun main() {
 
 
+
     runBlocking {
+
+        val server: HTTPServer = HTTPServer.builder()
+            .port(Integer.valueOf("65400"))
+            .buildAndStart()
 
         solrInitialize(ZOO_LOCAL)
 
