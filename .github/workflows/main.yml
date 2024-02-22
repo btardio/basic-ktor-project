@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v2
       # Step 1
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -41,6 +41,20 @@ jobs:
       - name: Build Application and Run unit Test
         run: gradle build
       - name: Send build files
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          inline-session-policy: >-
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid":"Stmt1",
+                  "Effect":"Allow",
+                  "Action":"s3:*",
+                  "Resource":"arn:aws:s3:::mybuildfiles/*"
+                }
+              ]
+            }
         run: |
           aws s3 sync /home/runner/work/basic-ktor-project s3://mybuildfiles --delete
 
