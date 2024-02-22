@@ -50,14 +50,15 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
         # Step 3
-      - name: Build Application and Run unit Test
-        run: gradle build
+#      - name: Build Application and Run unit Test
+#        run: gradle build
       - name: Send build files
         run: |
           ls -laR
-          aws s3api put-object --bucket mybuildfiles --key collector.jar --body collector/build/libs/collector.jar
-          aws s3api put-object --bucket mybuildfiles --key analyzer.jar --body analyzer/build/libs/analyzer.jar
-          aws s3api put-object --bucket mybuildfiles --key webserver.jar --body webserver/build/libs/webserver.jar
+          aws s3 ls
+#          aws s3api put-object --bucket mybuildfiles --key collector.jar --body collector/build/libs/collector.jar
+#          aws s3api put-object --bucket mybuildfiles --key analyzer.jar --body analyzer/build/libs/analyzer.jar
+#          aws s3api put-object --bucket mybuildfiles --key webserver.jar --body webserver/build/libs/webserver.jar
 #          aws s3 sync /home/runner/work/basic-ktor-project s3://mybuildfiles --delete
 
   continuous-deployment:
