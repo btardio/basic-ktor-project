@@ -155,6 +155,18 @@ services:
       ZOO_SERVERS: ${ZOO_SERVERS}
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
 #    networks:
 #      - solr
 
