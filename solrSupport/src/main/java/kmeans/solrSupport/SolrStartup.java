@@ -55,13 +55,9 @@ public class SolrStartup {
 		} catch ( Exception e ) {
 			exit(-1);
 		}
-		try {
-			List<String> existingCollectionNames = CollectionAdminRequest.listCollections(solr);
-			if (!existingCollectionNames.contains(collectionName)) {
-				solr.request(CollectionAdminRequest.createCollection(collectionName, numShards, numReplicas));
-			}
-		} catch (Exception e) {
-			// do nothing
+		List<String> existingCollectionNames = CollectionAdminRequest.listCollections(solr);
+		if (!existingCollectionNames.contains(collectionName)) {
+			solr.request(CollectionAdminRequest.createCollection(collectionName, numShards, numReplicas));
 		}
 	}
 
