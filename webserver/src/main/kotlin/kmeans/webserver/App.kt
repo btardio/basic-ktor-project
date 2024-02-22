@@ -316,7 +316,7 @@ fun main() {
                             ))
                         }
                     } catch (e: SolrServerException) {
-
+                        counter.labelValues("get_all_schedules_fail").inc()
                     }
 
 
@@ -357,7 +357,7 @@ fun main() {
                             ))
 
                     } catch (e: SolrServerException) {
-
+                        counter.labelValues("get_finished_schedule_fail").inc()
                     }
                 }
 
