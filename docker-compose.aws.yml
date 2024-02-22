@@ -39,6 +39,8 @@ services:
       - AWSHOSTNAME=${HOSTNAME}
       - ZOO_LOCAL=${ZOO_LOCAL}
       - SOLR_CONNECT_IP=${SOLR_CONNECT_IP}
+    depends_on:
+      - solr1
   data-analyzer:
     build:
       context: ./
@@ -60,6 +62,8 @@ services:
       - AWSHOSTNAME=${HOSTNAME}
       - ZOO_LOCAL=${ZOO_LOCAL}
       - SOLR_CONNECT_IP=${SOLR_CONNECT_IP}
+    depends_on:
+      - solr1
   data-collector:
     build:
       context: ./
@@ -81,6 +85,8 @@ services:
       - AWSHOSTNAME=${HOSTNAME}
       - ZOO_LOCAL=${ZOO_LOCAL}
       - SOLR_CONNECT_IP=${SOLR_CONNECT_IP}
+    depends_on:
+      - solr1
   rabbit:
     network_mode: "host"
     image: rabbitmq:3.12-alpine
