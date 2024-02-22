@@ -12,15 +12,27 @@ alerting:
 scrape_configs:
   - job_name: prometheus
     honor_timestamps: true
-    scrape_interval: 6s
+    scrape_interval: 15s
     scrape_timeout: 5s
     metrics_path: /metrics
     scheme: http
     static_configs:
       - targets:
-          - 24.199.122.125:6541
-          - 24.199.122.125:6542
-          - 24.199.122.125:6543
+          - 10.0.1.100:65400
+          - 10.0.1.100:65403
+          - 10.0.1.100:65409
+          - 10.0.1.109:65400
+          - 10.0.1.109:65403
+          - 10.0.1.109:65409
+          - 10.0.1.119:65400
+          - 10.0.1.119:65403
+          - 10.0.1.119:65409
+          - 10.0.1.200:65400
+          - 10.0.1.200:65403
+          - 10.0.1.200:65409
+          - 10.0.1.209:65400
+          - 10.0.1.209:65403
+          - 10.0.1.209:65409
 #  - job_name: dropwizard
 #    metrics_path: /metrics
 #    scrape_interval: 5s

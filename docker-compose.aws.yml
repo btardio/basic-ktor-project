@@ -169,7 +169,8 @@ services:
       - prom_data:/prometheus
 #    networks:
 #      - solr
-
+volumes:
+  prom_data:
 #  zoo2:
 #    image: zookeeper:3.6.2
 #    container_name: zoo2
