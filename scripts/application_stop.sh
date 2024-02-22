@@ -1,24 +1,30 @@
 #!/bin/bash
 # docker-compose down
 
-docker container stop application-httpdproxy-1 || true
-docker container stop httpd || true
-docker container stop application-rabbit-1 || true
-docker container stop kotlin-ktor-analyzer || true
-docker container stop kotlin-ktor-collector || true
-docker container stop zoo1 || true
-docker container stop kotlin-ktor-server || true
-docker container stop solr2 || true
-docker container stop solr3 || true
-docker container stop solr1 || true
+#trap 'pkill -P $$; exit' SIGINT SIGTERM
 
-docker container rm application-httpdproxy-1 || true
-docker container rm httpd || true
-docker container rm application-rabbit-1 || true
-docker container rm kotlin-ktor-analyzer || true
-docker container rm kotlin-ktor-collector || true
-docker container rm zoo1 || true
-docker container rm kotlin-ktor-server || true
-docker container rm solr2 || true
-docker container rm solr3 || true
-docker container rm solr1 || true
+docker container stop application-httpdproxy-1 &>/dev/null || true
+docker container stop httpd &>/dev/null  || true
+docker container stop application-rabbit-1 &>/dev/null || true
+docker container stop kotlin-ktor-analyzer &>/dev/null || true
+docker container stop kotlin-ktor-collector &>/dev/null || true
+docker container stop zoo1 &>/dev/null || true
+docker container stop kotlin-ktor-server &>/dev/null || true
+docker container stop solr2 &>/dev/null || true
+docker container stop solr3 &>/dev/null || true
+docker container stop solr1 &>/dev/null || true
+docker container stop prometheus &>/dev/null || true
+
+docker container rm application-httpdproxy-1 &>/dev/null || true
+docker container rm httpd &>/dev/null || true
+docker container rm application-rabbit-1 &>/dev/null || true
+docker container rm kotlin-ktor-analyzer &>/dev/null || true
+docker container rm kotlin-ktor-collector &>/dev/null || true
+docker container rm zoo1 &>/dev/null || true
+docker container rm kotlin-ktor-server &>/dev/null || true
+docker container rm solr2 &>/dev/null || true
+docker container rm solr3 &>/dev/null || true
+docker container rm solr1 &>/dev/null || true
+docker container rm prometheus &>/dev/null || true
+
+#wait
