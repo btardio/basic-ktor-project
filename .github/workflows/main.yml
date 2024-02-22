@@ -31,18 +31,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      # Step 2
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'adopt'
-        # Step 3
-      - name: Build Application and Run unit Test
-        run: gradle build
-      - name: Send build files
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
           inline-session-policy: >-
             {
               "Version": "2012-10-17",
@@ -55,6 +43,16 @@ jobs:
                 }
               ]
             }
+      # Step 2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+        # Step 3
+      - name: Build Application and Run unit Test
+        run: gradle build
+      - name: Send build files
         run: |
           aws s3 sync /home/runner/work/basic-ktor-project s3://mybuildfiles --delete
 
