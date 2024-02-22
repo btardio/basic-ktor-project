@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.System.exit;
+
 
 public class SolrStartup {
 	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
@@ -47,11 +49,19 @@ public class SolrStartup {
 	// note: delete all {'delete': {'query': '*:*'}}
 
 	static public void createCollection(int numShards, int numReplicas, String collectionName, String zooHost) throws SolrServerException, IOException {
-		try (SolrClient solr = new CloudSolrClient.Builder().withZkHost(zooHost).build()) {
+		SolrClient solr = null;
+		try {
+			solr = new CloudSolrClient.Builder().withZkHost(zooHost).build();
+		} catch ( Exception e ) {
+			exit(-1);
+		}
+		try {
 			List<String> existingCollectionNames = CollectionAdminRequest.listCollections(solr);
 			if (!existingCollectionNames.contains(collectionName)) {
 				solr.request(CollectionAdminRequest.createCollection(collectionName, numShards, numReplicas));
 			}
+		} catch (Exception e) {
+			// do nothing
 		}
 	}
 
