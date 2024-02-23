@@ -10,7 +10,7 @@ import static kmeans.support.ContextCloseExit.closeContextExit;
 public class LazyInitializedSingleton {
     private static final Logger log = LoggerFactory.getLogger(LazyInitializedSingleton.class);
     private static ThreadLocal<Channel> instance = new ThreadLocal<>();
-    private static ThreadLocal<Connection> connection;
+    private static ThreadLocal<Connection> connection = new ThreadLocal<>();
     private LazyInitializedSingleton(){}
 
     public static Channel getInstance(ConnectionFactory connectionFactory) {

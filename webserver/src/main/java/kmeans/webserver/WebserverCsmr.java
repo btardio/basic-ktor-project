@@ -139,6 +139,9 @@ public class WebserverCsmr implements Consumer {
 							MessageProperties.PERSISTENT_BASIC,
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
+					if (envelope != null) {
+						this.ch.basicAck(envelope.getDeliveryTag(), false);
+					};
 				}
 			} else {
 

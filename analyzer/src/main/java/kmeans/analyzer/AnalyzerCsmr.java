@@ -119,6 +119,9 @@ public class AnalyzerCsmr  implements Consumer {
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
 				}
+				if (envelope != null) {
+					this.ch.basicAck(envelope.getDeliveryTag(), false);
+				};
 				return;
 			} finally {
                 solrClient.close();
