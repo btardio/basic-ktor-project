@@ -1,8 +1,6 @@
 package kmeans.solrSupport;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -57,4 +55,33 @@ public class Coordinate {
 	public void setZ(BigDecimal z) {
 		this.z = z;
 	}
+
+
+
+
+
+
+	public Double getXD() {
+		return x.doubleValue();
+	}
+
+//	public void setXD(BigDecimal x) {
+//		this.x = x;
+//	}
+
+	public double getYD() {
+		return y.doubleValue();
+	}
+
+//	public void setYD(BigDecimal y) {
+//		this.y = y;
+//	}
+
+	public double getZD() {
+		return z.doubleValue();
+	}
+
+//	public void setZD(BigDecimal z) {
+//		this.z = z;
+//	}
 }

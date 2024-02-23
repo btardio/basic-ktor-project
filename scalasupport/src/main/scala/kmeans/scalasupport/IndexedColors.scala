@@ -27,7 +27,7 @@ class IndexedColorFilter(initialImage: java.util.List[Coordinate]) extends KMean
   private var steps = 0
   val colorCount = 16   // add one to intended color count, off by one
   val points = CollectionConverters.ListHasAsScala(initialImage).asScala.map(coordinate => {
-    Point(coordinate.getX(), coordinate.getY(), coordinate.getZ() )
+    Point(coordinate.getXD(), coordinate.getYD(), coordinate.getZD() )
   }).toList
   val means = initializeIndex(colorCount, points)
 
@@ -42,7 +42,7 @@ class IndexedColorFilter(initialImage: java.util.List[Coordinate]) extends KMean
 
 //  private def imageToPoints(list: Seq[Coordinate]): Seq[Point] = {
 //    list.map(coordinate => {
-//      Point(coordinate.getX(), coordinate.getY(), coordinate.getZ() )
+//      Point(coordinate.getXD(), coordinate.getYD(), coordinate.getZD() )
 //
 //    })
 //  }
@@ -55,7 +55,7 @@ class IndexedColorFilter(initialImage: java.util.List[Coordinate]) extends KMean
     val pts = collection.mutable.Set[Point]()
 
     CollectionConverters.ListHasAsScala(initialImage).asScala.map(coordinate => {
-      findClosest(Point(coordinate.getX, coordinate.getY, coordinate.getZ), means)
+      findClosest(Point(coordinate.getXD(), coordinate.getYD(), coordinate.getZD()), means)
     }).toList
 
 //    for x <- 0 until img.width; y <- 0 until img.height yield
