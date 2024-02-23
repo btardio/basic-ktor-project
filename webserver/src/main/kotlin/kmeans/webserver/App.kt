@@ -24,7 +24,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.prometheus.metrics.core.metrics.Counter
 import io.prometheus.metrics.exporter.httpserver.HTTPServer
-import kmeans.`env-support`.getEnvStr
+import kmeans.support.getEnvStr
 import kmeans.solrSupport.SolrEntity
 import kmeans.solrSupport.SolrEntityCoordinateJsonData
 import kmeans.solrSupport.SolrEntityScheduledRunJsonData

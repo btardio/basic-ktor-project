@@ -1,6 +1,5 @@
 package kmeans.collector
 
-import com.rabbitmq.client.*
 import com.rabbitmq.client.ConnectionFactory
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -9,8 +8,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.prometheus.metrics.core.metrics.Counter
 import io.prometheus.metrics.exporter.httpserver.HTTPServer
-import kmeans.`env-support`.getEnvInt
-import kmeans.`env-support`.getEnvStr
+import kmeans.support.getEnvInt
+import kmeans.support.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import kmeans.solrSupport.SolrStartup.*

@@ -1,13 +1,12 @@
 package kmeans.analyzer
 
-import com.rabbitmq.client.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kmeans.`env-support`.getEnvInt
-import kmeans.`env-support`.getEnvStr
+import kmeans.support.getEnvInt
+import kmeans.support.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
