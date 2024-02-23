@@ -25,7 +25,7 @@ class IndexedColorFilter(initialImage: java.util.List[Coordinate]) extends KMean
   val initStrategy = RandomSampling;
   val convStrategy = ConvergedAfterNSteps(3)
   private var steps = 0
-  val colorCount = 8   // add one to intended color count, off by one
+  val colorCount = 16   // add one to intended color count, off by one
   val points = CollectionConverters.ListHasAsScala(initialImage).asScala.map(coordinate => {
     Point(coordinate.getX(), coordinate.getY(), coordinate.getZ() )
   }).toList

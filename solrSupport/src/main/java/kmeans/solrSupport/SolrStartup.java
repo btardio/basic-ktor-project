@@ -65,7 +65,7 @@ public class SolrStartup {
 				exit(-1);
 			}
 			if (pingResponse.getStatus() != 0){
-				log.error("Unable to ping zk host.");
+				log.error("Unable to ping zk host." + pingResponse.getStatus());
 				exit(-1);
 			};
 

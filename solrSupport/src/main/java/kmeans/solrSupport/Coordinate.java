@@ -4,13 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class Coordinate {
 	@JsonProperty("x")
-	Double x;
+	BigDecimal x;
 	@JsonProperty("y")
-	Double y;
+	BigDecimal y;
 	@JsonProperty("z")
-	Double z;
+	BigDecimal z;
 
 	public Coordinate() {
 
@@ -26,32 +29,32 @@ public class Coordinate {
 	}
 
 	public Coordinate(Double x, Double y, Double z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.x = new BigDecimal(x).setScale(3, RoundingMode.FLOOR);
+		this.y = new BigDecimal(y).setScale(3, RoundingMode.FLOOR);
+		this.z = new BigDecimal(z).setScale(3, RoundingMode.FLOOR);
 	}
 
-	public Double getX() {
+	public BigDecimal getX() {
 		return x;
 	}
 
-	public void setX(Double x) {
+	public void setX(BigDecimal x) {
 		this.x = x;
 	}
 
-	public Double getY() {
+	public BigDecimal getY() {
 		return y;
 	}
 
-	public void setY(Double y) {
+	public void setY(BigDecimal y) {
 		this.y = y;
 	}
 
-	public Double getZ() {
+	public BigDecimal getZ() {
 		return z;
 	}
 
-	public void setZ(Double z) {
+	public void setZ(BigDecimal z) {
 		this.z = z;
 	}
 }
