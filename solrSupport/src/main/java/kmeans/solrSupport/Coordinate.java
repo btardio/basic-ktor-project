@@ -61,7 +61,7 @@ public class Coordinate {
 
 
 
-	public Double getXD() {
+	public Double XD() {
 		return x.doubleValue();
 	}
 
@@ -69,7 +69,7 @@ public class Coordinate {
 //		this.x = x;
 //	}
 
-	public double getYD() {
+	public double YD() {
 		return y.doubleValue();
 	}
 
@@ -77,7 +77,8 @@ public class Coordinate {
 //		this.y = y;
 //	}
 
-	public double getZD() {
+
+	public double ZD() {
 		return z.doubleValue();
 	}
 
