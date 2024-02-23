@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.System.exit;
+import static kmeans.support.ContextCloseExit.closeContextExit;
 
 
 public class SolrStartup {
@@ -61,16 +62,16 @@ public class SolrStartup {
 				pingResponse = solr.ping();
 			} catch (Exception e) {
 				log.error("Unable to ping zk host.");
-				exit(-1);
+				closeContextExit(-1);
 			}
 			if (pingResponse.getStatus() != 0){
 				log.error("Unable to ping zk host." + pingResponse.getStatus());
-				exit(-1);
+				closeContextExit(-1);
 			};
 
 		} catch ( Exception e ) {
 			log.error("exiting create collection" + e);
-			exit(-1);
+			closeContextExit(-1);
 		}
 		try {
 			List<String> existingCollectionNames = CollectionAdminRequest.listCollections(solr);
@@ -79,7 +80,7 @@ public class SolrStartup {
 			}
 		} catch ( Exception e ){
 			log.error("exiting create collection" + e);
-			exit(-1);
+			closeContextExit(-1);
 		}
 
 	}

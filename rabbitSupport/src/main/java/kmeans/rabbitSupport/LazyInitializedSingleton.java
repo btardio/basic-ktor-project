@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.lang.System.exit;
+import static kmeans.support.ContextCloseExit.closeContextExit;
 
 public class LazyInitializedSingleton {
     private static final Logger log = LoggerFactory.getLogger(LazyInitializedSingleton.class);
@@ -23,7 +24,7 @@ public class LazyInitializedSingleton {
                     @Override
                     public void shutdownCompleted(ShutdownSignalException e) {
                         log.error("Connection shutdown unexpectedly.", e);
-                        exit(-1);
+                        closeContextExit(-1);
                     }
                 });
 
@@ -32,12 +33,12 @@ public class LazyInitializedSingleton {
                     @Override
                     public void shutdownCompleted(ShutdownSignalException e) {
                         log.error("Channel shutdown unexpectedly.", e);
-                        exit(-1);
+                        closeContextExit(-1);
                     }
                 });
             } catch (Exception e) {
                 log.error("Unable to create connection factory instance.", e);
-                exit(-1);
+                closeContextExit(-1);
             }
         }
         return instance.get();
