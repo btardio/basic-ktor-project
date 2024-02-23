@@ -61,12 +61,12 @@ public class SolrStartup {
 			try {
 				pingResponse = solr.ping();
 			} catch (Exception e) {
-				log.error("Unable to ping zk host.");
-				closeContextExit(-1);
+				log.error("Unable to ping zk host.", e);
+//				closeContextExit(-1);
 			}
 			if (pingResponse.getStatus() != 0){
 				log.error("Unable to ping zk host." + pingResponse.getStatus());
-				closeContextExit(-1);
+//				closeContextExit(-1);
 			};
 
 		} catch ( Exception e ) {
