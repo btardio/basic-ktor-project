@@ -55,7 +55,6 @@ public class SolrStartup {
 		SolrClient solr = null;
 		try {
 			solr = new CloudSolrClient.Builder().withZkHost(zooHost).build();
-			solr.ping();
 
 			SolrPingResponse pingResponse = null;
 			try {
@@ -70,6 +69,7 @@ public class SolrStartup {
 			};
 
 		} catch ( Exception e ) {
+			log.error("exiting create collection" + e);
 			exit(-1);
 		}
 		try {
