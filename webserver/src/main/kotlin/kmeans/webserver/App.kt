@@ -1,6 +1,16 @@
 package kmeans.webserver
 
 
+
+
+////// TODO /////////
+///// app hangs after it cant find a replica, need to restart it if solr isnt ready
+//Exception in thread "main" org.apache.solr.client.solrj.impl.HttpSolrClient$RemoteSolrException: Error from server at http://10.0.1.119:8983/solr/coordinates_after_webserver: No active replicas found for collection: coordinates_after_webserver
+////////////////////////////////////////////////////////////////
+
+
+
+
 //import kmeans.webserver.SolrStartup.createCollection
 //import kmeans.webserver.SolrStartup.createSchema
 
@@ -51,14 +61,15 @@ private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
-    queueName: String
+    queueName: String,
+    counter: Counter
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
     channel.basicConsume(
         queueName,
         false,
-        WebserverCsmr(channel, connectionFactory)
+        WebserverCsmr(channel, connectionFactory, counter)
     );
 }
 
@@ -67,12 +78,14 @@ suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String?,
+    counter: Counter
 ) {
 
     logger.info("listening for notifications " + queueName)
     listenForNotificationRequests(
         connectionFactory,
-        queueName
+        queueName,
+        counter
     )
 }
 
@@ -201,6 +214,7 @@ fun main() {
             queueName = WEBSERVER_QUEUE,
             //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = null,
+            counter,
         )
 
         embeddedServer(Netty, port = 8888) {

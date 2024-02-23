@@ -9,6 +9,8 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.MessageProperties;
 import com.rabbitmq.client.ShutdownSignalException;
+import io.prometheus.metrics.core.metrics.Counter;
+import kmeans.rabbitSupport.LazyInitializedSingleton;
 import kmeans.rabbitSupport.RabbitMessageStartRun;
 import kmeans.solrSupport.SolrEntity;
 import kmeans.solrSupport.SolrEntityScheduledRunJsonData;
@@ -19,6 +21,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrException;
+import kmeans.solrSupport.SolrUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
+
 
 
 public class WebserverCsmr implements Consumer {
@@ -41,10 +45,12 @@ public class WebserverCsmr implements Consumer {
 	private final ConnectionFactory connectionFactory;
 
 	private static final Logger log = LoggerFactory.getLogger(WebserverCsmr.class);
+	private final Counter counter;
 
-	public WebserverCsmr(Channel ch, ConnectionFactory connectionFactory) {
+	public WebserverCsmr(Channel ch, ConnectionFactory connectionFactory, Counter counter) {
 		this.ch = ch;
 		this.connectionFactory = connectionFactory;
+		this.counter = counter;
 	}
 
 //	java.util.List<Coordinate> convert(Object seq) {
@@ -88,12 +94,7 @@ public class WebserverCsmr implements Consumer {
 
 			RabbitMessageStartRun rabbitMessageStartRun = objectMapper.readValue(body, RabbitMessageStartRun.class);
 			//log.error(rabbitMessageStartRun.toString());
-			Channel cfA = null;
-			try {
-				cfA = this.connectionFactory.newConnection().createChannel();
-			} catch (TimeoutException e) {
-				throw new RuntimeException(e);
-			}
+			Channel cfA = LazyInitializedSingleton.getInstance(connectionFactory);
 			//log.error(rabbitMessageStartRun.toString());
 
 
@@ -103,11 +104,15 @@ public class WebserverCsmr implements Consumer {
 			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
 			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build();
+
+			SolrUtility.pingCollection(solrClient, "coordinates_after_analyzer");
+
 			QueryResponse response = null;
 			//log.error(String.valueOf(response));
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
+				log.error("Exception querying coordinates_after_analyzer.", e);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -118,10 +123,13 @@ public class WebserverCsmr implements Consumer {
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
 				}
+			} finally {
+				solrClient.close();
 			}
 
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() != 1L) {
+				log.error(response.getResults().getNumFound() + "Records found on coordinates_after_analyzer.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -133,6 +141,9 @@ public class WebserverCsmr implements Consumer {
 					);
 				}
 			} else {
+
+				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
+				SolrUtility.pingCollection(solrClient, "schedules");
 
 				assert(((List)response.getResults().get(0).getFieldValue("jsonData")).size() == 1);
 
@@ -152,7 +163,7 @@ public class WebserverCsmr implements Consumer {
 
 
 				// save schedule run, create collection
-				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
+
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -163,7 +174,7 @@ public class WebserverCsmr implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
-
+					counter.labelValues("get_all_schedules_fail").inc();
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,
 							UUID.randomUUID().toString(),
@@ -171,29 +182,31 @@ public class WebserverCsmr implements Consumer {
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
 
-					try {
-						cfA.close();
-					} catch (TimeoutException ignored) {
 
-					}
-
+//					try {
+//						cfA.close();
+//					} catch (TimeoutException ee) {
+//
+//					}
 
 					if (envelope != null) {
 						this.ch.basicAck(envelope.getDeliveryTag(), false);
 					};
 
+				} finally {
+					solrClient.close();
 				}
 
 
 				// publish to webserver exchange
 
 			}
-
-			try {
-				cfA.close();
-			} catch (TimeoutException e) {
-
-			}
+//
+//			try {
+//				cfA.close();
+//			} catch (TimeoutException e) {
+//
+//			}
 
 
 			if (envelope != null) {

@@ -72,7 +72,7 @@ public class SolrStartup {
 
 			SchemaRequest.AddField addFieldUpdateSchemaRequestUuid = new SchemaRequest.AddField(fieldAttributes);
 			addFieldUpdateSchemaRequestUuid.process(client);
-		} catch( BaseHttpSolrClient.RemoteExecutionException e ) {
+		} catch(BaseHttpSolrClient.RemoteExecutionException e ) {
 			LoggerFactory.getLogger(SolrStartup.class).info("Failed creating schema, continuing." + "\n" + e.getMessage());
 		}
 		try {

@@ -9,6 +9,7 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.MessageProperties;
 import com.rabbitmq.client.ShutdownSignalException;
 
+import kmeans.rabbitSupport.LazyInitializedSingleton;
 import kmeans.rabbitSupport.RabbitMessageStartRun;
 
 import java.awt.image.BufferedImage;
@@ -22,6 +23,7 @@ import kmeans.solrSupport.Coordinate;
 
 import kmeans.solrSupport.SolrEntity;
 import kmeans.solrSupport.SolrEntityCoordinateJsonData;
+import kmeans.solrSupport.SolrUtility;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -90,12 +92,7 @@ public class CollectorCsmr implements Consumer {
 
 			RabbitMessageStartRun rabbitMessageStartRun = objectMapper.readValue(body, RabbitMessageStartRun.class);
 			//log.error(rabbitMessageStartRun.toString());
-			Channel cfA = null;
-			try {
-				cfA = this.connectionFactory.newConnection().createChannel();
-			} catch (TimeoutException e) {
-				throw new RuntimeException(e);
-			}
+			Channel cfA = LazyInitializedSingleton.getInstance(connectionFactory);
 			//log.error(rabbitMessageStartRun.toString());
 
 
@@ -105,11 +102,15 @@ public class CollectorCsmr implements Consumer {
 			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
 			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_webserver").build();
+
+			SolrUtility.pingCollection(solrClient, "coordinates_after_webserver");
+
 			QueryResponse response = null;
 			//log.error(String.valueOf(response));
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
+				log.error("coordinates_after_webserver query failure.", e);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -119,11 +120,16 @@ public class CollectorCsmr implements Consumer {
 							MessageProperties.PERSISTENT_BASIC,
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
+					if (envelope != null) {
+						this.ch.basicAck(envelope.getDeliveryTag(), false);
+					};
 				}
+				return;
 			}
 
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() != 1L) {
+				log.error(response.getResults().getNumFound() + "Records found on coordinates_after_webserver.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -133,8 +139,15 @@ public class CollectorCsmr implements Consumer {
 							MessageProperties.PERSISTENT_BASIC,
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
+					if (envelope != null) {
+						this.ch.basicAck(envelope.getDeliveryTag(), false);
+					};
 				}
+				return;
 			} else {
+
+				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
+				SolrUtility.pingCollection(solrClient, "coordinates_after_collector");
 
 				assert(((List)response.getResults().get(0).getFieldValue("jsonData")).size() == 1);
 
@@ -187,7 +200,7 @@ public class CollectorCsmr implements Consumer {
 				coordinateList.setHeight(height);
 
 				// save coordinate
-				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
+
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -198,6 +211,7 @@ public class CollectorCsmr implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
+					log.error("Coordinates after collector commit failure.", e);
 					int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 					if (numTries < 100) {
 						rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -207,18 +221,24 @@ public class CollectorCsmr implements Consumer {
 								MessageProperties.PERSISTENT_BASIC,
 								objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 						);
+						if (envelope != null) {
+							this.ch.basicAck(envelope.getDeliveryTag(), false);
+						};
+						return;
 					}
-					try {
-						cfA.close();
-					} catch (TimeoutException ee) {
-
-					}
+//					try {
+//						cfA.close();
+//					} catch (TimeoutException ee) {
+//
+//					}
 					if (envelope != null) {
 						this.ch.basicAck(envelope.getDeliveryTag(), false);
 					}
 					;
 					return;
-				}
+				} finally {
+                    solrClient.close();
+                }
 
 
 				// do some processing with the coordinates
@@ -238,11 +258,11 @@ public class CollectorCsmr implements Consumer {
 				);
 			}
 
-			try {
-				cfA.close();
-			} catch (TimeoutException e) {
-
-			}
+//			try {
+//				cfA.close();
+//			} catch (TimeoutException e) {
+//
+//			}
 
 
 			if (envelope != null) {
