@@ -19,7 +19,7 @@ public class SolrUtility {
 
         SolrPingResponse pingResponse = null;
         try {
-            pingResponse = client.ping(collectionName);
+            pingResponse = client.ping();
         } catch (Exception e) {
             log.error("Unable to ping collection " + collectionName, e);
 
