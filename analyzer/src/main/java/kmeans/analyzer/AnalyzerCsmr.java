@@ -93,9 +93,6 @@ public class AnalyzerCsmr  implements Consumer {
 			//log.error(rabbitMessageStartRun.toString());
 			Channel cfA = LazyInitializedSingleton.getInstance(connectionFactory);
 
-			//log.error(rabbitMessageStartRun.toString());
-
-
 			// get coordinates entry in solr
 			SolrQuery query = new SolrQuery();
 
