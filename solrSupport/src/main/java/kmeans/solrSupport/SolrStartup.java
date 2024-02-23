@@ -57,17 +57,17 @@ public class SolrStartup {
 		try {
 			solr = new CloudSolrClient.Builder().withZkHost(zooHost).build();
 
-			SolrPingResponse pingResponse = null;
-			try {
-				pingResponse = solr.ping();
-			} catch (Exception e) {
-				log.error("Unable to ping zk host.", e);
-//				closeContextExit(-1);
-			}
-			if (pingResponse.getStatus() != 0){
-				log.error("Unable to ping zk host." + pingResponse.getStatus());
-//				closeContextExit(-1);
-			};
+//			SolrPingResponse pingResponse = null;
+//			try {
+////				pingResponse = solr.ping();
+//			} catch (Exception e) {
+//				log.error("Unable to ping zk host.", e);
+////				closeContextExit(-1);
+//			}
+//			if (pingResponse.getStatus() != 0){
+//				log.error("Unable to ping zk host." + pingResponse.getStatus());
+////				closeContextExit(-1);
+//			};
 
 		} catch ( Exception e ) {
 			log.error("exiting create collection" + e);
