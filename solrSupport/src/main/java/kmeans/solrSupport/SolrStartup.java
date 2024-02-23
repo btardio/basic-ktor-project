@@ -78,6 +78,7 @@ public class SolrStartup {
 				solr.request(CollectionAdminRequest.createCollection(collectionName, numShards, numReplicas));
 			}
 		} catch ( Exception e ){
+			log.error("exiting create collection" + e);
 			exit(-1);
 		}
 
