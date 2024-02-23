@@ -9,6 +9,8 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.SolrPingResponse;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -22,6 +24,7 @@ import static java.lang.System.exit;
 
 
 public class SolrStartup {
+	private static final Logger log = LoggerFactory.getLogger(SolrStartup.class);
 	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
 			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 
@@ -52,13 +55,32 @@ public class SolrStartup {
 		SolrClient solr = null;
 		try {
 			solr = new CloudSolrClient.Builder().withZkHost(zooHost).build();
+			solr.ping();
+
+			SolrPingResponse pingResponse = null;
+			try {
+				pingResponse = solr.ping();
+			} catch (Exception e) {
+				log.error("Unable to ping zk host.");
+				exit(-1);
+			}
+			if (pingResponse.getStatus() != 0){
+				log.error("Unable to ping zk host.");
+				exit(-1);
+			};
+
 		} catch ( Exception e ) {
 			exit(-1);
 		}
-		List<String> existingCollectionNames = CollectionAdminRequest.listCollections(solr);
-		if (!existingCollectionNames.contains(collectionName)) {
-			solr.request(CollectionAdminRequest.createCollection(collectionName, numShards, numReplicas));
+		try {
+			List<String> existingCollectionNames = CollectionAdminRequest.listCollections(solr);
+			if (!existingCollectionNames.contains(collectionName)) {
+				solr.request(CollectionAdminRequest.createCollection(collectionName, numShards, numReplicas));
+			}
+		} catch ( Exception e ){
+			exit(-1);
 		}
+
 	}
 
 	static public void createSchema(SolrClient client) throws SolrServerException, IOException {
