@@ -1,19 +1,19 @@
 package kmeans.analyzer
 
+import com.rabbitmq.client.ConnectionFactory
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.prometheus.metrics.core.metrics.Counter
+import io.prometheus.metrics.exporter.httpserver.HTTPServer
+import kmeans.solrSupport.SolrStartup.solrInitialize
 import kmeans.support.getEnvInt
 import kmeans.support.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-
-import com.rabbitmq.client.ConnectionFactory
-import io.prometheus.metrics.core.metrics.Counter
-import io.prometheus.metrics.exporter.httpserver.HTTPServer
-import kmeans.solrSupport.SolrStartup.*
+import java.util.*
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -29,6 +29,7 @@ val EMBEDDED_NETTY_PORT = getEnvInt("DATA_ANALYZER_PORT_MAP", 8887)
 val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
 val ZOO_LOCAL = getEnvStr("ZOO_LOCAL", "zoo1:2181")
 val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
+val SOLR_CONNECT_IP = getEnvStr("SOLR_CONNECT_IP", "solr1:8983")
 
 private val logger = LoggerFactory.getLogger("kmeans.analyzer.App")
 
@@ -42,7 +43,7 @@ private fun listenForNotificationRequests(
     channel.basicConsume(
         queueName,
         false,
-        AnalyzerCsmr(channel, exchangeName, connectionFactory)
+        AnalyzerCsmr(channel, exchangeName, connectionFactory, SOLR_CONNECT_IP, UUID.randomUUID().toString())
     );
 }
 

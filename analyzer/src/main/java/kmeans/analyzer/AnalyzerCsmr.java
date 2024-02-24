@@ -31,23 +31,33 @@ import static java.lang.System.exit;
 
 
 public class AnalyzerCsmr  implements Consumer {
-	public static final String ANALYZER_EXCHANGE = System.getenv("ANALYZER_EXCHANGE").isEmpty() ?
+	public static final String ANALYZER_EXCHANGE = System.getenv("ANALYZER_EXCHANGE") == null || System.getenv("ANALYZER_EXCHANGE").isEmpty() ?
 			"analyzer-exchange" : System.getenv("ANALYZER_EXCHANGE");
 
 	// TODO change the connect ip to round robin
-	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
+//	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+//			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 
 	private final Channel ch;
 	private final String exchangeName;
 	private final ConnectionFactory connectionFactory;
 
+	private final String solrUri;
+
+	private String routingKey;
+
 	private static final Logger log = LoggerFactory.getLogger(AnalyzerCsmr.class);
 
-	public AnalyzerCsmr(Channel ch, String exchangeName, ConnectionFactory connectionFactory) {
+	public AnalyzerCsmr(Channel ch,
+						String exchangeName,
+						ConnectionFactory connectionFactory,
+						String solrUri,
+						String routingKey) {
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
+		this.solrUri = solrUri;
+		this.routingKey = routingKey;
 	}
 
 //	java.util.List<Coordinate> convert(Object seq) {
@@ -99,7 +109,7 @@ public class AnalyzerCsmr  implements Consumer {
 			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
 			SolrClient solrClient = new HttpSolrClient.Builder(
-					"http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
+					"http://" + solrUri + "/solr/coordinates_after_collector").build();
 
             SolrUtility.pingCollection(solrClient, "coordinates_after_collector");
 
@@ -146,7 +156,7 @@ public class AnalyzerCsmr  implements Consumer {
                 return;
 			} else {
 
-				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build();
+				solrClient = new HttpSolrClient.Builder("http://" + solrUri + "/solr/coordinates_after_analyzer").build();
                 SolrUtility.pingCollection(solrClient, "coordinates_after_analyzer");
 
 				assert(((List)response.getResults().get(0).getFieldValue("jsonData")).size() == 1);
@@ -213,9 +223,9 @@ public class AnalyzerCsmr  implements Consumer {
 
 
 				// publish to webserver exchange
-				cfA.basicPublish(
+				LazyInitializedSingleton.getInstance(connectionFactory).basicPublish(
 						exchangeName,
-						UUID.randomUUID().toString(),
+						routingKey,
 						MessageProperties.PERSISTENT_BASIC,
 						objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 				);

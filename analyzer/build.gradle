@@ -67,6 +67,11 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.8")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
     implementation("org.projectlombok:lombok:1.18.30")
+
+
+    testImplementation "org.testcontainers:solr:1.19.6"
+    testImplementation "org.testcontainers:rabbitmq:1.19.6"
+
 }
 
 //
