@@ -14,6 +14,8 @@ package kmeans.webserver
 //import kmeans.webserver.SolrStartup.createCollection
 //import kmeans.webserver.SolrStartup.createSchema
 
+//import io.prometheus.metrics.core.metrics.Counter
+//import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
@@ -22,13 +24,12 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-//import io.prometheus.metrics.core.metrics.Counter
-//import io.prometheus.metrics.exporter.httpserver.HTTPServer
-import kmeans.support.getEnvStr
 import kmeans.solrSupport.SolrEntity
 import kmeans.solrSupport.SolrEntityCoordinateJsonData
 import kmeans.solrSupport.SolrEntityScheduledRunJsonData
 import kmeans.solrSupport.SolrStartup.solrInitialize
+import kmeans.support.ContextCloseExit
+import kmeans.support.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.apache.solr.client.solrj.SolrClient
 import org.apache.solr.client.solrj.SolrQuery
@@ -99,8 +100,12 @@ fun main() {
 //            .port(Integer.valueOf("65409"))
 //            .buildAndStart()
 
-
-        solrInitialize(ZOO_LOCAL)
+        try {
+            solrInitialize(ZOO_LOCAL)
+        } catch ( e: Exception ) {
+            logger.error("solrInitialize", e)
+            ContextCloseExit.closeContextExit(-1)
+        }
 //
 //        var solrClient: HttpSolrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/sanesystem").build();
 //
@@ -234,7 +239,7 @@ fun main() {
 
 
                     } catch (e: Exception) {
-
+                        call.respondText("" + e.message)
                     }
 
 //                    scheduledRun.setStartTime(Timestamp(Date().time))
@@ -320,6 +325,8 @@ fun main() {
                             ))
                         }
                     } catch (e: SolrServerException) {
+                        call.respondText("" + e.message)
+                    //log.error("solr error", e)
                         //counter.labelValues("get_all_schedules_fail").inc()
                     }
 
@@ -361,6 +368,7 @@ fun main() {
                             ))
 
                     } catch (e: SolrServerException) {
+                        call.respondText("" + e.message)
                         //counter.labelValues("get_finished_schedule_fail").inc()
                     }
                 }

@@ -6,13 +6,14 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.prometheus.metrics.core.metrics.Counter
-import io.prometheus.metrics.exporter.httpserver.HTTPServer
+//import io.prometheus.metrics.core.metrics.Counter
+//import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.support.getEnvInt
 import kmeans.support.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import kmeans.solrSupport.SolrStartup.*
+import kmeans.support.ContextCloseExit
 
 
 // WebServer -> Collector -> Analyzer -> WebServer
@@ -61,22 +62,27 @@ suspend fun listenAndPublish(
     )
 }
 
-val counter: Counter = Counter.builder()
-    .name("my_count_total")
-    .help("example counter")
-    .labelNames("status")
-    .register()
+//val counter: Counter = Counter.builder()
+//    .name("my_count_total")
+//    .help("example counter")
+//    .labelNames("status")
+//    .register()
 
 fun main() {
 
     runBlocking {
 
-        val server: HTTPServer = HTTPServer.builder()
-            .port(Integer.valueOf("65403"))
-            .buildAndStart()
+//        val server: HTTPServer = HTTPServer.builder()
+//            .port(Integer.valueOf("65403"))
+//            .buildAndStart()
 
 
-        solrInitialize(ZOO_LOCAL)
+        try {
+            solrInitialize(ZOO_LOCAL)
+        } catch ( e: Exception ) {
+            logger.error("solrInitialize", e)
+            ContextCloseExit.closeContextExit(-1)
+        }
 
 
         val connectionFactory = ConnectionFactory();
