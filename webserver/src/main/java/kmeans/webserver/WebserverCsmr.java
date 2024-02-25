@@ -47,10 +47,10 @@ public class WebserverCsmr implements Consumer {
 	private static final Logger log = LoggerFactory.getLogger(WebserverCsmr.class);
 	private final Counter counter;
 
-	public WebserverCsmr(Channel ch, ConnectionFactory connectionFactory, Counter counter) {
+	public WebserverCsmr(Channel ch, ConnectionFactory connectionFactory) {
 		this.ch = ch;
 		this.connectionFactory = connectionFactory;
-		this.counter = counter;
+		this.counter = null;
 	}
 
 //	java.util.List<Coordinate> convert(Object seq) {

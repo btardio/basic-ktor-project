@@ -50,7 +50,7 @@ application {
 dependencies {
 //    implementation 'org.scala-lang:scala3-library_3:3.0.0'
     implementation 'org.apache.commons:commons-text'
-    implementation(project(":env-support"))
+    implementation(project(":envsupport"))
     implementation(project(":solrSupport"))
     implementation(project(":scalasupport"))
     implementation project(path: ':rabbitSupport')

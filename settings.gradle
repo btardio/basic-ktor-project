@@ -26,6 +26,6 @@ include('scalasupport',
         'collector',
         'analyzer',
         'webserver',
-        'env-support',
+        'envsupport',
         'solrSupport',
         'rabbitSupport')

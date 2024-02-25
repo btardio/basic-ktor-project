@@ -11,7 +11,7 @@ dependencies {
     implementation 'org.apache.commons:commons-text'
     implementation 'org.scala-lang:scala3-library_3:3.0.0'
     implementation 'org.apache.commons:commons-text'
-    implementation(project(":env-support"))
+    implementation(project(":envsupport"))
     implementation(project(":solrSupport"))
     implementation project(path: ':rabbitSupport')
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

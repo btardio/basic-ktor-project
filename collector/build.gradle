@@ -33,7 +33,7 @@ application {
 
 dependencies {
     implementation 'org.apache.commons:commons-text'
-    implementation(project(":env-support"))
+    implementation(project(":envsupport"))
     implementation(project(":solrSupport"))
     implementation project(path: ':rabbitSupport')
     implementation("org.apache.commons:commons-lang3:3.14.0")

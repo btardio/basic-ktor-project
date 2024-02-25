@@ -22,8 +22,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.prometheus.metrics.core.metrics.Counter
-import io.prometheus.metrics.exporter.httpserver.HTTPServer
+//import io.prometheus.metrics.core.metrics.Counter
+//import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.support.getEnvStr
 import kmeans.solrSupport.SolrEntity
 import kmeans.solrSupport.SolrEntityCoordinateJsonData
@@ -61,15 +61,14 @@ private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
-    queueName: String,
-    counter: Counter
+    queueName: String
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
     channel.basicConsume(
         queueName,
         false,
-        WebserverCsmr(channel, connectionFactory, counter)
+        WebserverCsmr(channel, connectionFactory)
     );
 }
 
@@ -77,15 +76,13 @@ private fun listenForNotificationRequests(
 suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
-    exchangeName: String?,
-    counter: Counter
+    exchangeName: String?
 ) {
 
     logger.info("listening for notifications " + queueName)
     listenForNotificationRequests(
         connectionFactory,
-        queueName,
-        counter
+        queueName
     )
 }
 
@@ -94,19 +91,13 @@ private operator fun SolrDocument.component1(): SolrDocument {
     return this;
 }
 
-val counter: Counter = Counter.builder()
-    .name("my_count_total")
-    .help("example counter")
-    .labelNames("status")
-    .register()
-
 fun main() {
 
     runBlocking {
-
-        val server: HTTPServer = HTTPServer.builder()
-            .port(Integer.valueOf("65409"))
-            .buildAndStart()
+//
+//        val server: HTTPServer = HTTPServer.builder()
+//            .port(Integer.valueOf("65409"))
+//            .buildAndStart()
 
 
         solrInitialize(ZOO_LOCAL)
@@ -214,7 +205,6 @@ fun main() {
             queueName = WEBSERVER_QUEUE,
             //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = null,
-            counter,
         )
 
         embeddedServer(Netty, port = 8888) {
@@ -330,7 +320,7 @@ fun main() {
                             ))
                         }
                     } catch (e: SolrServerException) {
-                        counter.labelValues("get_all_schedules_fail").inc()
+                        //counter.labelValues("get_all_schedules_fail").inc()
                     }
 
 
@@ -371,7 +361,7 @@ fun main() {
                             ))
 
                     } catch (e: SolrServerException) {
-                        counter.labelValues("get_finished_schedule_fail").inc()
+                        //counter.labelValues("get_finished_schedule_fail").inc()
                     }
                 }
 
