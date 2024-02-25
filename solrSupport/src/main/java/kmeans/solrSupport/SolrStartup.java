@@ -3,7 +3,7 @@ package kmeans.solrSupport;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.BaseHttpSolrClient;
+
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
@@ -52,7 +52,7 @@ public class SolrStartup {
 	
 	// note: delete all {'delete': {'query': '*:*'}}
 
-	static public void createCollection(int numShards, int numReplicas, String collectionName, String zooHost) throws SolrServerException, IOException {
+	static public void createCollection(int numShards, int numReplicas, String collectionName, String zooHost) {
 		SolrClient solr = null;
 		try {
 			solr = new CloudSolrClient.Builder().withZkHost(zooHost).build();
@@ -85,7 +85,7 @@ public class SolrStartup {
 
 	}
 
-	static public void createSchema(SolrClient client) throws SolrServerException, IOException {
+	static public void createSchema(SolrClient client) {
 		try {
 			Map<String, Object> fieldAttributes = new HashMap<>();
 
@@ -96,7 +96,7 @@ public class SolrStartup {
 
 			SchemaRequest.AddField addFieldUpdateSchemaRequestUuid = new SchemaRequest.AddField(fieldAttributes);
 			addFieldUpdateSchemaRequestUuid.process(client);
-		} catch(BaseHttpSolrClient.RemoteExecutionException e ) {
+		} catch(Exception e ) {
 			LoggerFactory.getLogger(SolrStartup.class).info("Failed creating schema, continuing." + "\n" + e.getMessage());
 		}
 		try {
@@ -109,7 +109,7 @@ public class SolrStartup {
 
 			SchemaRequest.AddField addFieldUpdateSchemaRequestUuid = new SchemaRequest.AddField(fieldAttributes);
 			addFieldUpdateSchemaRequestUuid.process(client);
-		} catch( BaseHttpSolrClient.RemoteExecutionException e ) {
+		} catch( Exception e ) {
 			LoggerFactory.getLogger(SolrStartup.class).info("Failed creating schema, continuing." + "\n" + e.getMessage());
 		}
 		try {
@@ -124,7 +124,7 @@ public class SolrStartup {
 
 			SchemaRequest.AddField addFieldUpdateSchemaRequestJsonData = new SchemaRequest.AddField(fieldAttributes);
 			addFieldUpdateSchemaRequestJsonData.process(client);
-		} catch( BaseHttpSolrClient.RemoteExecutionException e ) {
+		} catch( Exception e ) {
 			LoggerFactory.getLogger(SolrStartup.class).info("Failed creating schema, continuing." + "\n" + e.getMessage());
 		}
 		try {
@@ -136,13 +136,13 @@ public class SolrStartup {
 
 			SchemaRequest.AddField addFieldUpdateSchemaRequestJsonData = new SchemaRequest.AddField(fieldAttributes);
 			addFieldUpdateSchemaRequestJsonData.process(client);
-		} catch( BaseHttpSolrClient.RemoteExecutionException e ) {
+		} catch( Exception e ) {
 			LoggerFactory.getLogger(SolrStartup.class).info("Failed creating schema, continuing." + "\n" + e.getMessage());
 		}
 
 	}
 
-	public static void solrInitialize(String zooHost) throws Exception {
+	public static void solrInitialize(String zooHost) {
 
 		HttpSolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/sanesystem").build();
 
@@ -156,27 +156,31 @@ public class SolrStartup {
 
 		String currentTime = String.valueOf(new Date().getTime());
 
-		// we can write
-		solrClient.addBean(
-				new SolrEntity(
-						currentTime,
-						currentTime,
-						"{" + new Date().toString() + "}"
-				)
-		);
-		solrClient.commit();
+		try {
+			// we can write
+			solrClient.addBean(
+					new SolrEntity(
+							currentTime,
+							currentTime,
+							"{" + new Date().toString() + "}"
+					)
+			);
+			solrClient.commit();
 
 //            // not sane            .withCql("CREATE TABLE sanity (uuid varchar, value varchar, PRIMARY KEY (uuid));")
 
-		// we can read
-		SolrQuery query = new SolrQuery();
-		query.set("q", "schedule_uuid:" + currentTime);
-		QueryResponse response = solrClient.query(query);
+			// we can read
+			SolrQuery query = new SolrQuery();
+			query.set("q", "schedule_uuid:" + currentTime);
+			QueryResponse response = solrClient.query(query);
 
-		if ( response.getResults().getNumFound() != 1L ) {
-			throw new Exception("Error, not sane.");
+			if (response.getResults().getNumFound() != 1L) {
+				throw new Exception("Error, unable to insert sane check.");
+			}
+		} catch (Exception e){
+			log.error("Error, failed checks.", e);
+			closeContextExit(-1);
 		}
-
 		createCollection(COORDINATES_AFTER_WEBSERVER_SHARDS,COORDINATES_AFTER_WEBSERVER_REPLICAS, "coordinates_after_webserver", zooHost);
 		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_webserver").build();
 		createSchema(solrClient);

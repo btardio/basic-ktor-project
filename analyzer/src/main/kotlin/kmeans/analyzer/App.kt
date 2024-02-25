@@ -12,6 +12,7 @@ import kmeans.solrSupport.SolrStartup.solrInitialize
 import kmeans.support.ContextCloseExit
 import kmeans.support.getEnvInt
 import kmeans.support.getEnvStr
+
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.util.*

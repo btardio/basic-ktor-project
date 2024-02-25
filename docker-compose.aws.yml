@@ -125,30 +125,30 @@ services:
       - SOLR_PORT=8981
     depends_on:
       - zooAws
-
-  solr2:
-    image: solr:8.7.0
-    network_mode: "host"
-    restart: always
-    container_name: solr2
-    environment:
-      - ZK_HOST=${SOLR_ZK_HOST}
-      - SOLR_HOST=${IPADDRB}
-      - SOLR_PORT=8982
-    depends_on:
-      - zooAws
-
-  solr3:
-    image: solr:8.7.0
-    network_mode: "host"
-    restart: always
-    container_name: solr3
-    environment:
-      - ZK_HOST=${SOLR_ZK_HOST}
-      - SOLR_HOST=${IPADDRC}
-      - SOLR_PORT=8983
-    depends_on:
-      - zooAws
+#
+#  solr2:
+#    image: solr:8.7.0
+#    network_mode: "host"
+#    restart: always
+#    container_name: solr2
+#    environment:
+#      - ZK_HOST=${SOLR_ZK_HOST}
+#      - SOLR_HOST=${IPADDRB}
+#      - SOLR_PORT=8982
+#    depends_on:
+#      - zooAws
+#
+#  solr3:
+#    image: solr:8.7.0
+#    network_mode: "host"
+#    restart: always
+#    container_name: solr3
+#    environment:
+#      - ZK_HOST=${SOLR_ZK_HOST}
+#      - SOLR_HOST=${IPADDRC}
+#      - SOLR_PORT=8983
+#    depends_on:
+#      - zooAws
 
   zooAws:
     image: zookeeper:3.6.2

@@ -287,7 +287,7 @@ fun main() {
             // todo: add start a job given a picture
 
         }
-    }.start(wait = true)
+    }.start(wait = false)
 
     runBlocking {
 //
