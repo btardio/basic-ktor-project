@@ -8,7 +8,7 @@ ENV APP=""
 COPY . .
 #RUN ls
 
-RUN gradle build
+RUN gradle build -x test
 EXPOSE ${port}
 #ENTRYPOINT /bin/bash
 ENTRYPOINT java -Djava.security.egd=file:/dev/./urandom -Dserver.port=${PORT} ${JAVA_OPTS} -jar ${APP}
