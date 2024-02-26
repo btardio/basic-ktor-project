@@ -38,29 +38,29 @@
 </div>
 
 
-<!--<form method="post" action="127.0.0.1/startKmeans/"-->
+<!--<form method="post" action="http://127.0.0.1/startKmeans/"-->
 <script>
     $(document).ready(function () {
 
-        $("#000").click(function () { $.get("netty.netoxena.com/startKmeans/000.png"); });
-        $("#001").click(function () { $.get("netty.netoxena.com/startKmeans/001.png"); });
-        $("#002").click(function () { $.get("netty.netoxena.com/startKmeans/002.png"); });
-        $("#003").click(function () { $.get("netty.netoxena.com/startKmeans/003.png"); });
-        $("#004").click(function () { $.get("netty.netoxena.com/startKmeans/004.png"); });
-        $("#005").click(function () { $.get("netty.netoxena.com/startKmeans/005.png"); });
-        $("#006").click(function () { $.get("netty.netoxena.com/startKmeans/006.png"); });
-        $("#007").click(function () { $.get("netty.netoxena.com/startKmeans/007.png"); });
-        $("#008").click(function () { $.get("netty.netoxena.com/startKmeans/008.png"); });
-        $("#009").click(function () { $.get("netty.netoxena.com/startKmeans/009.png"); });
-        $("#010").click(function () { $.get("netty.netoxena.com/startKmeans/010.png"); });
-        $("#011").click(function () { $.get("netty.netoxena.com/startKmeans/011.png"); });
+        $("#000").click(function () { $.get("http://netty.netoxena.com/startKmeans/000.png"); });
+        $("#001").click(function () { $.get("http://netty.netoxena.com/startKmeans/001.png"); });
+        $("#002").click(function () { $.get("http://netty.netoxena.com/startKmeans/002.png"); });
+        $("#003").click(function () { $.get("http://netty.netoxena.com/startKmeans/003.png"); });
+        $("#004").click(function () { $.get("http://netty.netoxena.com/startKmeans/004.png"); });
+        $("#005").click(function () { $.get("http://netty.netoxena.com/startKmeans/005.png"); });
+        $("#006").click(function () { $.get("http://netty.netoxena.com/startKmeans/006.png"); });
+        $("#007").click(function () { $.get("http://netty.netoxena.com/startKmeans/007.png"); });
+        $("#008").click(function () { $.get("http://netty.netoxena.com/startKmeans/008.png"); });
+        $("#009").click(function () { $.get("http://netty.netoxena.com/startKmeans/009.png"); });
+        $("#010").click(function () { $.get("http://netty.netoxena.com/startKmeans/010.png"); });
+        $("#011").click(function () { $.get("http://netty.netoxena.com/startKmeans/011.png"); });
 
 
 
         let alreadyRendered = ['1', '2', '3'];
 
         $('#startKmeans').click(function () {
-            $.get("netty.netoxena.com/startKmeans/" + $("#numberPoints").val(), function (data, status) {
+            $.get("http://netty.netoxena.com/startKmeans/" + $("#numberPoints").val(), function (data, status) {
                 alert(data);
             });
 
@@ -105,7 +105,7 @@
 //  $('#load_posts').load("display.php").fadeIn("slow");
 
             $.ajax({
-                url: "netty.netoxena.com/getAllSchedules",
+                url: "http://netty.netoxena.com/getAllSchedules",
                 method: "GET",
                 data: "",
                 dataType: "text",
@@ -127,7 +127,7 @@
                             let width = item.jsonData.width;
 
 
-                            $.get("netty.netoxena.com/getFinishedSchedule/" + item.coordinate_uuid, function (data, status) {
+                            $.get("http://netty.netoxena.com/getFinishedSchedule/" + item.coordinate_uuid, function (data, status) {
 
                                 // console.log(height);
                                 // console.log(width);
