@@ -6,7 +6,7 @@ services:
     ports:
       - '8181:80'
     volumes:
-      - /application/httpd/htdocs:/usr/local/apache2/htdocs
+      - /application/httpd/htdocsaws:/usr/local/apache2/htdocs
     extra_hosts:
       - "host.docker.internal:host-gateway"
   httpdproxy:
