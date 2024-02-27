@@ -44,14 +44,13 @@
 
         var settings = {
             'cache': false,
-            'dataType': 'json',
-            'async': false,
+            'dataType': 'jsonp',
+            'async': true,
             'crossDomain': true,
             'url': 'http://netty.netoxena.com/startKmeans/000.png',
             'method': 'GET',
             'headers': {
-                'Access-Control-Allow-Origin': 'http://netty.netoxena.com',
-                'Access-Control-Allow-Credentials': 'true'
+                'Access-Control-Allow-Origin': 'http://netty.netoxena.com'
             }
         }
 
@@ -61,11 +60,120 @@
                 console.log(response);
             })
         });
-        $("#001").click(function () { $.get("http://netty.netoxena.com/startKmeans/001.png"); });
-        $("#002").click(function () { $.get("http://netty.netoxena.com/startKmeans/002.png"); });
-        $("#003").click(function () { $.get("http://netty.netoxena.com/startKmeans/003.png"); });
-        $("#004").click(function () { $.get("http://netty.netoxena.com/startKmeans/004.png"); });
-        $("#005").click(function () { $.get("http://netty.netoxena.com/startKmeans/005.png"); });
+
+
+
+        $("#001").click(function () {
+            //$.get("http://netty.netoxena.com/startKmeans/000.png");
+            $.ajax({
+                'cache': false,
+                'dataType': 'jsonp',
+                'async': true,
+                'crossDomain': true,
+                'url': 'http://netty.netoxena.com/startKmeans/001.png',
+                'method': 'GET',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*'
+                }
+            }).done(function (response) {
+                console.log(response);
+            })
+        });
+
+        $("#002").click(function () {
+            Start()
+            //$.get("http://netty.netoxena.com/startKmeans/000.png");
+            // $.ajax({
+            //     'cache': false,
+            //     'dataType': 'jsonp',
+            //     'async': true,
+            //     'crossDomain': true,
+            //     'url': 'http://netty.netoxena.com/startKmeans/001.png',
+            //     'method': 'GET',
+            //     'headers': {
+            //         'Access-Control-Allow-Origin': '*',
+            //         'Access-Control-Allow-Credentials': 'true'
+            //     }
+            // }).done(function (response) {
+            //     console.log(response);
+            // })
+        });
+
+        $("#003").click(function () {
+            $.ajax({
+                'cache': false,
+                'dataType': 'jsonp',
+                'async': true,
+                'crossDomain': true,
+                'url': 'http://netty.netoxena.com/startKmeans/001.png',
+                'method': 'GET',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Origin'
+                }
+            }).done(function (response) {
+                console.log(response);
+            })
+        });
+
+
+
+        $("#004").click(function () {
+            //$.get("http://netty.netoxena.com/startKmeans/000.png");
+            $.ajax({
+                'cache': false,
+                'dataType': 'jsonp',
+                'async': true,
+                'crossDomain': true,
+                'url': 'http://netty.netoxena.com/startKmeans/001.png',
+                'method': 'GET',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Origin'
+                }
+            }).done(function (response) {
+                console.log(response);
+            })
+        });
+
+
+
+
+
+        function Start()
+        {
+            var url = "http://netty.netoxena.com/startKmeans/001.png";
+            $.getJSON(url, APICallback);
+        }
+
+
+        function APICallback(data)
+        {
+            console.log(data);
+        }
+
+        //$("#001").click(function () { $.get("http://netty.netoxena.com/startKmeans/001.png"); });
+        //$("#002").click(function () { $.get("http://netty.netoxena.com/startKmeans/002.png"); });
+        // $("#003").click(function () { $.get("http://netty.netoxena.com/startKmeans/003.png"); });
+        // $("#004").click(function () { $.get("http://netty.netoxena.com/startKmeans/004.png"); });
+
+        $("#005").click(function () {
+
+            $.ajax({
+                'cache': false,
+                'dataType': 'jsonp',
+                'async': true,
+                'crossDomain': true,
+                'url': 'http://netty.netoxena.com/startKmeans/001.png',
+                'method': 'GET',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                }
+            }).done(function (response) {
+                console.log(response);
+            })
+
+        });
         $("#006").click(function () { $.get("http://netty.netoxena.com/startKmeans/006.png"); });
         $("#007").click(function () { $.get("http://netty.netoxena.com/startKmeans/007.png"); });
         $("#008").click(function () { $.get("http://netty.netoxena.com/startKmeans/008.png"); });
