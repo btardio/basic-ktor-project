@@ -174,9 +174,48 @@
             })
 
         });
-        $("#006").click(function () { $.get("http://netty.netoxena.com/startKmeans/006.png"); });
-        $("#007").click(function () { $.get("http://netty.netoxena.com/startKmeans/007.png"); });
-        $("#008").click(function () { $.get("http://netty.netoxena.com/startKmeans/008.png"); });
+        $("#006").click(function () {
+            $.ajax({
+                'cache': false,
+                'dataType': 'jsonp',
+                'async': true,
+                'crossDomain': false,
+                'url': 'http://netty.netoxena.com/startKmeans/001.png',
+                'method': 'GET',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                }
+            }).done(function (response) {
+                console.log(response);
+            })
+        });
+        $("#007").click(function () { $.ajax({
+            'cache': false,
+            'async': true,
+            'crossDomain': true,
+            'url': 'http://netty.netoxena.com/startKmeans/001.png',
+            'method': 'GET',
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+            }
+        }).done(function (response) {
+            console.log(response);
+        })
+        });
+        $("#008").click(function () {
+            $.ajax({
+                'cache': false,
+                'async': true,
+                'crossDomain': false,
+                'url': 'http://netty.netoxena.com/startKmeans/001.png',
+                'method': 'GET',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                }
+            }).done(function (response) {
+                console.log(response);
+            })
+        });
         $("#009").click(function () { $.get("http://netty.netoxena.com/startKmeans/009.png"); });
         $("#010").click(function () { $.get("http://netty.netoxena.com/startKmeans/010.png"); });
         $("#011").click(function () { $.get("http://netty.netoxena.com/startKmeans/011.png"); });
