@@ -42,7 +42,25 @@
 <script>
     $(document).ready(function () {
 
-        $("#000").click(function () { $.get("http://netty.netoxena.com/startKmeans/000.png"); });
+        var settings = {
+            'cache': false,
+            'dataType': 'json',
+            'async': false,
+            'crossDomain': true,
+            'url': 'http://netty.netoxena.com/startKmeans/000.png',
+            'method': 'GET',
+            'headers': {
+                'Access-Control-Allow-Origin': 'http://netty.netoxena.com',
+                'Access-Control-Allow-Credentials': 'true'
+            }
+        }
+
+        $("#000").click(function () {
+            //$.get("http://netty.netoxena.com/startKmeans/000.png");
+            $.ajax(settings).done(function (response) {
+                console.log(response);
+            })
+        });
         $("#001").click(function () { $.get("http://netty.netoxena.com/startKmeans/001.png"); });
         $("#002").click(function () { $.get("http://netty.netoxena.com/startKmeans/002.png"); });
         $("#003").click(function () { $.get("http://netty.netoxena.com/startKmeans/003.png"); });
