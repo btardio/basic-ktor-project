@@ -113,7 +113,7 @@ fun main() {
     val prometheus: HTTPServer = HTTPServer.builder()
         .port(Integer.valueOf("65403"))
         .buildAndStart()
-    webserverCounter.inc()
+    webserverCounter.labelValues("rabbits_acknowledged").inc()
     try {
         solrInitialize(ZOO_LOCAL)
     } catch ( e: Exception ) {

@@ -84,7 +84,7 @@ fun main() {
     val prometheus: HTTPServer = HTTPServer.builder()
         .port(Integer.valueOf("65400"))
         .buildAndStart()
-    analyzerCounter.inc()
+    analyzerCounter.labelValues("rabbits_acknowledged").inc()
 
     runBlocking {
 
