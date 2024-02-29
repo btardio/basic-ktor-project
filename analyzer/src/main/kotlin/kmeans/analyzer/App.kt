@@ -19,6 +19,7 @@ import kmeans.support.getEnvStr
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.util.*
+import java.util.Map
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -38,22 +39,52 @@ val SOLR_CONNECT_IP = getEnvStr("SOLR_CONNECT_IP", "solr1:8983")
 
 private val logger = LoggerFactory.getLogger("kmeans.analyzer.App")
 
-val analyzerCounter: Counter = Counter.builder()
-    .name("analyzerCounter")
-    .labelNames("rabbits_consumed", "rabbits_acknowledged", "rabbits_published")
-    .register()
+//log.error(new String(body, StandardCharsets.UTF_8));
+var analyzerCounter: kotlin.collections.Map<String, Counter> = Map.of(
+    "rabbits_consumed",
+    Counter.builder().name("rabbits_consumed").register(),
+    "rabbits_acknowledged",
+    Counter.builder().name("rabbits_acknowledged").register(),
+    "rabbits_published",
+    Counter.builder().name("rabbits_published").register(),
+    "not_found_expected_coordinates",
+    Counter.builder().name("not_found_expected_coordinates").register(),
+    "exception_unknown_republish",
+    Counter.builder().name("exception_unknown_republish").register(),
+    "processed_coordinates_after_read",
+    Counter.builder().name("processed_coordinates_after_read").register(),
+    "failed_writing_coordinates_after_read",
+    Counter.builder().name("failed_writing_coordinates_after_read").register(),
+    "succeeded_writing_coordinates_after_read",
+    Counter.builder().name("succeeded_writing_coordinates_after_read").register()
+)
+//
+//val analyzerCounter: Counter = Counter.builder()
+//    .name("analyzerCounter")
+//    .labelNames(
+//        "rabbits_consumed",
+//        "rabbits_acknowledged",
+//        "rabbits_published",
+//        "not_found_expected_coordinates",
+//        "exception_unknown_republish",
+//        "processed_coordinates_after_read",
+//        "failed_writing_coordinates_after_read",
+//        "succeeded_writing_coordinates_after_read"
+//    )
+//    .register()
 
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
-    exchangeName: String
+    exchangeName: String,
+    counter: kotlin.collections.Map<String, Counter>
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
     channel.basicConsume(
         queueName,
         false,
-        AnalyzerCsmr(channel, exchangeName, connectionFactory, SOLR_CONNECT_IP, UUID.randomUUID().toString())
+        AnalyzerCsmr(channel, exchangeName, connectionFactory, SOLR_CONNECT_IP, UUID.randomUUID().toString(), counter)
     );
 }
 
@@ -62,13 +93,15 @@ suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String,
+    counter: kotlin.collections.Map<String, Counter>
 ) {
 
     logger.info("listening for notifications " + queueName)
     listenForNotificationRequests(
         connectionFactory,
         queueName,
-        exchangeName
+        exchangeName,
+        counter
     )
 }
 
@@ -84,7 +117,7 @@ fun main() {
     val prometheus: HTTPServer = HTTPServer.builder()
         .port(Integer.valueOf("65400"))
         .buildAndStart()
-    analyzerCounter.labelValues("rabbits_acknowledged").inc()
+
 
     runBlocking {
 
@@ -163,6 +196,7 @@ fun main() {
             queueName = ANALYZER_QUEUE,
             //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = WEBSERVER_EXCHANGE,
+            counter = analyzerCounter
         )
 
 

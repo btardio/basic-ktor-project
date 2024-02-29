@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import kmeans.solrSupport.SolrStartup.*
 import kmeans.support.ContextCloseExit
+import java.util.Map
 
 
 // WebServer -> Collector -> Analyzer -> WebServer
@@ -36,11 +37,25 @@ val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
-val collectorCounter: Counter = Counter.builder()
-    .name("collectorCounter")
-    .labelNames("rabbits_consumed", "rabbits_acknowledged", "rabbits_published")
-    .register()
 
+var collectorCounter: kotlin.collections.Map<String, Counter> = Map.of(
+    "rabbits_consumed",
+    Counter.builder().name("rabbits_consumed").register(),
+    "rabbits_acknowledged",
+    Counter.builder().name("rabbits_acknowledged").register(),
+    "rabbits_published",
+    Counter.builder().name("rabbits_published").register(),
+    "not_found_expected_coordinates",
+    Counter.builder().name("not_found_expected_coordinates").register(),
+    "exception_unknown_republish",
+    Counter.builder().name("exception_unknown_republish").register(),
+    "processed_coordinates_after_read",
+    Counter.builder().name("processed_coordinates_after_read").register(),
+    "failed_writing_coordinates_after_read",
+    Counter.builder().name("failed_writing_coordinates_after_read").register(),
+    "succeeded_writing_coordinates_after_read",
+    Counter.builder().name("succeeded_writing_coordinates_after_read").register()
+)
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
@@ -83,7 +98,7 @@ fun main() {
     val prometheus: HTTPServer = HTTPServer.builder()
         .port(Integer.valueOf("65409"))
         .buildAndStart()
-    collectorCounter.labelValues("rabbits_acknowledged").inc()
+    
     runBlocking {
 
 //        val server: HTTPServer = HTTPServer.builder()

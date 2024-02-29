@@ -44,6 +44,7 @@ import kotlin.jvm.optionals.getOrElse
 import io.prometheus.metrics.core.metrics.Counter
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
+import java.util.Map
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -65,6 +66,24 @@ val RABBIT_URL = getEnvStr("RABBIT_URL", "rabbit")
 
 val connectionFactory = ConnectionFactory();
 
+var webserverCounter: kotlin.collections.Map<String, Counter> = Map.of(
+    "rabbits_consumed",
+    Counter.builder().name("rabbits_consumed").register(),
+    "rabbits_acknowledged",
+    Counter.builder().name("rabbits_acknowledged").register(),
+    "rabbits_published",
+    Counter.builder().name("rabbits_published").register(),
+    "not_found_expected_coordinates",
+    Counter.builder().name("not_found_expected_coordinates").register(),
+    "exception_unknown_republish",
+    Counter.builder().name("exception_unknown_republish").register(),
+    "processed_coordinates_after_read",
+    Counter.builder().name("processed_coordinates_after_read").register(),
+    "failed_writing_coordinates_after_read",
+    Counter.builder().name("failed_writing_coordinates_after_read").register(),
+    "succeeded_writing_coordinates_after_read",
+    Counter.builder().name("succeeded_writing_coordinates_after_read").register()
+)
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
@@ -99,11 +118,11 @@ suspend fun listenAndPublish(
 private operator fun SolrDocument.component1(): SolrDocument {
     return this;
 }
-
-val webserverCounter: Counter = Counter.builder()
-    .name("webserverCounter")
-    .labelNames("rabbits_consumed", "rabbits_acknowledged", "rabbits_published")
-    .register()
+//
+//val webserverCounter: Counter = Counter.builder()
+//    .name("webserverCounter")
+//    .labelNames("rabbits_consumed", "rabbits_acknowledged", "rabbits_published")
+//    .register()
 
 fun main() {
     connectionFactory.setHost(RABBIT_URL);
@@ -113,7 +132,7 @@ fun main() {
     val prometheus: HTTPServer = HTTPServer.builder()
         .port(Integer.valueOf("65403"))
         .buildAndStart()
-    webserverCounter.labelValues("rabbits_acknowledged").inc()
+
     try {
         solrInitialize(ZOO_LOCAL)
     } catch ( e: Exception ) {
