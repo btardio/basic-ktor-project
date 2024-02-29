@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -45,12 +46,14 @@ public class WebserverCsmr implements Consumer {
 	private final ConnectionFactory connectionFactory;
 
 	private static final Logger log = LoggerFactory.getLogger(WebserverCsmr.class);
-	private final Counter counter;
+	private final Map<String, Counter> counter;
 
-	public WebserverCsmr(Channel ch, ConnectionFactory connectionFactory) {
+	public WebserverCsmr(Channel ch,
+						 ConnectionFactory connectionFactory,
+						 Map<String, Counter> counter) {
 		this.ch = ch;
 		this.connectionFactory = connectionFactory;
-		this.counter = null;
+		this.counter = counter;
 	}
 
 //	java.util.List<Coordinate> convert(Object seq) {
@@ -84,7 +87,7 @@ public class WebserverCsmr implements Consumer {
 
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-
+		counter.get("rabbits_consumed").inc();
 		ObjectMapper objectMapper = new ObjectMapper();
 		//log.error(new String(body, StandardCharsets.UTF_8));
 
@@ -112,6 +115,7 @@ public class WebserverCsmr implements Consumer {
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
+				counter.get("exception_unknown_republish").inc();
 				log.error("Exception querying coordinates_after_analyzer.", e);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -129,6 +133,7 @@ public class WebserverCsmr implements Consumer {
 
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() != 1L) {
+				counter.get("not_found_expected_coordinates").inc();
 				log.error(response.getResults().getNumFound() + "Records found on coordinates_after_analyzer.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -166,7 +171,7 @@ public class WebserverCsmr implements Consumer {
 
 
 				// save schedule run, create collection
-
+				counter.get("processed_coordinates_after_read").inc();
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -177,6 +182,7 @@ public class WebserverCsmr implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
+					counter.get("failed_writing_coordinates_after_read").inc();
 //					counter.get("get_all_schedules_fail").inc();
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,
@@ -191,7 +197,7 @@ public class WebserverCsmr implements Consumer {
 //					} catch (TimeoutException ee) {
 //
 //					}
-
+					counter.get("succeeded_writing_coordinates_after_read").inc();
 					if (envelope != null) {
 						this.ch.basicAck(envelope.getDeliveryTag(), false);
 					};

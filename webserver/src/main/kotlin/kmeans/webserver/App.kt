@@ -89,14 +89,15 @@ private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
-    queueName: String
+    queueName: String,
+    counter: kotlin.collections.Map<String, Counter>
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
     channel.basicConsume(
         queueName,
         false,
-        WebserverCsmr(channel, connectionFactory)
+        WebserverCsmr(channel, connectionFactory, counter)
     );
 }
 
@@ -104,13 +105,15 @@ private fun listenForNotificationRequests(
 suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
-    exchangeName: String?
+    exchangeName: String?,
+    counter: kotlin.collections.Map<String, Counter>
 ) {
 
     logger.info("listening for notifications " + queueName)
     listenForNotificationRequests(
         connectionFactory,
-        queueName
+        queueName,
+        counter
     )
 }
 
@@ -254,6 +257,8 @@ fun main() {
                     call.respondText("" + e.message)
                     //log.error("solr error", e)
                     //counter.labelValues("get_all_schedules_fail").inc()
+                } catch (e: Exception) {
+
                 }
 
 
@@ -422,6 +427,7 @@ fun main() {
             queueName = WEBSERVER_QUEUE,
             //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = null,
+            counter = webserverCounter
         )
 
     }
