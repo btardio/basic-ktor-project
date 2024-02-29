@@ -6,6 +6,9 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.prometheus.metrics.core.metrics.Counter
+import io.prometheus.metrics.exporter.httpserver.HTTPServer
+import io.prometheus.metrics.instrumentation.jvm.JvmMetrics
 //import io.prometheus.metrics.core.metrics.Counter
 //import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.support.getEnvInt
@@ -32,6 +35,11 @@ val ZOO_LOCAL = getEnvStr("ZOO_LOCAL", "zoo1:2181")
 val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
+
+val collectorCounter: Counter = Counter.builder()
+    .name("collectorCounter")
+    .labelNames("rabbits_consumed", "rabbits_acknowledged", "rabbits_published")
+    .register()
 
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
@@ -70,6 +78,12 @@ suspend fun listenAndPublish(
 
 fun main() {
 
+    JvmMetrics.builder().register();
+
+    val prometheus: HTTPServer = HTTPServer.builder()
+        .port(Integer.valueOf("65409"))
+        .buildAndStart()
+    collectorCounter.inc()
     runBlocking {
 
 //        val server: HTTPServer = HTTPServer.builder()

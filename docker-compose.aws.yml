@@ -26,6 +26,7 @@ services:
     container_name: kotlin-ktor-server
     ports:
       - ${BASIC_SERVER_PORT_MAP}
+      - "65403:65403"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -51,6 +52,7 @@ services:
       - "host.docker.internal:host-gateway"
     ports:
       - ${DATA_ANALYZER_PORT_MAP}
+      - "65400:65400"
     environment:
       - WEBSERVER_EXCHANGE=webserver-exchange
       - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
@@ -72,6 +74,7 @@ services:
     container_name: kotlin-ktor-collector
     ports:
       - ${DATA_COLLECTOR_PORT_MAP}
+      - "65409:65409"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -171,7 +174,7 @@ services:
       - 9090:9090
     restart: unless-stopped
     volumes:
-      - ./prometheus:/etc/prometheus
+      - /application/prometheus:/etc/prometheus
       - prom_data:/prometheus
 #    networks:
 #      - solr

@@ -41,6 +41,9 @@ import org.apache.solr.common.SolrDocument
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.jvm.optionals.getOrElse
+import io.prometheus.metrics.core.metrics.Counter
+import io.prometheus.metrics.exporter.httpserver.HTTPServer;
+import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -97,11 +100,20 @@ private operator fun SolrDocument.component1(): SolrDocument {
     return this;
 }
 
+val webserverCounter: Counter = Counter.builder()
+    .name("webserverCounter")
+    .labelNames("rabbits_consumed", "rabbits_acknowledged", "rabbits_published")
+    .register()
+
 fun main() {
     connectionFactory.setHost(RABBIT_URL);
 
+    JvmMetrics.builder().register();
 
-
+    val prometheus: HTTPServer = HTTPServer.builder()
+        .port(Integer.valueOf("65403"))
+        .buildAndStart()
+    webserverCounter.inc()
     try {
         solrInitialize(ZOO_LOCAL)
     } catch ( e: Exception ) {

@@ -6,6 +6,9 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.prometheus.metrics.core.metrics.Counter
+import io.prometheus.metrics.exporter.httpserver.HTTPServer
+import io.prometheus.metrics.instrumentation.jvm.JvmMetrics
 //import io.prometheus.metrics.core.metrics.Counter
 //import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.solrSupport.SolrStartup.solrInitialize
@@ -34,6 +37,11 @@ val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
 val SOLR_CONNECT_IP = getEnvStr("SOLR_CONNECT_IP", "solr1:8983")
 
 private val logger = LoggerFactory.getLogger("kmeans.analyzer.App")
+
+val analyzerCounter: Counter = Counter.builder()
+    .name("analyzerCounter")
+    .labelNames("rabbits_consumed", "rabbits_acknowledged", "rabbits_published")
+    .register()
 
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
@@ -72,7 +80,11 @@ suspend fun listenAndPublish(
 
 fun main() {
 
-
+    JvmMetrics.builder().register();
+    val prometheus: HTTPServer = HTTPServer.builder()
+        .port(Integer.valueOf("65400"))
+        .buildAndStart()
+    analyzerCounter.inc()
 
     runBlocking {
 
