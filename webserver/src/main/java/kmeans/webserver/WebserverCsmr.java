@@ -177,7 +177,7 @@ public class WebserverCsmr implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
-					counter.labelValues("get_all_schedules_fail").inc();
+//					counter.get("get_all_schedules_fail").inc();
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,
 							UUID.randomUUID().toString(),
