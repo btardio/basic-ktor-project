@@ -4,11 +4,13 @@ package kmeans.analyzer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 
+import io.prometheus.metrics.core.metrics.Counter;
 import kmeans.rabbitSupport.LazyInitializedSingleton;
 import kmeans.rabbitSupport.RabbitMessageStartRun;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import kmeans.scalasupport.IndexedColorFilter;
@@ -43,6 +45,7 @@ public class AnalyzerCsmr  implements Consumer {
 	private final ConnectionFactory connectionFactory;
 
 	private final String solrUri;
+	private final Map<String, Counter> counter;
 
 	private String routingKey;
 
@@ -52,12 +55,14 @@ public class AnalyzerCsmr  implements Consumer {
 						String exchangeName,
 						ConnectionFactory connectionFactory,
 						String solrUri,
-						String routingKey) {
+						String routingKey,
+						Map<String, Counter> counter) {
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
 		this.solrUri = solrUri;
 		this.routingKey = routingKey;
+		this.counter = counter;
 	}
 
 //	java.util.List<Coordinate> convert(Object seq) {
@@ -91,9 +96,11 @@ public class AnalyzerCsmr  implements Consumer {
 
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-
+		counter.get("rabbits_consumed").inc();
 		ObjectMapper objectMapper = new ObjectMapper();
 		//log.error(new String(body, StandardCharsets.UTF_8));
+
+
 
 		if (body != null) {
 
@@ -118,6 +125,7 @@ public class AnalyzerCsmr  implements Consumer {
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
+				counter.get("exception_unknown_republish").inc();
 				log.error("Exception querying coordinates_after_collector.", e);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -139,6 +147,7 @@ public class AnalyzerCsmr  implements Consumer {
 
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() < 1L) {
+				counter.get("not_found_expected_coordinates").inc();
 				log.error(response.getResults().getNumFound() + "Records found on coordinates_after_collector.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -174,7 +183,7 @@ public class AnalyzerCsmr  implements Consumer {
 				coordinateList.setFilename(coordinates.getFilename());
 				coordinateList.setWidth(coordinates.getWidth());
 				coordinateList.setHeight(coordinates.getHeight());
-
+				counter.get("processed_coordinates_after_read").inc();
 				// save coordinate
 
 				try {
@@ -187,6 +196,7 @@ public class AnalyzerCsmr  implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
+					counter.get("failed_writing_coordinates_after_read").inc();
 					log.error("Coordinates after analyzer commit failure.", e);
 					// exceptions put back on the exchange
 
@@ -212,6 +222,7 @@ public class AnalyzerCsmr  implements Consumer {
 //					if (envelope != null) {
 //						this.ch.basicAck(envelope.getDeliveryTag(), false);
 //					};
+					counter.get("succeeded_writing_coordinates_after_read").inc();
                     if (envelope != null) {
                         this.ch.basicAck(envelope.getDeliveryTag(), false);
                     }

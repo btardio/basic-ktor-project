@@ -35,7 +35,10 @@ def main(stdscr):
         stdscr.addstr(1,5,BBBB)
         if ( retry or last + 6 < time.time() ):
 
-            A = str(requests.get('http://netty.netoxena.com/startKmeans/000.png').json()['schedule_uuid'])
+            try:
+                A = str(requests.get('http://netty.netoxena.com/startKmeans/000.png').json()['schedule_uuid'])
+            except:
+                pass
             retry = False
             B = 'NOT FOUND'
             BBB = ''
@@ -46,16 +49,17 @@ def main(stdscr):
 #            uuid = "0"
 
     #        time.sleep(1)
-
-        for i in requests.get('http://netty.netoxena.com/getAllSchedules').json():
-            if i['schedule_uuid'] == A:
+        try:
+            for i in requests.get('http://netty.netoxena.com/getAllSchedules').json():
+                if i['schedule_uuid'] == A:
                 
-                if 'finished' in i['jsonData']:
+                    if 'finished' in i['jsonData']:
 
-                    B = 'FOUND' 
-                    BBB = str(A) 
-                    BBBB = str(i['schedule_uuid'])
-
+                        B = 'FOUND' 
+                        BBB = str(A) 
+                        BBBB = str(i['schedule_uuid'])
+        except:
+            pass
         #stdscr.addstr(0,0,str(res))
 
         stdscr.refresh()

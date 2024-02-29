@@ -59,13 +59,14 @@ var collectorCounter: kotlin.collections.Map<String, Counter> = Map.of(
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
-    exchangeName: String
+    exchangeName: String,
+    counter: kotlin.collections.Map<String, Counter>
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
     channel.basicConsume(queueName,
         false,
-        CollectorCsmr(channel, exchangeName, connectionFactory)
+        CollectorCsmr(channel, exchangeName, connectionFactory, counter)
     );
 }
 
@@ -75,13 +76,15 @@ suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String,
+    counter: kotlin.collections.Map<String, Counter>
 ) {
 
     logger.info("listening for notifications " + queueName)
     listenForNotificationRequests(
         connectionFactory,
         queueName,
-        exchangeName
+        exchangeName,
+        counter
     )
 }
 
@@ -98,7 +101,7 @@ fun main() {
     val prometheus: HTTPServer = HTTPServer.builder()
         .port(Integer.valueOf("65409"))
         .buildAndStart()
-    
+
     runBlocking {
 
 //        val server: HTTPServer = HTTPServer.builder()
@@ -175,6 +178,7 @@ fun main() {
             queueName = COLLECTOR_QUEUE,
             //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = ANALYZER_EXCHANGE,
+            counter = collectorCounter
         )
 
 
