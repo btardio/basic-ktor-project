@@ -188,11 +188,7 @@ fun main() {
 
                 // save coodrinates, use collection coordinates
 
-
-                call.respondText(
-                    "OK, Templeton, scheduling a new kmeans run using " + filename + "<BR>" +
-                            "Your schedule run ID: " + scheduleUUID.toString()
-                )
+                call.respondText("{\"filename\": \"${filename}\",\"schedule_uuid\": \"${scheduleUUID}\"}")
 
             }
             get("/getAllSchedules") {
