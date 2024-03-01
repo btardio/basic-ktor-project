@@ -68,21 +68,22 @@ val connectionFactory = ConnectionFactory();
 
 var webserverCounter: kotlin.collections.Map<String, Counter> = Map.of(
     "rabbits_consumed",
-    Counter.builder().name("rabbits_consumed").register(),
+    Counter.builder().name("rabbits_consumed").help("~").labelNames("sum").register(),
+
     "rabbits_acknowledged",
-    Counter.builder().name("rabbits_acknowledged").register(),
+    Counter.builder().name("rabbits_acknowledged").help("~").labelNames("sum").register(),
     "rabbits_published",
-    Counter.builder().name("rabbits_published").register(),
+    Counter.builder().name("rabbits_published").help("~").labelNames("sum").register(),
     "not_found_expected_coordinates",
-    Counter.builder().name("not_found_expected_coordinates").register(),
+    Counter.builder().name("not_found_expected_coordinates").help("~").labelNames("sum").register(),
     "exception_unknown_republish",
-    Counter.builder().name("exception_unknown_republish").register(),
+    Counter.builder().name("exception_unknown_republish").help("~").labelNames("sum").register(),
     "processed_coordinates_after_read",
-    Counter.builder().name("processed_coordinates_after_read").register(),
+    Counter.builder().name("processed_coordinates_after_read").help("~").labelNames("sum").register(),
     "failed_writing_coordinates_after_read",
-    Counter.builder().name("failed_writing_coordinates_after_read").register(),
+    Counter.builder().name("failed_writing_coordinates_after_read").help("~").labelNames("sum").register(),
     "succeeded_writing_coordinates_after_read",
-    Counter.builder().name("succeeded_writing_coordinates_after_read").register()
+    Counter.builder().name("succeeded_writing_coordinates_after_read").help("~").labelNames("sum").register(),
 )
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
@@ -256,7 +257,7 @@ fun main() {
                 } catch (e: SolrServerException) {
                     call.respondText("" + e.message)
                     //log.error("solr error", e)
-                    //counter.labelValues("get_all_schedules_fail").inc()
+                    //counter.labelValues("get_all_schedules_fail").labelValues("default").inc()
                 } catch (e: Exception) {
 
                 }
@@ -300,7 +301,7 @@ fun main() {
 
                 } catch (e: SolrServerException) {
                     call.respondText("" + e.message)
-                    //counter.labelValues("get_finished_schedule_fail").inc()
+                    //counter.labelValues("get_finished_schedule_fail").labelValues("default").inc()
                 }
             }
 

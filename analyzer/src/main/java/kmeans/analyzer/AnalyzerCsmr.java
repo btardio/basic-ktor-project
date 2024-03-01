@@ -96,7 +96,7 @@ public class AnalyzerCsmr  implements Consumer {
 
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-		counter.get("rabbits_consumed").inc();
+		counter.get("rabbits_consumed").labelValues("default").inc();
 		ObjectMapper objectMapper = new ObjectMapper();
 		//log.error(new String(body, StandardCharsets.UTF_8));
 
@@ -125,7 +125,7 @@ public class AnalyzerCsmr  implements Consumer {
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
-				counter.get("exception_unknown_republish").inc();
+				counter.get("exception_unknown_republish").labelValues("default").inc();
 				log.error("Exception querying coordinates_after_collector.", e);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -147,7 +147,7 @@ public class AnalyzerCsmr  implements Consumer {
 
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() < 1L) {
-				counter.get("not_found_expected_coordinates").inc();
+				counter.get("not_found_expected_coordinates").labelValues("default").inc();
 				log.error(response.getResults().getNumFound() + "Records found on coordinates_after_collector.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -183,7 +183,7 @@ public class AnalyzerCsmr  implements Consumer {
 				coordinateList.setFilename(coordinates.getFilename());
 				coordinateList.setWidth(coordinates.getWidth());
 				coordinateList.setHeight(coordinates.getHeight());
-				counter.get("processed_coordinates_after_read").inc();
+				counter.get("processed_coordinates_after_read").labelValues("default").inc();
 				// save coordinate
 
 				try {
@@ -196,7 +196,7 @@ public class AnalyzerCsmr  implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
-					counter.get("failed_writing_coordinates_after_read").inc();
+					counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
 					log.error("Coordinates after analyzer commit failure.", e);
 					// exceptions put back on the exchange
 
@@ -222,7 +222,7 @@ public class AnalyzerCsmr  implements Consumer {
 //					if (envelope != null) {
 //						this.ch.basicAck(envelope.getDeliveryTag(), false);
 //					};
-					counter.get("succeeded_writing_coordinates_after_read").inc();
+					counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
                     if (envelope != null) {
                         this.ch.basicAck(envelope.getDeliveryTag(), false);
                     }

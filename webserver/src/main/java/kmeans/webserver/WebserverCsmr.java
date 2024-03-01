@@ -87,7 +87,7 @@ public class WebserverCsmr implements Consumer {
 
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-		counter.get("rabbits_consumed").inc();
+		counter.get("rabbits_consumed").labelValues("default").inc();
 		ObjectMapper objectMapper = new ObjectMapper();
 		//log.error(new String(body, StandardCharsets.UTF_8));
 
@@ -115,7 +115,7 @@ public class WebserverCsmr implements Consumer {
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
-				counter.get("exception_unknown_republish").inc();
+				counter.get("exception_unknown_republish").labelValues("default").inc();
 				log.error("Exception querying coordinates_after_analyzer.", e);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -133,7 +133,7 @@ public class WebserverCsmr implements Consumer {
 
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() != 1L) {
-				counter.get("not_found_expected_coordinates").inc();
+				counter.get("not_found_expected_coordinates").labelValues("default").inc();
 				log.error(response.getResults().getNumFound() + "Records found on coordinates_after_analyzer.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -171,7 +171,7 @@ public class WebserverCsmr implements Consumer {
 
 
 				// save schedule run, create collection
-				counter.get("processed_coordinates_after_read").inc();
+				counter.get("processed_coordinates_after_read").labelValues("default").inc();
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -182,8 +182,8 @@ public class WebserverCsmr implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
-					counter.get("failed_writing_coordinates_after_read").inc();
-//					counter.get("get_all_schedules_fail").inc();
+					counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
+//					counter.get("get_all_schedules_fail").labelValues("default").inc();
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,
 							UUID.randomUUID().toString(),
@@ -197,7 +197,7 @@ public class WebserverCsmr implements Consumer {
 //					} catch (TimeoutException ee) {
 //
 //					}
-					counter.get("succeeded_writing_coordinates_after_read").inc();
+					counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
 					if (envelope != null) {
 						this.ch.basicAck(envelope.getDeliveryTag(), false);
 					};
