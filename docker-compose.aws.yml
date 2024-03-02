@@ -186,6 +186,11 @@ services:
       - prom_data:/prometheus
 #    networks:
 #      - solr
+  redis:
+    image: redis:7.0
+    restart: always
+    ports:
+      - 6379:6379
 volumes:
   prom_data:
 #  zoo2:

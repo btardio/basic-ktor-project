@@ -24,6 +24,7 @@ import org.apache.solr.common.SolrException;
 import kmeans.solrSupport.SolrUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.JedisPooled;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +39,8 @@ public class WebserverCsmr implements Consumer {
 	public static final String WEBSERVER_EXCHANGE = System.getenv("WEBSERVER_EXCHANGE").isEmpty() ?
 			"webserver-exchange" : System.getenv("WEBSERVER_EXCHANGE");
 
+	public static final String WEBSERVER_QUEUE = System.getenv("WEBSERVER_QUEUE").isEmpty() ? "webserver-queue" : System.getenv("WEBSERVER_QUEUE");
+
 	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
 			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 
@@ -47,13 +50,16 @@ public class WebserverCsmr implements Consumer {
 
 	private static final Logger log = LoggerFactory.getLogger(WebserverCsmr.class);
 	private final Map<String, Counter> counter;
+	private final JedisPooled jedis;
 
 	public WebserverCsmr(Channel ch,
 						 ConnectionFactory connectionFactory,
-						 Map<String, Counter> counter) {
+						 Map<String, Counter> counter,
+						 JedisPooled jedis) {
 		this.ch = ch;
 		this.connectionFactory = connectionFactory;
 		this.counter = counter;
+		this.jedis = jedis;
 	}
 
 //	java.util.List<Coordinate> convert(Object seq) {
@@ -335,6 +341,6 @@ public class WebserverCsmr implements Consumer {
 //			if (envelope != null) {
 //				ch.basicAck(envelope.getDeliveryTag(), false)
 //			};
-
+		jedis.expire(WEBSERVER_QUEUE, 30);
 	}
 }

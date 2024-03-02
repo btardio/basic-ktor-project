@@ -35,6 +35,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.JedisPooled;
 
 import javax.imageio.ImageIO;
 import java.io.InputStream;
@@ -42,6 +43,9 @@ import java.io.InputStream;
 public class CollectorCsmr implements Consumer {
 
 	public static final String COLLECTOR_EXCHANGE = System.getenv("COLLECTOR_EXCHANGE").isEmpty() ? "webserver-exchange" : System.getenv("COLLECTOR_EXCHANGE");
+
+	public static final String COLLECTOR_QUEUE = System.getenv("COLLECTOR_QUEUE").isEmpty() ? "webserver-queue" : System.getenv("COLLECTOR_QUEUE");
+
 	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
 			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 	private final Channel ch;
@@ -50,15 +54,18 @@ public class CollectorCsmr implements Consumer {
 
 	private static final Logger log = LoggerFactory.getLogger(CollectorCsmr.class);
 	private final Map<String, Counter> counter;
+	private final JedisPooled jedis;
 
 	public CollectorCsmr(Channel ch,
 						 String exchangeName,
 						 ConnectionFactory connectionFactory,
-						 Map<String, Counter> counter) {
+						 Map<String, Counter> counter,
+						 JedisPooled jedis) {
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
 		this.counter = counter;
+		this.jedis = jedis;
 	}
 
 	@Override
@@ -303,7 +310,7 @@ public class CollectorCsmr implements Consumer {
 //			if (envelope != null) {
 //				ch.basicAck(envelope.getDeliveryTag(), false)
 //			};
-
+		jedis.expire(COLLECTOR_QUEUE, 30);
 	}
 }
 //

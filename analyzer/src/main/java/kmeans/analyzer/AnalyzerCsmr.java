@@ -29,12 +29,18 @@ import org.apache.solr.common.SolrException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import kmeans.solrSupport.SolrUtility;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPooled;
+
 import static java.lang.System.exit;
 
 
 public class AnalyzerCsmr  implements Consumer {
 	public static final String ANALYZER_EXCHANGE = System.getenv("ANALYZER_EXCHANGE") == null || System.getenv("ANALYZER_EXCHANGE").isEmpty() ?
 			"analyzer-exchange" : System.getenv("ANALYZER_EXCHANGE");
+
+	public static final String ANALYZER_QUEUE = System.getenv("ANALYZER_QUEUE") == null || System.getenv("ANALYZER_QUEUE").isEmpty() ?
+			"analyzer-queue" : System.getenv("ANALYZER_QUEUE");
 
 	// TODO change the connect ip to round robin
 //	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
@@ -46,6 +52,7 @@ public class AnalyzerCsmr  implements Consumer {
 
 	private final String solrUri;
 	private final Map<String, Counter> counter;
+	private final JedisPooled jedis;
 
 	private String routingKey;
 
@@ -56,13 +63,15 @@ public class AnalyzerCsmr  implements Consumer {
 						ConnectionFactory connectionFactory,
 						String solrUri,
 						String routingKey,
-						Map<String, Counter> counter) {
+						Map<String, Counter> counter,
+						JedisPooled jedis) {
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
 		this.solrUri = solrUri;
 		this.routingKey = routingKey;
 		this.counter = counter;
+		this.jedis = jedis;
 	}
 
 //	java.util.List<Coordinate> convert(Object seq) {
@@ -342,7 +351,7 @@ public class AnalyzerCsmr  implements Consumer {
 //				this.ch.basicAck(envelope.getDeliveryTag(), false);
 //			}
 //			;
-
+			jedis.expire(ANALYZER_QUEUE, 33);
 
 		}
 //

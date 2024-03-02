@@ -18,6 +18,8 @@ import kmeans.support.getEnvStr
 
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import redis.clients.jedis.JedisPool
+import redis.clients.jedis.JedisPooled
 import java.util.*
 import java.util.Map
 
@@ -77,14 +79,21 @@ private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String,
-    counter: kotlin.collections.Map<String, Counter>
+    counter: kotlin.collections.Map<String, Counter>,
+    jedis: JedisPooled
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
     channel.basicConsume(
         queueName,
         false,
-        AnalyzerCsmr(channel, exchangeName, connectionFactory, SOLR_CONNECT_IP, UUID.randomUUID().toString(), counter)
+        AnalyzerCsmr(channel,
+            exchangeName,
+            connectionFactory,
+            SOLR_CONNECT_IP,
+            UUID.randomUUID().toString(),
+            counter,
+            jedis)
     );
 }
 
@@ -93,7 +102,8 @@ suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String,
-    counter: kotlin.collections.Map<String, Counter>
+    counter: kotlin.collections.Map<String, Counter>,
+    jedis: JedisPooled
 ) {
 
     logger.info("listening for notifications " + queueName)
@@ -101,7 +111,8 @@ suspend fun listenAndPublish(
         connectionFactory,
         queueName,
         exchangeName,
-        counter
+        counter,
+        jedis
     )
 }
 
@@ -113,6 +124,8 @@ suspend fun listenAndPublish(
 
 fun main() {
 
+    val jedis = JedisPooled("redis", 6379)
+    jedis.expire(ANALYZER_QUEUE, 13);
     JvmMetrics.builder().register();
     val prometheus: HTTPServer = HTTPServer.builder()
         .port(Integer.valueOf("65400"))
@@ -125,15 +138,16 @@ fun main() {
 //            .port(Integer.valueOf("65400"))
 //            .buildAndStart()
 
-        try {
-            solrInitialize(ZOO_LOCAL)
-        } catch ( e: Exception ) {
-            logger.error("solrInitialize", e)
-            ContextCloseExit.closeContextExit(-1)
+        if ( !jedis.get("EHLO").toString().equals("HELO") ) {
+            try {
+                solrInitialize(ZOO_LOCAL)
+                jedis.set("EHLO", "HELO")
+            } catch (e: Exception) {
+                logger.error("solrInitialize", e)
+                ContextCloseExit.closeContextExit(-1)
+            }
         }
-
-
-
+        jedis.expire(ANALYZER_QUEUE, 13);
 
         val connectionFactory = ConnectionFactory();
 
@@ -196,7 +210,8 @@ fun main() {
             queueName = ANALYZER_QUEUE,
             //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = WEBSERVER_EXCHANGE,
-            counter = analyzerCounter
+            counter = analyzerCounter,
+            jedis = jedis
         )
 
 

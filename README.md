@@ -18,6 +18,8 @@
 
 ```
 
+
+
 ### AWS
 
 ```
@@ -28,6 +30,12 @@
 
 
 ```
+
+Read logs of deploy live.
+```
+tail -f /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log
+```
+
 
 [//]: # ()
 [//]: # (1.  Run migrations)

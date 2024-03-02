@@ -1,9 +1,19 @@
 package kmeans.webserver
 
-
+//////
 
 
 ////// TODO /////////
+
+
+
+/// solve this:
+// restart application/service if messages ready gets to large
+// curl -i -u guest:guest
+// http://localhost:15672/api/queues/%2f/collector-queue-ip-10-0-1-119.us-west-1.compute.internal-b
+// docker container restart
+
+
 ///// app hangs after it cant find a replica, need to restart it if solr isnt ready
 //Exception in thread "main" org.apache.solr.client.solrj.impl.HttpSolrClient$RemoteSolrException: Error from server at http://10.0.1.119:8983/solr/coordinates_after_webserver: No active replicas found for collection: coordinates_after_webserver
 ////////////////////////////////////////////////////////////////
@@ -44,6 +54,7 @@ import kotlin.jvm.optionals.getOrElse
 import io.prometheus.metrics.core.metrics.Counter
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
+import redis.clients.jedis.JedisPooled
 import java.util.Map
 
 // WebServer -> Collector -> Analyzer -> WebServer
@@ -91,14 +102,19 @@ private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
-    counter: kotlin.collections.Map<String, Counter>
+    counter: kotlin.collections.Map<String, Counter>,
+    jedis: JedisPooled
 ) {
     val channel = connectionFactory.newConnection().createChannel()
 
     channel.basicConsume(
         queueName,
         false,
-        WebserverCsmr(channel, connectionFactory, counter)
+        WebserverCsmr(
+            channel,
+            connectionFactory,
+            counter,
+            jedis)
     );
 }
 
@@ -107,14 +123,16 @@ suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String?,
-    counter: kotlin.collections.Map<String, Counter>
+    counter: kotlin.collections.Map<String, Counter>,
+    jedis: JedisPooled
 ) {
 
     logger.info("listening for notifications " + queueName)
     listenForNotificationRequests(
         connectionFactory,
         queueName,
-        counter
+        counter,
+        jedis
     )
 }
 
@@ -129,6 +147,9 @@ private operator fun SolrDocument.component1(): SolrDocument {
 //    .register()
 
 fun main() {
+    val jedis = JedisPooled("redis", 6379)
+    jedis.expire(WEBSERVER_QUEUE, 13);
+
     connectionFactory.setHost(RABBIT_URL);
 
     JvmMetrics.builder().register();
@@ -137,13 +158,17 @@ fun main() {
         .port(Integer.valueOf("65403"))
         .buildAndStart()
 
-    try {
-        solrInitialize(ZOO_LOCAL)
-    } catch ( e: Exception ) {
-        logger.error("solrInitialize", e)
-        ContextCloseExit.closeContextExit(-1)
+    if ( !jedis.get("EHLO").toString().equals("HELO") ) {
+        try {
+            solrInitialize(ZOO_LOCAL)
+            jedis.set("EHLO", "HELO")
+        } catch (e: Exception) {
+            logger.error("solrInitialize", e)
+            ContextCloseExit.closeContextExit(-1)
+        }
     }
 
+    jedis.expire(WEBSERVER_QUEUE, 13);
 
 
     embeddedServer(Netty, port = 8888) {
@@ -428,7 +453,8 @@ fun main() {
             queueName = WEBSERVER_QUEUE,
             //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = null,
-            counter = webserverCounter
+            counter = webserverCounter,
+            jedis = jedis
         )
 
     }
