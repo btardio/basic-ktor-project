@@ -191,6 +191,26 @@ services:
     restart: always
     ports:
       - 6379:6379
+
+  python:
+    image: python:3.7-alpine
+    restart: always
+    network_mode: "host"
+    command: >
+      sh -c "pip install docker &&
+             pip install redis &&
+             python3 /restarter/restarter.py
+             "
+#    environment:
+#      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
+#      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-a
+#      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-a
+#      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-b
+#      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
+#      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-b
+    volumes:
+      - restarter/:/restarter
+      - "/var/run/docker.sock:/var/run/docker.sock"
 volumes:
   prom_data:
 #  zoo2:

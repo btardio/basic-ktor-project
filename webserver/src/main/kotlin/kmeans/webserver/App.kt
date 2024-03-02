@@ -135,8 +135,8 @@ private operator fun SolrDocument.component1(): SolrDocument {
 
 fun main() {
     val jedis = JedisPooled("redis", 6379)
-    jedis.set(WEBSERVER_QUEUE, "OK")
-    jedis.expire(WEBSERVER_QUEUE, 13);
+    jedis.set("webserver", "OK")
+    jedis.expire("webserver", 30);
 
     connectionFactory.setHost(RABBIT_URL);
 
@@ -155,8 +155,8 @@ fun main() {
             ContextCloseExit.closeContextExit(-1)
         }
     }
-    jedis.set(WEBSERVER_QUEUE, "OK")
-    jedis.expire(WEBSERVER_QUEUE, 13);
+    jedis.set("webserver", "OK")
+    jedis.expire("webserver", 30);
 
 
     embeddedServer(Netty, port = 8888) {

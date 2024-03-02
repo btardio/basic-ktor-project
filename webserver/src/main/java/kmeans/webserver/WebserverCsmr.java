@@ -341,7 +341,7 @@ public class WebserverCsmr implements Consumer {
 //			if (envelope != null) {
 //				ch.basicAck(envelope.getDeliveryTag(), false)
 //			};
-		jedis.set(WEBSERVER_QUEUE, "OK");
-		jedis.expire(WEBSERVER_QUEUE, 30);
+		jedis.set("webserver", "OK");
+		jedis.expire("webserver", 45);
 	}
 }

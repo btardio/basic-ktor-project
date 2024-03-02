@@ -109,8 +109,8 @@ suspend fun listenAndPublish(
 fun main() {
 
     val jedis = JedisPooled("redis", 6379)
-    jedis.set(COLLECTOR_QUEUE, "OK")
-    jedis.expire(COLLECTOR_QUEUE, 13);
+    jedis.set("collector", "OK")
+    jedis.expire("collector", 30);
     JvmMetrics.builder().register();
 
     val prometheus: HTTPServer = HTTPServer.builder()
@@ -133,8 +133,8 @@ fun main() {
                 ContextCloseExit.closeContextExit(-1)
             }
         }
-        jedis.set(COLLECTOR_QUEUE, "OK")
-        jedis.expire(COLLECTOR_QUEUE, 13);
+        jedis.set("collector", "OK")
+        jedis.expire("collector", 30);
 
         val connectionFactory = ConnectionFactory();
 

@@ -275,8 +275,8 @@ public class CollectorCsmr implements Consumer {
 
 
 		}
-		jedis.set(COLLECTOR_QUEUE, "OK");
-		jedis.expire(COLLECTOR_QUEUE, 30);
+		jedis.set("collector", "OK");
+		jedis.expire("collector", 45);
 	}
 }
 

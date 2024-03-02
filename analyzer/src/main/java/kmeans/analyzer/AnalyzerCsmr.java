@@ -351,8 +351,8 @@ public class AnalyzerCsmr  implements Consumer {
 //				this.ch.basicAck(envelope.getDeliveryTag(), false);
 //			}
 //			;
-			jedis.set(ANALYZER_QUEUE, "OK");
-			jedis.expire(ANALYZER_QUEUE, 33);
+			jedis.set("analyzer", "OK");
+			jedis.expire("analyzer", 45);
 
 		}
 //
