@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory
 import kmeans.solrSupport.SolrStartup.*
 import kmeans.support.ContextCloseExit
 import redis.clients.jedis.JedisPooled
+import java.util.*
 import java.util.Map
 
 
@@ -121,7 +122,7 @@ fun main() {
 //            .buildAndStart()
 
 
-        if ( !jedis.get("EHLO").toString().equals("HELO") ) {
+        if (Objects.isNull(jedis.get("EHLO"))) {
             try {
                 solrInitialize(ZOO_LOCAL)
                 jedis.set("EHLO", "HELO")

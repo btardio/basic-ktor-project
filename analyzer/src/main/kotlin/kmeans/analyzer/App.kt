@@ -22,6 +22,7 @@ import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPooled
 import java.util.*
 import java.util.Map
+import java.util.Objects.isNull
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -138,7 +139,7 @@ fun main() {
 //            .port(Integer.valueOf("65400"))
 //            .buildAndStart()
 
-        if ( !jedis.get("EHLO").toString().equals("HELO") ) {
+        if ( isNull(jedis.get("EHLO")) ) {
             try {
                 solrInitialize(ZOO_LOCAL)
                 jedis.set("EHLO", "HELO")

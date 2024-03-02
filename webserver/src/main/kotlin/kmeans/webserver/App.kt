@@ -158,7 +158,7 @@ fun main() {
         .port(Integer.valueOf("65403"))
         .buildAndStart()
 
-    if ( !jedis.get("EHLO").toString().equals("HELO") ) {
+    if (Objects.isNull(jedis.get("EHLO"))) {
         try {
             solrInitialize(ZOO_LOCAL)
             jedis.set("EHLO", "HELO")
