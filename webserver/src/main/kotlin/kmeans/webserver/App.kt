@@ -18,14 +18,6 @@ package kmeans.webserver
 //Exception in thread "main" org.apache.solr.client.solrj.impl.HttpSolrClient$RemoteSolrException: Error from server at http://10.0.1.119:8983/solr/coordinates_after_webserver: No active replicas found for collection: coordinates_after_webserver
 ////////////////////////////////////////////////////////////////
 
-
-
-
-//import kmeans.webserver.SolrStartup.createCollection
-//import kmeans.webserver.SolrStartup.createSchema
-
-//import io.prometheus.metrics.core.metrics.Counter
-//import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
@@ -140,14 +132,10 @@ suspend fun listenAndPublish(
 private operator fun SolrDocument.component1(): SolrDocument {
     return this;
 }
-//
-//val webserverCounter: Counter = Counter.builder()
-//    .name("webserverCounter")
-//    .labelNames("rabbits_consumed", "rabbits_acknowledged", "rabbits_published")
-//    .register()
 
 fun main() {
     val jedis = JedisPooled("redis", 6379)
+    jedis.set(WEBSERVER_QUEUE, "OK")
     jedis.expire(WEBSERVER_QUEUE, 13);
 
     connectionFactory.setHost(RABBIT_URL);
@@ -167,7 +155,7 @@ fun main() {
             ContextCloseExit.closeContextExit(-1)
         }
     }
-
+    jedis.set(WEBSERVER_QUEUE, "OK")
     jedis.expire(WEBSERVER_QUEUE, 13);
 
 
@@ -201,10 +189,6 @@ fun main() {
                     call.respondText("" + e.message)
                 }
 
-//                    scheduledRun.setStartTime(Timestamp(Date().time))
-//                    scheduledRun.setNumberPoints(numPointsAsInt)
-//                    scheduledRun.setStatus("started");
-                //coordinateList.setSchedule_uuid(scheduledRun.getSchedule_uuid())
                 val scheduleUUID = UUID.randomUUID();
                 val coordinateUUID = UUID.randomUUID()
                 var sendingMessage: kmeans.rabbitSupport.RabbitMessageStartRun =
@@ -216,12 +200,6 @@ fun main() {
                     MessageProperties.PERSISTENT_BASIC,
                     ObjectMapper().writeValueAsString(sendingMessage).toByteArray()
                 )
-                //cf.close()
-//                    cf.close()
-
-
-                // save schedule run, create collection
-
 
                 // save schedule run, create collection
                 var solrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
@@ -300,10 +278,6 @@ fun main() {
                     HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build()
 
                 try {
-//                        var response: QueryResponse? = null
-//                        response = solrClient.query(query)
-
-
                     call.respondText(ObjectMapper().writeValueAsString(solrClient.query(query).getResults().map {
                         assert( (it.getFieldValue("jsonData") as List<String>).size == 1)
                         SolrEntity(
@@ -348,57 +322,6 @@ fun main() {
     }.start(wait = false)
 
     runBlocking {
-//
-//        val server: HTTPServer = HTTPServer.builder()
-//            .port(Integer.valueOf("65409"))
-//            .buildAndStart()
-
-
-//
-//        var solrClient: HttpSolrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/sanesystem").build();
-//
-//        // sane checks stay
-//
-//        // we have a collection
-//        createCollection(1,1, "sanesystem")
-//
-//        // we have a schema
-//        createSchema(solrClient)
-//
-//        val uuid: UUID = UUID.randomUUID()
-//
-//        val currentTime = Date().getTime().toString()
-//
-//        // we can write
-//        solrClient.addBean(
-//            SolrEntity(
-//                currentTime,
-//                currentTime,
-//                "{" + Date().toString() + "}"
-//            )
-//        )
-//        solrClient.commit()
-//
-////            // not sane            .withCql("CREATE TABLE sanity (uuid varchar, value varchar, PRIMARY KEY (uuid));")
-//
-//        // we can read
-//        val query = SolrQuery()
-//        query.set("q", "schedule_uuid:" + currentTime)
-//        val response: QueryResponse = solrClient.query(query)
-//
-//        if ( response.results.size != 1 ) {
-//            throw Exception("Error, not sane.")
-//        }
-//
-//
-//        createCollection(3,1, "coordinates")
-//        solrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates").build()
-//        createSchema(solrClient);
-//
-//        createCollection(3,1, "schedules");
-//        solrClient = HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build()
-//        createSchema(solrClient);
-
 
         val ch = LazyInitializedSingleton.getInstance(connectionFactory)
 
@@ -409,21 +332,6 @@ fun main() {
             false,
             null
         )
-//        ch.queueDeclare(
-//            COLLECTOR_QUEUE,
-//            false,
-//            false,
-//            false,
-//            null,
-//
-//            )
-//        ch.queueBind(
-//            COLLECTOR_QUEUE,
-//            COLLECTOR_EXCHANGE,
-//            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
-//        )
-
-
         ch.exchangeDeclare(
             WEBSERVER_EXCHANGE,
             "x-consistent-hash",
@@ -445,18 +353,12 @@ fun main() {
             getEnvStr("ROUNDTRIP_NOTIFICATION_CONSISTENT_HASH_ROUTING", "83")
         )
 
-
-
         listenAndPublish(
             connectionFactory = connectionFactory,
-//        queueName = REGISTRATION_REQUEST_QUEUE,
             queueName = WEBSERVER_QUEUE,
-            //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = null,
             counter = webserverCounter,
             jedis = jedis
         )
-
     }
-
 }

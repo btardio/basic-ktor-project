@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import kmeans.solrSupport.SolrStartup.*
 import kmeans.support.ContextCloseExit
+import kmeans.webserver.WEBSERVER_QUEUE
 import redis.clients.jedis.JedisPooled
 import java.util.*
 import java.util.Map
@@ -108,7 +109,8 @@ suspend fun listenAndPublish(
 fun main() {
 
     val jedis = JedisPooled("redis", 6379)
-    jedis.expire(ANALYZER_QUEUE, 13);
+    jedis.set(COLLECTOR_QUEUE, "OK")
+    jedis.expire(COLLECTOR_QUEUE, 13);
     JvmMetrics.builder().register();
 
     val prometheus: HTTPServer = HTTPServer.builder()
@@ -131,8 +133,8 @@ fun main() {
                 ContextCloseExit.closeContextExit(-1)
             }
         }
-
-        jedis.expire(ANALYZER_QUEUE, 13);
+        jedis.set(COLLECTOR_QUEUE, "OK")
+        jedis.expire(COLLECTOR_QUEUE, 13);
 
         val connectionFactory = ConnectionFactory();
 

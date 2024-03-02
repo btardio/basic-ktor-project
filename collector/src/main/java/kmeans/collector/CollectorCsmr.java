@@ -16,9 +16,7 @@ import kmeans.rabbitSupport.RabbitMessageStartRun;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.TimeoutException;
 
 import kmeans.solrSupport.Coordinate;
 
@@ -97,7 +95,6 @@ public class CollectorCsmr implements Consumer {
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 		counter.get("rabbits_consumed").labelValues("default").inc();
 		ObjectMapper objectMapper = new ObjectMapper();
-		//log.error(new String(body, StandardCharsets.UTF_8));
 
 		if (body != null) {
 
@@ -242,11 +239,7 @@ public class CollectorCsmr implements Consumer {
 						};
 						return;
 					}
-//					try {
-//						cfA.close();
-//					} catch (TimeoutException ee) {
-//
-//					}
+
 					if (envelope != null) {
 						this.ch.basicAck(envelope.getDeliveryTag(), false);
 					}
@@ -274,12 +267,6 @@ public class CollectorCsmr implements Consumer {
 				);
 			}
 
-//			try {
-//				cfA.close();
-//			} catch (TimeoutException e) {
-//
-//			}
-
 			counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
 			if (envelope != null) {
 				this.ch.basicAck(envelope.getDeliveryTag(), false);
@@ -288,105 +275,9 @@ public class CollectorCsmr implements Consumer {
 
 
 		}
-//
-//
-////
-//
-//
-////        var numPointsAsInt = Integer.parseInt(numberPoints)
-////
-////        var coordinateList = SolrEntityCoordinate()
-////
-////        var scheduledRun = SolrEntityScheduledRun(coordinateList)
-////
-////        scheduledRun.setStartTime(Timestamp(Date().time))
-////        scheduledRun.setNumberPoints(numPointsAsInt)
-////        scheduledRun.setStatus("started");
-////        coordinateList.setSchedule_uuid(scheduledRun.getSchedule_uuid())
-////
-////        var sendingMessage: RabbitMessageStartRun = RabbitMessageStartRun(scheduledRun, coordinateList);
-//
-//
-//			if (envelope != null) {
-//				ch.basicAck(envelope.getDeliveryTag(), false)
-//			};
+		jedis.set(COLLECTOR_QUEUE, "OK");
 		jedis.expire(COLLECTOR_QUEUE, 30);
 	}
 }
-//
-//	class CollectorCsmr(ch: Channel, exchangeName: String, connectionFactory: ConnectionFactory) : Consumer {
-//
-//		val ch: Channel = ch
-//		val exchange: String = exchangeName
-//		val connectionFactory = connectionFactory
-//
-//		override fun handleConsumeOk(consumerTag: String?) {
-//
-//		}
-//
-//		override fun handleCancelOk(consumerTag: String?) {
-//
-//		}
-//
-//		override fun handleCancel(consumerTag: String?) {
-//
-//		}
-//
-//		override fun handleShutdownSignal(consumerTag: String?, sig: ShutdownSignalException?) {
-//			sig?.let {
-////            throw it
-//			}
-//		}
-//
-//		override fun handleRecoverOk(consumerTag: String?) {
-//
-//		}
-//
-//		override fun handleDelivery(
-//				consumerTag: String?,
-//				envelope: Envelope?,
-//				properties: AMQP.BasicProperties?,
-//				body: ByteArray?
-//    ) {
-//
-//			println("received" + String(body!!, StandardCharsets.UTF_8))
-//
-//			if (body != null) {
-//				var solrEntity: SolrEntity =
-//						ObjectMapper().registerModule(KotlinModule()).readValue(String(body, StandardCharsets.UTF_8))
-//
-//				val cf = connectionFactory.newConnection().createChannel()
-//				cf.basicPublish(
-//						kmeans.collector.ANALYZER_EXCHANGE,
-//						UUID.randomUUID().toString(),
-//						MessageProperties.PERSISTENT_BASIC,
-//						ObjectMapper().registerModule(KotlinModule()).writeValueAsString(solrEntity).toByteArray()
-//				)
-//				cf.close()
-//			}
-//
-//
-////
-//
-//
-////        var numPointsAsInt = Integer.parseInt(numberPoints)
-////
-////        var coordinateList = SolrEntityCoordinate()
-////
-////        var scheduledRun = SolrEntityScheduledRun(coordinateList)
-////
-////        scheduledRun.setStartTime(Timestamp(Date().time))
-////        scheduledRun.setNumberPoints(numPointsAsInt)
-////        scheduledRun.setStatus("started");
-////        coordinateList.setSchedule_uuid(scheduledRun.getSchedule_uuid())
-////
-////        var sendingMessage: RabbitMessageStartRun = RabbitMessageStartRun(scheduledRun, coordinateList);
-//
-//
-//			if (envelope != null) {
-//				ch.basicAck(envelope.getDeliveryTag(), false)
-//			};
-//		}
-//	}
 
 
