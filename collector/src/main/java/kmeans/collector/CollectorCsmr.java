@@ -9,7 +9,6 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.MessageProperties;
 import com.rabbitmq.client.ShutdownSignalException;
 
-import io.prometheus.metrics.core.metrics.Counter;
 import kmeans.rabbitSupport.LazyInitializedSingleton;
 import kmeans.rabbitSupport.RabbitMessageStartRun;
 
@@ -32,10 +31,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
+
 
 
 import redis.clients.jedis.JedisPooled;
@@ -55,24 +51,17 @@ public class CollectorCsmr implements Consumer {
 	private final String exchangeName;
 	private final ConnectionFactory connectionFactory;
 
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(CollectorCsmr.class);
-	private final Map<String, Counter> counter;
 	private final JedisPooled jedis;
 
 	public CollectorCsmr(Channel ch,
 						 String exchangeName,
 						 ConnectionFactory connectionFactory,
-						 Map<String, Counter> counter,
 						 JedisPooled jedis) {
 
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		ch.qos.logback.classic.Logger root = lc.getLogger(Logger.ROOT_LOGGER_NAME);
-		root.setLevel(Level.WARN);
 
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
-		this.counter = counter;
 		this.jedis = jedis;
 	}
 
@@ -103,7 +92,7 @@ public class CollectorCsmr implements Consumer {
 
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-		counter.get("rabbits_consumed").labelValues("default").inc();
+		//counter.get("rabbits_consumed").labelValues("default").inc();
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		if (body != null) {
@@ -130,8 +119,8 @@ public class CollectorCsmr implements Consumer {
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
-				counter.get("exception_unknown_republish").labelValues("default").inc();
-				log.error("coordinates_after_webserver query failure.", e);
+				//counter.get("exception_unknown_republish").labelValues("default").inc();
+				//log.error("coordinates_after_webserver query failure.", e);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -150,8 +139,8 @@ public class CollectorCsmr implements Consumer {
 
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() != 1L) {
-				counter.get("not_found_expected_coordinates").labelValues("default").inc();
-				log.error(response.getResults().getNumFound() + "Records found on coordinates_after_webserver.");
+				//counter.get("not_found_expected_coordinates").labelValues("default").inc();
+				//log.error(response.getResults().getNumFound() + "Records found on coordinates_after_webserver.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -194,7 +183,7 @@ public class CollectorCsmr implements Consumer {
 				try {
 					image = ImageIO.read(new URL("http://apache/" + coordinates.getFilename()));
 				} catch (Exception e) {
-					log.error(e.getMessage(), e);
+					//log.error(e.getMessage(), e);
 				}
 
 				int height = image.getHeight();
@@ -222,7 +211,7 @@ public class CollectorCsmr implements Consumer {
 				coordinateList.setHeight(height);
 
 				// save coordinate
-				counter.get("processed_coordinates_after_read").labelValues("default").inc();
+				//counter.get("processed_coordinates_after_read").labelValues("default").inc();
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -233,8 +222,8 @@ public class CollectorCsmr implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
-					counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
-					log.error("Coordinates after collector commit failure.", e);
+					//counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
+					//log.error("Coordinates after collector commit failure.", e);
 					int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 					if (numTries < 100) {
 						rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -277,7 +266,7 @@ public class CollectorCsmr implements Consumer {
 				);
 			}
 
-			counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
+			//counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
 			if (envelope != null) {
 				this.ch.basicAck(envelope.getDeliveryTag(), false);
 			}

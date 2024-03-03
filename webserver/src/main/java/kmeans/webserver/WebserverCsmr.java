@@ -9,7 +9,6 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.MessageProperties;
 import com.rabbitmq.client.ShutdownSignalException;
-import io.prometheus.metrics.core.metrics.Counter;
 import kmeans.rabbitSupport.LazyInitializedSingleton;
 import kmeans.rabbitSupport.RabbitMessageStartRun;
 import kmeans.solrSupport.SolrEntity;
@@ -31,10 +30,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
 
 public class WebserverCsmr implements Consumer {
 	public static final String WEBSERVER_EXCHANGE = System.getenv("WEBSERVER_EXCHANGE").isEmpty() ?
@@ -49,22 +44,16 @@ public class WebserverCsmr implements Consumer {
 
 	private final ConnectionFactory connectionFactory;
 
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(WebserverCsmr.class);
-	private final Map<String, Counter> counter;
 	private final JedisPooled jedis;
 
 	public WebserverCsmr(Channel ch,
 						 ConnectionFactory connectionFactory,
-						 Map<String, Counter> counter,
 						 JedisPooled jedis) {
 
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		ch.qos.logback.classic.Logger root = lc.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		root.setLevel(Level.WARN);
+
 
 		this.ch = ch;
 		this.connectionFactory = connectionFactory;
-		this.counter = counter;
 		this.jedis = jedis;
 	}
 
@@ -99,7 +88,7 @@ public class WebserverCsmr implements Consumer {
 
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-		counter.get("rabbits_consumed").labelValues("default").inc();
+		//counter.get("rabbits_consumed").labelValues("default").inc();
 		ObjectMapper objectMapper = new ObjectMapper();
 		//log.error(new String(body, StandardCharsets.UTF_8));
 
@@ -127,8 +116,8 @@ public class WebserverCsmr implements Consumer {
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
-				counter.get("exception_unknown_republish").labelValues("default").inc();
-				log.error("Exception querying coordinates_after_analyzer.", e);
+				//counter.get("exception_unknown_republish").labelValues("default").inc();
+				//log.error("Exception querying coordinates_after_analyzer.", e);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -145,8 +134,8 @@ public class WebserverCsmr implements Consumer {
 
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() != 1L) {
-				counter.get("not_found_expected_coordinates").labelValues("default").inc();
-				log.error(response.getResults().getNumFound() + "Records found on coordinates_after_analyzer.");
+				//counter.get("not_found_expected_coordinates").labelValues("default").inc();
+				//log.error(response.getResults().getNumFound() + "Records found on coordinates_after_analyzer.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -183,7 +172,7 @@ public class WebserverCsmr implements Consumer {
 
 
 				// save schedule run, create collection
-				counter.get("processed_coordinates_after_read").labelValues("default").inc();
+				//counter.get("processed_coordinates_after_read").labelValues("default").inc();
 				try {
 					solrClient.addBean(
 							new SolrEntity(
@@ -194,7 +183,7 @@ public class WebserverCsmr implements Consumer {
 					);
 					solrClient.commit();
 				} catch (SolrServerException | SolrException e) {
-					counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
+					//counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
 //					counter.get("get_all_schedules_fail").labelValues("default").inc();
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,
@@ -209,7 +198,7 @@ public class WebserverCsmr implements Consumer {
 //					} catch (TimeoutException ee) {
 //
 //					}
-					counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
+					//counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
 					if (envelope != null) {
 						this.ch.basicAck(envelope.getDeliveryTag(), false);
 					};

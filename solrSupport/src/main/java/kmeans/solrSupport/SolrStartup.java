@@ -70,7 +70,7 @@ public class SolrStartup {
 //			};
 
 		} catch ( Exception e ) {
-			log.error("exiting create collection" + e);
+			//log.error("exiting create collection" + e);
 			closeContextExit(-1);
 		}
 		try {
@@ -79,7 +79,7 @@ public class SolrStartup {
 				solr.request(CollectionAdminRequest.createCollection(collectionName, numShards, numReplicas));
 			}
 		} catch ( Exception e ){
-			log.error("exiting create collection" + e);
+			//log.error("exiting create collection" + e);
 			closeContextExit(-1);
 		}
 
@@ -178,7 +178,7 @@ public class SolrStartup {
 				throw new Exception("Error, unable to insert sane check.");
 			}
 		} catch (Exception e){
-			log.error("Error, failed checks.", e);
+			//log.error("Error, failed checks.", e);
 			closeContextExit(-1);
 		}
 		createCollection(COORDINATES_AFTER_WEBSERVER_SHARDS,COORDINATES_AFTER_WEBSERVER_REPLICAS, "coordinates_after_webserver", zooHost);

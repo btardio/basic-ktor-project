@@ -21,12 +21,12 @@ public class SolrUtility {
         try {
             pingResponse = client.ping();
         } catch (Exception e) {
-            log.error("Unable to ping collection " + collectionName, e);
+            //log.error("Unable to ping collection " + collectionName, e);
 
             closeContextExit(-1);
         }
         if (pingResponse.getStatus() != 0){
-            log.error("Unable to ping collection " + collectionName);
+            //log.error("Unable to ping collection " + collectionName);
             closeContextExit(-1);
         };
     }

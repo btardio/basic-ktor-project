@@ -43,9 +43,6 @@ import org.apache.solr.common.SolrDocument
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.jvm.optionals.getOrElse
-import io.prometheus.metrics.core.metrics.Counter
-import io.prometheus.metrics.exporter.httpserver.HTTPServer;
-import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import redis.clients.jedis.JedisPooled
 import java.util.Map
 
@@ -69,32 +66,12 @@ val RABBIT_URL = getEnvStr("RABBIT_URL", "rabbit")
 
 val connectionFactory = ConnectionFactory();
 
-var webserverCounter: kotlin.collections.Map<String, Counter> = Map.of(
-    "rabbits_consumed",
-    Counter.builder().name("rabbits_consumed").help("~").labelNames("sum").register(),
-
-    "rabbits_acknowledged",
-    Counter.builder().name("rabbits_acknowledged").help("~").labelNames("sum").register(),
-    "rabbits_published",
-    Counter.builder().name("rabbits_published").help("~").labelNames("sum").register(),
-    "not_found_expected_coordinates",
-    Counter.builder().name("not_found_expected_coordinates").help("~").labelNames("sum").register(),
-    "exception_unknown_republish",
-    Counter.builder().name("exception_unknown_republish").help("~").labelNames("sum").register(),
-    "processed_coordinates_after_read",
-    Counter.builder().name("processed_coordinates_after_read").help("~").labelNames("sum").register(),
-    "failed_writing_coordinates_after_read",
-    Counter.builder().name("failed_writing_coordinates_after_read").help("~").labelNames("sum").register(),
-    "succeeded_writing_coordinates_after_read",
-    Counter.builder().name("succeeded_writing_coordinates_after_read").help("~").labelNames("sum").register(),
-)
 
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
-    counter: kotlin.collections.Map<String, Counter>,
     jedis: JedisPooled
 ) {
     val channel = connectionFactory.newConnection().createChannel()
@@ -105,7 +82,6 @@ private fun listenForNotificationRequests(
         WebserverCsmr(
             channel,
             connectionFactory,
-            counter,
             jedis)
     );
 }
@@ -115,7 +91,6 @@ suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String?,
-    counter: kotlin.collections.Map<String, Counter>,
     jedis: JedisPooled
 ) {
 
@@ -123,7 +98,6 @@ suspend fun listenAndPublish(
     listenForNotificationRequests(
         connectionFactory,
         queueName,
-        counter,
         jedis
     )
 }
@@ -139,12 +113,6 @@ fun main() {
     jedis.expire("webserver", 30);
 
     connectionFactory.setHost(RABBIT_URL);
-
-    JvmMetrics.builder().register();
-
-    val prometheus: HTTPServer = HTTPServer.builder()
-        .port(Integer.valueOf("65403"))
-        .buildAndStart()
 
     if (Objects.isNull(jedis.get("EHLO"))) {
         try {
@@ -357,7 +325,6 @@ fun main() {
             connectionFactory = connectionFactory,
             queueName = WEBSERVER_QUEUE,
             exchangeName = null,
-            counter = webserverCounter,
             jedis = jedis
         )
     }

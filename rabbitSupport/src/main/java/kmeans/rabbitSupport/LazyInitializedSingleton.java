@@ -23,7 +23,7 @@ public class LazyInitializedSingleton {
                 connection.get().addShutdownListener(new ShutdownListener() {
                     @Override
                     public void shutdownCompleted(ShutdownSignalException e) {
-                        log.error("Connection shutdown unexpectedly.", e);
+                        //log.error("Connection shutdown unexpectedly.", e);
                         closeContextExit(-1);
                     }
                 });
@@ -32,12 +32,12 @@ public class LazyInitializedSingleton {
                 instance.get().addShutdownListener(new ShutdownListener() {
                     @Override
                     public void shutdownCompleted(ShutdownSignalException e) {
-                        log.error("Channel shutdown unexpectedly.", e);
+                        //log.error("Channel shutdown unexpectedly.", e);
                         closeContextExit(-1);
                     }
                 });
             } catch (Exception e) {
-                log.error("Unable to create connection factory instance.", e);
+                //log.error("Unable to create connection factory instance.", e);
                 closeContextExit(-1);
             }
         }

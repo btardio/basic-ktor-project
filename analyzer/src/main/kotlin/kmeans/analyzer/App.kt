@@ -44,29 +44,28 @@ val SOLR_CONNECT_IP = getEnvStr("SOLR_CONNECT_IP", "solr1:8983")
 private val logger = LoggerFactory.getLogger("kmeans.analyzer.App")
 
 //log.error(new String(body, StandardCharsets.UTF_8));
-var analyzerCounter: kotlin.collections.Map<String, Counter> = Map.of(
-    "rabbits_consumed",
-    Counter.builder().name("rabbits_consumed").help("~").labelNames("sum").register(),
-    "rabbits_acknowledged",
-    Counter.builder().name("rabbits_acknowledged").help("~").labelNames("sum").register(),
-    "rabbits_published",
-    Counter.builder().name("rabbits_published").help("~").labelNames("sum").register(),
-    "not_found_expected_coordinates",
-    Counter.builder().name("not_found_expected_coordinates").help("~").labelNames("sum").register(),
-    "exception_unknown_republish",
-    Counter.builder().name("exception_unknown_republish").help("~").labelNames("sum").register(),
-    "processed_coordinates_after_read",
-    Counter.builder().name("processed_coordinates_after_read").help("~").labelNames("sum").register(),
-    "failed_writing_coordinates_after_read",
-    Counter.builder().name("failed_writing_coordinates_after_read").help("~").labelNames("sum").register(),
-    "succeeded_writing_coordinates_after_read",
-    Counter.builder().name("succeeded_writing_coordinates_after_read").help("~").labelNames("sum").register(),
-)
+//var analyzerCounter: kotlin.collections.Map<String, Counter> = Map.of(
+//    "rabbits_consumed",
+//    Counter.builder().name("rabbits_consumed").help("~").labelNames("sum").register(),
+//    "rabbits_acknowledged",
+//    Counter.builder().name("rabbits_acknowledged").help("~").labelNames("sum").register(),
+//    "rabbits_published",
+//    Counter.builder().name("rabbits_published").help("~").labelNames("sum").register(),
+//    "not_found_expected_coordinates",
+//    Counter.builder().name("not_found_expected_coordinates").help("~").labelNames("sum").register(),
+//    "exception_unknown_republish",
+//    Counter.builder().name("exception_unknown_republish").help("~").labelNames("sum").register(),
+//    "processed_coordinates_after_read",
+//    Counter.builder().name("processed_coordinates_after_read").help("~").labelNames("sum").register(),
+//    "failed_writing_coordinates_after_read",
+//    Counter.builder().name("failed_writing_coordinates_after_read").help("~").labelNames("sum").register(),
+//    "succeeded_writing_coordinates_after_read",
+//    Counter.builder().name("succeeded_writing_coordinates_after_read").help("~").labelNames("sum").register(),
+//)
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String,
-    counter: kotlin.collections.Map<String, Counter>,
     jedis: JedisPooled
 ) {
     val channel = connectionFactory.newConnection().createChannel()
@@ -79,9 +78,9 @@ private fun listenForNotificationRequests(
             connectionFactory,
             SOLR_CONNECT_IP,
             UUID.randomUUID().toString(),
-            counter,
             jedis)
     );
+
 }
 
 
@@ -89,7 +88,6 @@ suspend fun listenAndPublish(
     connectionFactory: ConnectionFactory,
     queueName: String,
     exchangeName: String,
-    counter: kotlin.collections.Map<String, Counter>,
     jedis: JedisPooled
 ) {
 
@@ -98,7 +96,6 @@ suspend fun listenAndPublish(
         connectionFactory,
         queueName,
         exchangeName,
-        counter,
         jedis
     )
 }
@@ -112,9 +109,9 @@ fun main() {
     jedis.set("analyzer", "OK")
     jedis.expire("analyzer", 30);
     JvmMetrics.builder().register();
-    val prometheus: HTTPServer = HTTPServer.builder()
-        .port(Integer.valueOf("65400"))
-        .buildAndStart()
+//    val prometheus: HTTPServer = HTTPServer.builder()
+//        .port(Integer.valueOf("65400"))
+//        .buildAndStart()
 
 
     runBlocking {
@@ -164,7 +161,6 @@ fun main() {
             connectionFactory = connectionFactory,
             queueName = ANALYZER_QUEUE,
             exchangeName = WEBSERVER_EXCHANGE,
-            counter = analyzerCounter,
             jedis = jedis
         )
 
