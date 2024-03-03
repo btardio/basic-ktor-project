@@ -148,7 +148,7 @@ services:
     environment:
       - ZK_HOST=${SOLR_ZK_HOST}
       - SOLR_HOST=${IPADDRA}
-      - SOLR_PORT=8981
+      - SOLR_PORT=8983
     depends_on:
       - zooAws
 #  solr2:
