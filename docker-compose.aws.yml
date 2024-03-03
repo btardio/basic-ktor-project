@@ -140,7 +140,6 @@ services:
              rabbitmq-server"
     volumes:
       - /home/ec2-user/90-rabbitmq.conf:/etc/rabbitmq/conf.d/90-rabbitmq.conf
-
   solr1:
     image: solr:8.7.0
     network_mode: "host"
@@ -152,7 +151,6 @@ services:
       - SOLR_PORT=8981
     depends_on:
       - zooAws
-
   solr2:
     image: solr:8.7.0
     network_mode: "host"
@@ -164,7 +162,6 @@ services:
       - SOLR_PORT=8982
     depends_on:
       - zooAws
-
   solr3:
     image: solr:8.7.0
     network_mode: "host"
@@ -176,7 +173,6 @@ services:
       - SOLR_PORT=8983
     depends_on:
       - zooAws
-
   zooAws:
     image: zookeeper:3.6.2
     network_mode: "host"
@@ -207,15 +203,11 @@ services:
     restart: unless-stopped
     volumes:
       - /application/prometheus:/etc/prometheus
-      - prom_data:/prometheus
-#    networks:
-#      - solr
   redis:
     image: redis:7.0
     restart: always
     ports:
       - 6379:6379
-
   python:
     image: python:3.7-alpine
     restart: always
@@ -228,50 +220,3 @@ services:
     volumes:
       - /application/restarter/:/restarter
       - "/var/run/docker.sock:/var/run/docker.sock"
-volumes:
-  prom_data:
-
-#    environment:
-#      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
-#      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-a
-#      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-a
-#      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-b
-#      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
-#      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-b
-
-#  zoo2:
-#    image: zookeeper:3.6.2
-#    container_name: zoo2
-#    hostname: zoo2
-#    ports:
-#      - "${ZOO2_PORTS}"
-#      - 7002:7000
-#      - "${ZOO2_COMMANDS}"
-#      - "${ZOOIPB}:22888-23888:2888-3888"
-#    environment:
-#      ZOO_MY_ID: ${ZOO2_ID}
-#      ZOO_SERVERS: ${ZOO_SERVERS}
-#      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
-#      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-##    networks:
-##      - solr
-#
-#  zoo3:
-#    image: zookeeper:3.6.2
-#    container_name: zoo3
-#    hostname: zoo3
-#    ports:
-#      - "${ZOO3_PORTS}"
-#      - 7003:7000
-#      - "${ZOO3_COMMANDS}"
-#      - "${ZOOIPC}:32888-33888:2888-3888"
-#    environment:
-#      ZOO_MY_ID: ${ZOO3_ID}
-#      ZOO_SERVERS: ${ZOO_SERVERS}
-#      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
-#      ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
-#    networks:
-#      - solr
-#
-#networks:
-#  solr:

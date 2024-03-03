@@ -259,37 +259,37 @@ public class AnalyzerCsmr  implements Consumer {
 
 
 			// start delete coordinates from collector collection, no longer needed
-
-			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
-			 solrClient = new HttpSolrClient.Builder(
-					"http://" + solrUri + "/solr/coordinates_after_collector").build();
-
-			SolrUtility.pingCollection(solrClient, "coordinates_after_collector");
-
-			List<String> idsDeleting = response.getResults().stream().map(item -> item.get("id").toString()).toList();
-
-			try {
-				solrClient.deleteById("coordinates_after_collector", idsDeleting);
-			} catch (SolrServerException | SolrException e) {
-				//counter.get("exception_unknown_republish").labelValues("default").inc();
-				log.error("Exception deleting from coordinates_after_collector.", e);
-				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
-				if (numTries < 100) {
-					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
-					cfA.basicPublish(
-							ANALYZER_EXCHANGE,
-							UUID.randomUUID().toString(),
-							MessageProperties.PERSISTENT_BASIC,
-							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
-					);
-				}
-				if (envelope != null) {
-					this.ch.basicAck(envelope.getDeliveryTag(), false);
-				};
-				return;
-			} finally {
-				solrClient.close();
-			}
+//
+//			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
+//			 solrClient = new HttpSolrClient.Builder(
+//					"http://" + solrUri + "/solr/coordinates_after_collector").build();
+//
+//			SolrUtility.pingCollection(solrClient, "coordinates_after_collector");
+//
+//			List<String> idsDeleting = response.getResults().stream().map(item -> item.get("id").toString()).toList();
+//
+//			try {
+//				solrClient.deleteById("coordinates_after_collector", idsDeleting);
+//			} catch (SolrServerException | SolrException e) {
+//				//counter.get("exception_unknown_republish").labelValues("default").inc();
+//				log.error("Exception deleting from coordinates_after_collector.", e);
+//				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
+//				if (numTries < 100) {
+//					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
+//					cfA.basicPublish(
+//							ANALYZER_EXCHANGE,
+//							UUID.randomUUID().toString(),
+//							MessageProperties.PERSISTENT_BASIC,
+//							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
+//					);
+//				}
+//				if (envelope != null) {
+//					this.ch.basicAck(envelope.getDeliveryTag(), false);
+//				};
+//				return;
+//			} finally {
+//				solrClient.close();
+//			}
 
 			// end delete coordinates from collector collection, no longer needed
 

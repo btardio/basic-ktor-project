@@ -100,12 +100,6 @@ suspend fun listenAndPublish(
     )
 }
 
-//val counter: Counter = Counter.builder()
-//    .name("my_count_total")
-//    .help("example counter")
-//    .labelNames("status")
-//    .register()
-
 fun main() {
 
     val jedis = JedisPooled("redis", 6379)
@@ -118,11 +112,6 @@ fun main() {
         .buildAndStart()
 
     runBlocking {
-
-//        val server: HTTPServer = HTTPServer.builder()
-//            .port(Integer.valueOf("65403"))
-//            .buildAndStart()
-
 
         if (Objects.isNull(jedis.get("EHLO"))) {
             try {
@@ -151,23 +140,6 @@ fun main() {
             false,
             null
         )
-//        ch.queueDeclare(
-//            ANALYZER_QUEUE,
-//            false,
-//            false,
-//            false,
-//            null,
-//
-//            )
-//        ch.queueBind(
-//            ANALYZER_QUEUE,
-//            ANALYZER_EXCHANGE,
-//            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
-//        )
-
-
-
-
         ch.exchangeDeclare(
             COLLECTOR_EXCHANGE,
             "x-consistent-hash",
@@ -188,20 +160,13 @@ fun main() {
             COLLECTOR_EXCHANGE,
             getEnvStr("ROUNDTRIP_NOTIFICATION_CONSISTENT_HASH_ROUTING", "83")
         )
-
-
-
         listenAndPublish(
             connectionFactory = connectionFactory,
-//        queueName = REGISTRATION_REQUEST_QUEUE,
             queueName = COLLECTOR_QUEUE,
-            //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = ANALYZER_EXCHANGE,
             counter = collectorCounter,
             jedis = jedis
         )
-
-
         embeddedServer(Netty, port = EMBEDDED_NETTY_PORT) {
             routing {
                 get("/") {
@@ -209,7 +174,5 @@ fun main() {
                 }
             }
         }.start(wait = true)
-
     }
-
 }

@@ -61,21 +61,6 @@ var analyzerCounter: kotlin.collections.Map<String, Counter> = Map.of(
     "succeeded_writing_coordinates_after_read",
     Counter.builder().name("succeeded_writing_coordinates_after_read").help("~").labelNames("sum").register(),
 )
-//
-//val analyzerCounter: Counter = Counter.builder()
-//    .name("analyzerCounter")
-//    .labelNames(
-//        "rabbits_consumed",
-//        "rabbits_acknowledged",
-//        "rabbits_published",
-//        "not_found_expected_coordinates",
-//        "exception_unknown_republish",
-//        "processed_coordinates_after_read",
-//        "failed_writing_coordinates_after_read",
-//        "succeeded_writing_coordinates_after_read"
-//    )
-//    .register()
-
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
@@ -117,12 +102,6 @@ suspend fun listenAndPublish(
     )
 }
 
-//val counter: Counter = Counter.builder()
-//    .name("my_count_total")
-//    .help("example counter")
-//    .labelNames("status")
-//    .register()
-
 fun main() {
 
     val jedis = JedisPooled("redis", 6379)
@@ -135,10 +114,6 @@ fun main() {
 
 
     runBlocking {
-
-//        val server: HTTPServer = HTTPServer.builder()
-//            .port(Integer.valueOf("65400"))
-//            .buildAndStart()
 
         if ( isNull(jedis.get("EHLO")) ) {
             try {
@@ -159,30 +134,6 @@ fun main() {
         val conn = connectionFactory.newConnection();
 
         val ch = conn.createChannel();
-
-//        ch.exchangeDeclare(
-//            WEBSERVER_EXCHANGE,
-//            "x-consistent-hash",
-//            false,
-//            false,
-//            null
-//        )
-//        ch.queueDeclare(
-//            WEBSERVER_QUEUE,
-//            false,
-//            false,
-//            false,
-//            null,
-//
-//            )
-//        ch.queueBind(
-//            WEBSERVER_QUEUE,
-//            WEBSERVER_EXCHANGE,
-//            getEnvStr("ROUNDTRIP_REQUEST_CONSISTENT_HASH_ROUTING", "11")
-//        )
-
-
-
 
         ch.exchangeDeclare(
             ANALYZER_EXCHANGE,
@@ -205,19 +156,13 @@ fun main() {
             getEnvStr("ROUNDTRIP_NOTIFICATION_CONSISTENT_HASH_ROUTING", "83")
         )
 
-
-
         listenAndPublish(
             connectionFactory = connectionFactory,
-//        queueName = REGISTRATION_REQUEST_QUEUE,
             queueName = ANALYZER_QUEUE,
-            //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = WEBSERVER_EXCHANGE,
             counter = analyzerCounter,
             jedis = jedis
         )
-
-
 
         embeddedServer(Netty, port = EMBEDDED_NETTY_PORT) {
             routing {
@@ -226,12 +171,6 @@ fun main() {
                 }
             }
         }.start(wait = true)
-
     }
-
-
-
-
-
 }
 
