@@ -4,6 +4,8 @@ import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+
 import static java.lang.System.exit;
 import static kmeans.support.ContextCloseExit.closeContextExit;
 
@@ -24,6 +26,9 @@ public class LazyInitializedSingleton {
                     @Override
                     public void shutdownCompleted(ShutdownSignalException e) {
                         //log.error("Connection shutdown unexpectedly.", e);
+                        String timestamp = String.valueOf(new Date().getTime() / 10L);
+                        jedis.set(timestamp, "Coordinates after collector commit failure." + e.getMessage());
+                        jedis.expire(timestamp, 900);
                         closeContextExit(-1);
                     }
                 });

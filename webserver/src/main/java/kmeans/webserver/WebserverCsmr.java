@@ -25,6 +25,7 @@ import redis.clients.jedis.JedisPooled;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -118,6 +119,9 @@ public class WebserverCsmr implements Consumer {
 			} catch (SolrServerException | SolrException e) {
 				//counter.get("exception_unknown_republish").labelValues("default").inc();
 				//log.error("Exception querying coordinates_after_analyzer.", e);
+				String timestamp = String.valueOf(new Date().getTime() / 10L);
+				jedis.set(timestamp, "Exception querying coordinates_after_analyzer." + e.getMessage());
+				jedis.expire(timestamp, 900);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -127,15 +131,25 @@ public class WebserverCsmr implements Consumer {
 							MessageProperties.PERSISTENT_BASIC,
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
+					if (envelope != null) {
+						this.ch.basicAck(envelope.getDeliveryTag(), false);
+					};
 				}
 			} finally {
 				solrClient.close();
 			}
 
+			String timestamp = String.valueOf(new Date().getTime() / 10L);
+			jedis.set(timestamp, "Records found on coordinates_after_analyzer." + response.getResults().getNumFound());
+			jedis.expire(timestamp, 900);
+
 			// if its not fuond it will be
-			if (response.getResults().getNumFound() != 1L) {
+			if (response.getResults().getNumFound() < 1L) {
 				//counter.get("not_found_expected_coordinates").labelValues("default").inc();
 				//log.error(response.getResults().getNumFound() + "Records found on coordinates_after_analyzer.");
+				timestamp = String.valueOf(new Date().getTime() / 10L);
+				jedis.set(timestamp, "Records not found on coordinates_after_analyzer.");
+				jedis.expire(timestamp, 900);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -185,6 +199,9 @@ public class WebserverCsmr implements Consumer {
 				} catch (SolrServerException | SolrException e) {
 					//counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
 //					counter.get("get_all_schedules_fail").labelValues("default").inc();
+					timestamp = String.valueOf(new Date().getTime() / 10L);
+					jedis.set(timestamp, "failed_writing_coordinates_after_read" + e.getMessage());
+					jedis.expire(timestamp, 900);
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,
 							UUID.randomUUID().toString(),
@@ -204,6 +221,7 @@ public class WebserverCsmr implements Consumer {
 					};
 
 				} finally {
+
 					solrClient.close();
 				}
 

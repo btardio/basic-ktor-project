@@ -323,7 +323,9 @@ fun main() {
 
         listenAndPublish(
             connectionFactory = connectionFactory,
+//        queueName = REGISTRATION_REQUEST_QUEUE,
             queueName = WEBSERVER_QUEUE,
+            //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = null,
             jedis = jedis
         )

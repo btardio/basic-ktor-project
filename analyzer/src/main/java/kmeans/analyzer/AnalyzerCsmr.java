@@ -11,6 +11,7 @@ import kmeans.rabbitSupport.LazyInitializedSingleton;
 import kmeans.rabbitSupport.RabbitMessageStartRun;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -141,6 +142,9 @@ public class AnalyzerCsmr  implements Consumer {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
 				//log.error("Exception querying coordinates_after_collector.", e);
+				String timestamp = String.valueOf(new Date().getTime() / 10L);
+				jedis.set(timestamp, "Exception querying coordinates_after_collector." + e.getMessage());
+				jedis.expire(timestamp, 900);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
 					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -159,8 +163,15 @@ public class AnalyzerCsmr  implements Consumer {
                 solrClient.close();
             }
 
+			String timestamp = String.valueOf(new Date().getTime() / 10L);
+			jedis.set(timestamp, "Records found on coordinates_after_collector." + response.getResults().getNumFound());
+			jedis.expire(timestamp, 900);
+
 			// if its not fuond it will be
 			if (response.getResults().getNumFound() < 1L) {
+				timestamp = String.valueOf(new Date().getTime() / 10L);
+				jedis.set(timestamp, "Records not found on coordinates_after_collector.");
+				jedis.expire(timestamp, 900);
 				//counter.get("not_found_expected_coordinates").labelValues("default").inc();
 				///log.error(response.getResults().getNumFound() + "Records found on coordinates_after_collector.");
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
@@ -213,7 +224,9 @@ public class AnalyzerCsmr  implements Consumer {
 					//counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
 					//log.error("Coordinates after analyzer commit failure.", e);
 					// exceptions put back on the exchange
-
+					timestamp = String.valueOf(new Date().getTime() / 10L);
+					jedis.set(timestamp, "Coordinates after analyzer commit failure." + e.getMessage());
+					jedis.expire(timestamp, 900);
 					int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 					if (numTries < 100) {
 						rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
@@ -264,37 +277,40 @@ public class AnalyzerCsmr  implements Consumer {
 
 
 			// start delete coordinates from collector collection, no longer needed
-//
-//			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
-//			 solrClient = new HttpSolrClient.Builder(
-//					"http://" + solrUri + "/solr/coordinates_after_collector").build();
-//
-//			SolrUtility.pingCollection(solrClient, "coordinates_after_collector");
-//
-//			List<String> idsDeleting = response.getResults().stream().map(item -> item.get("id").toString()).toList();
-//
-//			try {
-//				solrClient.deleteById("coordinates_after_collector", idsDeleting);
-//			} catch (SolrServerException | SolrException e) {
-//				//counter.get("exception_unknown_republish").labelValues("default").inc();
-//				log.error("Exception deleting from coordinates_after_collector.", e);
-//				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
-//				if (numTries < 100) {
-//					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
-//					cfA.basicPublish(
-//							ANALYZER_EXCHANGE,
-//							UUID.randomUUID().toString(),
-//							MessageProperties.PERSISTENT_BASIC,
-//							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
-//					);
-//				}
-//				if (envelope != null) {
-//					this.ch.basicAck(envelope.getDeliveryTag(), false);
-//				};
-//				return;
-//			} finally {
-//				solrClient.close();
-//			}
+
+			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
+			 solrClient = new HttpSolrClient.Builder(
+					"http://" + solrUri + "/solr/coordinates_after_collector").build();
+
+			SolrUtility.pingCollection(solrClient, "coordinates_after_collector");
+
+			List<String> idsDeleting = response.getResults().stream().map(item -> item.get("id").toString()).toList();
+
+			try {
+				solrClient.deleteById("coordinates_after_collector", idsDeleting);
+			} catch (SolrServerException | SolrException e) {
+				//counter.get("exception_unknown_republish").labelValues("default").inc();
+				//log.error("Exception deleting from coordinates_after_collector.", e);
+				timestamp = String.valueOf(new Date().getTime() / 10L);
+				jedis.set(timestamp, "Exception deleting from coordinates_after_collector." + e.getMessage());
+				jedis.expire(timestamp, 900);
+				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
+				if (numTries < 100) {
+					rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
+					cfA.basicPublish(
+							ANALYZER_EXCHANGE,
+							UUID.randomUUID().toString(),
+							MessageProperties.PERSISTENT_BASIC,
+							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
+					);
+				}
+				if (envelope != null) {
+					this.ch.basicAck(envelope.getDeliveryTag(), false);
+				};
+				return;
+			} finally {
+				solrClient.close();
+			}
 
 			// end delete coordinates from collector collection, no longer needed
 
