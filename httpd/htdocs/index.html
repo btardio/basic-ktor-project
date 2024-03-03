@@ -2,8 +2,7 @@
 <html lang="en">
 
 <head>
-
-    <title>jQuery Demo</title>
+    <title>Applications of Software Architecture for Big Data Final Project</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/css/bootstrap.min.css"
           integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 </head>
@@ -14,6 +13,8 @@
 <script src="js/scripts.js"></script>
 <BR>
 <h3>Greetings, click an image to start a KMeans Task</h3>
+Author: Brandon Tardio
+Github: <A href="https://github.com/btardio/basic-ktor-project/">https://github.com/btardio/basic-ktor-project/</A>
 <hr>
 <hr>
 <hr>
@@ -27,8 +28,8 @@
 <img style="width:100px;height:100px;" class="img-thumbnail" id="006" src="006.png">
 <img style="width:100px;height:100px;" class="img-thumbnail" id="007" src="007.png">
 <img style="width:100px;height:100px;" class="img-thumbnail" id="008" src="008.png">
-<!--<img style="width:100px;height:100px;" class="img-thumbnail" id="009" src="009.png">-->
-<!--<img style="width:100px;height:100px;" class="img-thumbnail" id="010" src="010.png">-->
+<img style="width:100px;height:100px;" class="img-thumbnail" id="009" src="009.png">
+<img style="width:100px;height:100px;" class="img-thumbnail" id="010" src="010.png">
 <img style="width:100px;height:100px;" class="img-thumbnail" id="011" src="011.png">
 
 <hr><hr><hr>
@@ -37,8 +38,6 @@
     <div id="schedules"></div>
 </div>
 
-
-<!--<form method="post" action="http://127.0.0.1/startKmeans/"-->
 <script>
     $(document).ready(function () {
 
@@ -55,54 +54,26 @@
         $("#010").click(function () { $.get("/netty/startKmeans/010.png"); });
         $("#011").click(function () { $.get("/netty/startKmeans/011.png"); });
 
-
-
         let alreadyRendered = ['1', '2', '3'];
 
         $('#startKmeans').click(function () {
             $.get("/netty/startKmeans/" + $("#numberPoints").val(), function (data, status) {
                 alert(data);
             });
-
         });
-
-// $('#post_button').click(function(){
-//  var post_name = $('#post_name').val();
-        //trim() is used to remover spaces
-//  if($.trim(post_name) != '')
-//  {
-//   $.ajax({
-//    url:"https://worldtimeapi.org/api/timezone/America/Los_Angeles",
-//    method:"GET",
-//    data:"",
-//    dataType:"text",
-//    success:function(data)
-//    {
-//     $('#post_name').val(data);
-//    }
-//   });
-//  }
-// });
-
         function scrubData(data) {
-            // console.log(data);
             return jQuery.parseJSON(data).map(item => {
-                //console.log(item)
                 return {
                     ...item,
                     jsonData: jQuery.parseJSON(item.jsonData)
                 }
-                // return {}
             })
-
                 .filter(item => {
                     return item.jsonData.status == 'finished'
                 });
         }
 
-
-        setInterval(function () {//setInterval() method execute on every interval until called clearInterval()
-//  $('#load_posts').load("display.php").fadeIn("slow");
+        setInterval(function () {
 
             $.ajax({
                 url: "/netty/getAllSchedules",
@@ -110,28 +81,17 @@
                 data: "",
                 dataType: "text",
                 success: function (data) {
-                    // console.log(scrubData(data));
-                    //console.log(scrubData(data));
-                    // console.log(scrubData(data));
-                    //console.log(scrubData(data))
 
                     scrubData(data).forEach(item => {
-                        // console.log(item)
+
                         if (alreadyRendered.filter((entry) => {
                             return entry === item.schedule_uuid
                         }).length == 0) {
 
-                            // console.log("aaa");
-
                             let height = item.jsonData.height;
                             let width = item.jsonData.width;
 
-
                             $.get("/netty/getFinishedSchedule/" + item.coordinate_uuid, function (data, status) {
-
-                                // console.log(height);
-                                // console.log(width);
-
 
                                 $("#schedules").append("" +
                                     '<div class="card">' +
@@ -144,28 +104,22 @@
                                     '<h5 class="card-title"></h5>' +
                                     '<p class="card-text">' +
                                     '<div>' +
-
                                     '<div class="row">' +
                                     '  <div class="col">' +
                                     '    <div class="rounded float-left">Original</div>' +
                                     '  </div>' +
-
                                     '  <div class="col">' +
                                     '    <div class="rounded float-right">Indexed</div>' +
                                     '  </div>' +
                                     '</div>' +
-
-
                                     '<div class="row">' +
                                     '  <div class="col">' +
                                     '    <img class="rounded float-left" src="' + item.jsonData.filename + '">' +
                                     '  </div>' +
-
                                     '  <div class="col">' +
                                     '    <canvas class="rounded float-right" id="' + item.schedule_uuid + '" width="' + width + '" height=' + height + '></canvas>' +
                                     '  </div>' +
                                     '</div>' +
-
                                     '</div>' +
                                     '</p>' +
                                     '</div>' +
@@ -176,134 +130,24 @@
 
                                 rgbPoints = jQuery.parseJSON(data);
                                 rgbPoints[0].forEach(function (value, i) {
-                                    // console.log(i);
-                                    // console.log(value);
                                     let rowIndex = Math.floor(i / height);
                                     let colIndex = i % width;
-                                    //console.log(colIndex)
-
                                     let colorR = Math.floor(rgbPoints[0][i].x * 255);
                                     let colorG = Math.floor(rgbPoints[0][i].y * 255);
                                     let colorB = Math.floor(rgbPoints[0][i].z * 255);
                                     ctx.strokeStyle = "rgb(" + colorR + "," + colorG + "," + colorB + ")";
                                     ctx.fillStyle = "rgb(" + colorR + "," + colorG + "," + colorB + ")";
-
                                     ctx.fillRect(rowIndex, colIndex, rowIndex + 1, colIndex + 1);
-
                                 });
-                                //console.log(rgbPoints);
-                                // for (let i = 0; i < 300; i++) {
-                                //   for (let j = 0; j < 300; j++) {
-                                //     let colorIndex = i * j + j;
-                                //     let rgbPoint = rgbPoints[colorIndex];
-                                //     console.log(rgbPoint);
-                                //     //ctx.fillRect()
-                                //   }
-                                // }
-
-                                // todo: bring through width and height
-                                // for( let i = 0; i < rgbPoints.length; i++) {
-                                //
-                                // }
                             })
-
-                            // canvas = document["zone8"]
-                            // ctx = canvas.getContext("2d")
-                            //
-                            // x = 3
-                            //
-                            // def draw(event):
-                            // global x
-                            //
-                            // ctx.fillStyle = "rgb(100,10,100)"
-                            // ctx.strokeStyle = "rgb(100,10,100)"
-                            // ctx.beginPath()
-                            // ctx.fillRect(x, 0, x + 10, 10)
-                            // x += 15
-                            // ctx.stroke()
-                            //
-                            // document["button8"].bind("click", draw)
-                            //
-                            // }).then((data) => {
-                            //   console.log(jQuery.parseJSON(data));
-                            //   $( "#schedules" ).append( "" +
-                            //           '<div class="card">' +
-                            //           '<div class="card-header">' +
-                            //           'Schedule ID : ' +
-                            //           item.schedule_uuid +
-                            //           '</div>' +
-                            //           '<div class="card-body">' +
-                            //           '<h5 class="card-title">Indexed Image</h5>' +
-                            //           '<p class="card-text">' +
-                            //           jQuery.parseJSON(data).map(coordinates => {
-                            //             return coordinates.map(coordinate => {
-                            //               console.log(coordinate);
-                            //               return "(" + coordinate.x + "," + coordinate.y + "," + coordinate.z + ")";
-                            //             })
-                            //           }) +
-                            //           '</p>' +
-                            //           '</div>' +
-                            //           '</div>');
-                            // });
-                            // console.log(item);
-
-
-                            //console.log('rewq')
-                            //$('#post_name').appendChild($('<div id="111">hello</div>'));
                             alreadyRendered.push.apply(alreadyRendered, [item.schedule_uuid])
-                            //alreadyRendered = alreadyRendered.concat([item.schedule_uuid]);
-
                         } else {
                         }
-
                     })
-
-                    //.append()
-                    //$('#post_name').textContent(jQuery.parseJSON(data).toString());
                 }
             });
-
-
-            //load() method fetch data from fetch.php page
         }, 5000);
-
     });
-
-
-    //
-    // $.get("/netty/getFinishedSchedule/e3b6bb5c-aaec-4b5e-a1da-52c25c59a8c9" + item.coordinate_uuid, function(data, status){
-    //   console.log(data);
-    // });
-
 </script>
-
-
-<!--<script type="text/python" id="script8">-->
-<!--  from browser import document, html-->
-<!--  import math-->
-
-<!--  canvas = document["zone8"]-->
-<!--  ctx = canvas.getContext("2d")-->
-<!--  -->
-<!--  x = 3-->
-
-<!--  def draw(event):-->
-<!--      global x-->
-
-<!--      ctx.fillStyle = "rgb(100,10,100)"-->
-<!--      ctx.strokeStyle = "rgb(100,10,100)"-->
-<!--      ctx.beginPath()-->
-<!--      ctx.fillRect(x, 0, x + 10, 10)-->
-<!--      x += 15-->
-<!--      ctx.stroke()-->
-
-<!--  document["button8"].bind("click", draw)-->
-<!--</script>-->
-
-
-<!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>-->
 </body>
-
 </html>

@@ -38,7 +38,7 @@ def main(stdscr):
         stdscr.addstr(1,3,B, curses.color_pair(1))
         stdscr.addstr(1,4,BBB)
         stdscr.addstr(1,5,BBBB)
-        if ( retry or last + 15 < time.time() ):
+        if ( retry or last + 1 < time.time() ):
 
             try:
                 A = str(requests.get('http://netty.netoxena.com/startKmeans/000.png').json()['schedule_uuid'])
