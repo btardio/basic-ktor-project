@@ -1,6 +1,8 @@
 package kmeans.analyzer;
 
 
+//import ch.qos.logback.classic.Level;
+//import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 
@@ -26,11 +28,27 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import kmeans.solrSupport.SolrUtility;
+
+import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+
+
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPooled;
+
+//import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import ch.qos.logback.core.status.Status;
+import org.slf4j.spi.LoggingEventBuilder;
+import org.slf4j.spi.NOPLoggingEventBuilder;
+
 
 import static java.lang.System.exit;
 
@@ -56,7 +74,7 @@ public class AnalyzerCsmr  implements Consumer {
 
 	private String routingKey;
 
-	private static final Logger log = LoggerFactory.getLogger(AnalyzerCsmr.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(AnalyzerCsmr.class);
 
 	public AnalyzerCsmr(Channel ch,
 						String exchangeName,
@@ -65,6 +83,11 @@ public class AnalyzerCsmr  implements Consumer {
 						String routingKey,
 						Map<String, Counter> counter,
 						JedisPooled jedis) {
+
+		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+		Logger root = lc.getLogger(Logger.ROOT_LOGGER_NAME);
+		root.setLevel(Level.WARN);
+
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;

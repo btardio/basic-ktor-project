@@ -22,8 +22,6 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrException;
 import kmeans.solrSupport.SolrUtility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPooled;
 
 import java.io.IOException;
@@ -33,7 +31,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
-
+import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 
 public class WebserverCsmr implements Consumer {
 	public static final String WEBSERVER_EXCHANGE = System.getenv("WEBSERVER_EXCHANGE").isEmpty() ?
@@ -48,7 +49,7 @@ public class WebserverCsmr implements Consumer {
 
 	private final ConnectionFactory connectionFactory;
 
-	private static final Logger log = LoggerFactory.getLogger(WebserverCsmr.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(WebserverCsmr.class);
 	private final Map<String, Counter> counter;
 	private final JedisPooled jedis;
 
@@ -56,6 +57,11 @@ public class WebserverCsmr implements Consumer {
 						 ConnectionFactory connectionFactory,
 						 Map<String, Counter> counter,
 						 JedisPooled jedis) {
+
+		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+		ch.qos.logback.classic.Logger root = lc.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		root.setLevel(Level.WARN);
+
 		this.ch = ch;
 		this.connectionFactory = connectionFactory;
 		this.counter = counter;

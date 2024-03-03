@@ -31,8 +31,13 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+
+
 import redis.clients.jedis.JedisPooled;
 
 import javax.imageio.ImageIO;
@@ -50,7 +55,7 @@ public class CollectorCsmr implements Consumer {
 	private final String exchangeName;
 	private final ConnectionFactory connectionFactory;
 
-	private static final Logger log = LoggerFactory.getLogger(CollectorCsmr.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(CollectorCsmr.class);
 	private final Map<String, Counter> counter;
 	private final JedisPooled jedis;
 
@@ -59,6 +64,11 @@ public class CollectorCsmr implements Consumer {
 						 ConnectionFactory connectionFactory,
 						 Map<String, Counter> counter,
 						 JedisPooled jedis) {
+
+		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+		ch.qos.logback.classic.Logger root = lc.getLogger(Logger.ROOT_LOGGER_NAME);
+		root.setLevel(Level.WARN);
+
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
