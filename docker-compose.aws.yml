@@ -225,6 +225,12 @@ services:
              pip install redis &&
              python3 /restarter/restarter.py
              "
+    volumes:
+      - /application/restarter/:/restarter
+      - "/var/run/docker.sock:/var/run/docker.sock"
+volumes:
+  prom_data:
+
 #    environment:
 #      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-a
 #      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-a
@@ -232,11 +238,7 @@ services:
 #      - ANALYZER_QUEUE=analyzer-queue-${HOSTNAME}-b
 #      - WEBSERVER_QUEUE=webserver-queue-${HOSTNAME}-b
 #      - COLLECTOR_QUEUE=collector-queue-${HOSTNAME}-b
-    volumes:
-      - restarter/:/restarter
-      - "/var/run/docker.sock:/var/run/docker.sock"
-volumes:
-  prom_data:
+
 #  zoo2:
 #    image: zookeeper:3.6.2
 #    container_name: zoo2
