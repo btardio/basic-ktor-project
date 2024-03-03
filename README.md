@@ -5,6 +5,7 @@
 [//]: # (designed to handle very high throughput.)
 
 
+
 ## Set up
 
 ### Local Development (Product Environment)
@@ -29,6 +30,7 @@ and build step can be skipped.
 
 Collector:
 ```
+docker container exec -it kotlin-ktor-collector /bin/bash
 ./gradlew clean && 
 ./gradlew build && 
 java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /collector/collector/build/libs/collector.jar
@@ -37,6 +39,7 @@ java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /
 
 Webserver:
 ```
+docker container exec -it kotlin-ktor-server /bin/bash
 ./gradlew clean && 
 ./gradlew build && 
 java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /webserver/webserver/build/libs/webserver.jar
@@ -44,14 +47,24 @@ java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /
 
 Analyzer:
 ```
+docker container exec -it kotlin-ktor-analyzer /bin/bash
 ./gradlew clean && 
 ./gradlew build && 
 java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /analyzer/analyzer/build/libs/analyzer.jar
 ```
 
+#### Build System
+
+Project is using gradle, original build-logic directory was beyond my experience and so used a simpler
+gradle-init command to combine scala, java, kotlin.
+
 ### Running the Application (Product Environment & Rest Collaboration internal or API endpoint)
 
 The application comes with a very minimal JQuery frontend located in the httpd/htdocs/index.html directory.
+
+#
+
+http://netoxena.com
 
 #
 
