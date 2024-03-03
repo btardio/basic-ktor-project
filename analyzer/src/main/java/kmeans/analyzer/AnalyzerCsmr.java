@@ -395,7 +395,7 @@ public class AnalyzerCsmr  implements Consumer {
 //			}
 //			;
 			jedis.set("analyzer", "OK");
-			jedis.expire("analyzer", 45);
+			jedis.expire("analyzer", 180);
 
 		}
 //

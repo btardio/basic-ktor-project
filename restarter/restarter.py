@@ -30,12 +30,12 @@ while (True):
 #    print(webserverkeyvalue)
 
     if ( analyzerkeyvalue == None ):
-        analyzer.restart(timeout=0)
+        analyzer.restart(timeout=3)
 
     if ( collectorkeyvalue == None ):
-        collector.restart(timeout=0)
+        collector.restart(timeout=3)
 
     if ( webserverkeyvalue == None ):
-        server.restart(timeout=0)
+        server.restart(timeout=3)
 
     time.sleep(3)

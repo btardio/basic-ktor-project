@@ -107,7 +107,7 @@ fun main() {
 
     val jedis = JedisPooled("redis", 6379)
     jedis.set("analyzer", "OK")
-    jedis.expire("analyzer", 30);
+    jedis.expire("analyzer", 180);
     JvmMetrics.builder().register();
 //    val prometheus: HTTPServer = HTTPServer.builder()
 //        .port(Integer.valueOf("65400"))
@@ -126,7 +126,7 @@ fun main() {
             }
         }
         jedis.set("analyzer", "OK")
-        jedis.expire("analyzer", 30);
+        jedis.expire("analyzer", 180);
 
         val connectionFactory = ConnectionFactory();
 

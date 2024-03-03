@@ -80,7 +80,7 @@ fun main() {
 
     val jedis = JedisPooled("redis", 6379)
     jedis.set("collector", "OK")
-    jedis.expire("collector", 30);
+    jedis.expire("collector", 180);
     //JvmMetrics.builder().register();
 
 //    val prometheus: HTTPServer = HTTPServer.builder()
@@ -99,7 +99,7 @@ fun main() {
             }
         }
         jedis.set("collector", "OK")
-        jedis.expire("collector", 30);
+        jedis.expire("collector", 180);
 
         val connectionFactory = ConnectionFactory();
 
