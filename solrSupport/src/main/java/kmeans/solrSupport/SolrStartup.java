@@ -30,22 +30,22 @@ public class SolrStartup {
 			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 
 
-	public static final Integer COORDINATES_AFTER_WEBSERVER_SHARDS = System.getenv("COORDINATES_AFTER_WEBSERVER_SHARDS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			3 : Integer.valueOf(System.getenv("COORDINATES_AFTER_WEBSERVER_SHARDS"));
-	public static final Integer COORDINATES_AFTER_WEBSERVER_REPLICAS = System.getenv("COORDINATES_AFTER_WEBSERVER_REPLICAS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			1 : Integer.valueOf(System.getenv("COORDINATES_AFTER_WEBSERVER_REPLICAS"));
-	public static final Integer COORDINATES_AFTER_COLLECTOR_SHARDS = System.getenv("COORDINATES_AFTER_COLLECTOR_SHARDS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			3 : Integer.valueOf(System.getenv("COORDINATES_AFTER_COLLECTOR_SHARDS"));
-	public static final Integer COORDINATES_AFTER_COLLECTOR_REPLICAS = System.getenv("COORDINATES_AFTER_COLLECTOR_REPLICAS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			1 : Integer.valueOf(System.getenv("COORDINATES_AFTER_COLLECTOR_REPLICAS"));
-	public static final Integer COORDINATES_AFTER_ANALYZER_SHARDS = System.getenv("COORDINATES_AFTER_ANALYZER_SHARDS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			3 : Integer.valueOf(System.getenv("COORDINATES_AFTER_ANALYZER_SHARDS"));
-	public static final Integer COORDINATES_AFTER_ANALYZER_REPLICAS = System.getenv("COORDINATES_AFTER_ANALYZER_REPLICAS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			1 : Integer.valueOf(System.getenv("COORDINATES_AFTER_ANALYZER_REPLICAS"));
-	public static final Integer SCHEDULES_SHARDS = System.getenv("SCHEDULES_SHARDS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			3 : Integer.valueOf(System.getenv("SCHEDULES_SHARDS"));
-	public static final Integer SCHEDULES_REPLICAS = System.getenv("SCHEDULES_REPLICAS")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			1 : Integer.valueOf(System.getenv("SCHEDULES_REPLICAS"));
+	public static final Integer COORDINATES_AFTER_WEBSERVER_SHARDS = System.getenv("COORDINATES_AFTER_WEBSERVER_SHARDS")==null || System.getenv("COORDINATES_AFTER_WEBSERVER_SHARDS").isEmpty() ?
+			3 : Integer.parseInt(System.getenv("COORDINATES_AFTER_WEBSERVER_SHARDS"));
+	public static final Integer COORDINATES_AFTER_WEBSERVER_REPLICAS = System.getenv("COORDINATES_AFTER_WEBSERVER_REPLICAS")==null || System.getenv("COORDINATES_AFTER_WEBSERVER_REPLICAS").isEmpty() ?
+			1 : Integer.parseInt(System.getenv("COORDINATES_AFTER_WEBSERVER_REPLICAS"));
+	public static final Integer COORDINATES_AFTER_COLLECTOR_SHARDS = System.getenv("COORDINATES_AFTER_COLLECTOR_SHARDS")==null || System.getenv("COORDINATES_AFTER_COLLECTOR_SHARDS").isEmpty() ?
+			3 : Integer.parseInt(System.getenv("COORDINATES_AFTER_COLLECTOR_SHARDS"));
+	public static final Integer COORDINATES_AFTER_COLLECTOR_REPLICAS = System.getenv("COORDINATES_AFTER_COLLECTOR_REPLICAS")==null || System.getenv("COORDINATES_AFTER_COLLECTOR_REPLICAS").isEmpty() ?
+			1 : Integer.parseInt(System.getenv("COORDINATES_AFTER_COLLECTOR_REPLICAS"));
+	public static final Integer COORDINATES_AFTER_ANALYZER_SHARDS = System.getenv("COORDINATES_AFTER_ANALYZER_SHARDS")==null || System.getenv("COORDINATES_AFTER_ANALYZER_SHARDS").isEmpty() ?
+			3 : Integer.parseInt(System.getenv("COORDINATES_AFTER_ANALYZER_SHARDS"));
+	public static final Integer COORDINATES_AFTER_ANALYZER_REPLICAS = System.getenv("COORDINATES_AFTER_ANALYZER_REPLICAS")==null || System.getenv("COORDINATES_AFTER_ANALYZER_REPLICAS").isEmpty() ?
+			1 : Integer.parseInt(System.getenv("COORDINATES_AFTER_ANALYZER_REPLICAS"));
+	public static final Integer SCHEDULES_SHARDS = System.getenv("SCHEDULES_SHARDS")==null || System.getenv("SCHEDULES_SHARDS").isEmpty() ?
+			3 : Integer.parseInt(System.getenv("SCHEDULES_SHARDS"));
+	public static final Integer SCHEDULES_REPLICAS = System.getenv("SCHEDULES_REPLICAS")==null || System.getenv("SCHEDULES_REPLICAS").isEmpty() ?
+			1 : Integer.parseInt(System.getenv("SCHEDULES_REPLICAS"));
 	
 	
 	
