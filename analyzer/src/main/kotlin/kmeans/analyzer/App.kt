@@ -1,15 +1,11 @@
 package kmeans.analyzer
 
-import ch.qos.logback.classic.LoggerContext
 import com.rabbitmq.client.ConnectionFactory
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.prometheus.metrics.core.metrics.Counter
-import io.prometheus.metrics.exporter.httpserver.HTTPServer
-import io.prometheus.metrics.instrumentation.jvm.JvmMetrics
 //import io.prometheus.metrics.core.metrics.Counter
 //import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.solrSupport.SolrStartup.solrInitialize
@@ -108,7 +104,7 @@ fun main() {
     val jedis = JedisPooled("redis", 6379)
     jedis.set("analyzer", "OK")
     jedis.expire("analyzer", 180);
-    JvmMetrics.builder().register();
+//    JvmMetrics.builder().register();
 //    val prometheus: HTTPServer = HTTPServer.builder()
 //        .port(Integer.valueOf("65400"))
 //        .buildAndStart()
