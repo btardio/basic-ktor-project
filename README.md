@@ -144,8 +144,9 @@ test is found in the root directory: keepalive.py
 Improvements to this include building it bigger to see how the system handles at load.
 
 
+### Diagram
 
-
+![Screenshot](BTardioColoradoThirdCourse.png)
 
 
 
