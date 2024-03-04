@@ -156,6 +156,87 @@ test is found in the root directory: keepalive.py
 
 Improvements to this include building it bigger to see how the system handles at load.
 
+### Continuous Integration
+
+The continuous integration uses github actions. The definition is:
+
+One of the goals of this project was to make a docker-compose.yml that local development and production versions 
+were very similar. This goal was accomplished using docker compose and environment files. Local development was an above
+average experience.
+
+```
+
+  continuous-integration:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1
+      - uses: actions/checkout@v2
+      # Step 2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+      # Step 3
+      - name: Build Application and Run unit Test
+        run: gradle build
+
+```
+
+### Continuous Deploy
+
+The application uses AWS CI/CD Code Deploy. The github action that triggers this is
+
+```
+
+  continuous-deployment:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+     # Step 1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      # Step 2
+      - name: Create CodeDeploy Deployment
+        id: deploy
+        run: |
+          aws deploy create-deployment \
+            --application-name MyDeploymentGroupName \
+            --deployment-group-name MyDeploymentGroupName \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+
+```
+
+The cloud formation code deploy group is:
+
+```
+
+    codeDeply:
+        DependsOn: [A, B, C, D, E]
+        Type: AWS::CodeDeploy::DeploymentGroup
+        Properties:
+            ApplicationName: !Ref cdApp
+            DeploymentGroupName: !Ref DeploymentGroupName
+            DeploymentConfigName: CodeDeployDefault.AllAtOnce
+            AutoRollbackConfiguration:
+                Enabled: true
+                Events:
+                  - DEPLOYMENT_FAILURE
+                  - DEPLOYMENT_STOP_ON_REQUEST
+            ServiceRoleArn: !GetAtt cdRole.Arn  #GetAtt returns a
+            Ec2TagSet:
+                Ec2TagSetList:
+                  - Ec2TagGroup:
+                      - Type: KEY_AND_VALUE
+                        Key: "deploymentgroup"
+                        Value: "kotlindeploy"
+
+```
 
 ### Diagram
 
