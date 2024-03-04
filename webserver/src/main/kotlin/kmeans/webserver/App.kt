@@ -280,81 +280,81 @@ fun main() {
                     //counter.labelValues("get_finished_schedule_fail").labelValues("default").inc()
                 }
             }
-
-            get("/metricsDump") {
-                //jedis.scan('0 MATCH '17*' COUNT 1000');
-                var out = mutableMapOf<String, String>()
-                val scanParams = ScanParams().count(1000).match("17*")
-                var cur = SCAN_POINTER_START
-                do {
-                    val scanResult = jedis.scan(cur, scanParams)
-
-                    scanResult.result.stream().forEach { item: String? ->
-                        out.put(item.toString(), jedis.get(item))
-                    }
-
-                    cur = scanResult.cursor
-                } while (cur != SCAN_POINTER_START)
-
-                call.respondText(ObjectMapper().writeValueAsString(out))
-            }
-
-            get("/metrics") {
-                val map = mutableMapOf<String, String>();
-
-
-                val responseA: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                        .uri(URI("http://A.lf.lll:8888/metricsDump"))
-                        .GET()
-                        .build(), HttpResponse.BodyHandlers.ofString())
-                map.put("A.lf.lll", responseA.get().body());
-
-                val responseB: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                            .uri(URI("http://B.lf.lll:8888/metricsDump"))
-                            .GET()
-                            .build(), HttpResponse.BodyHandlers.ofString())
-                map.put("B.lf.lll", responseB.get().body());
-
-                val responseC: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                            .uri(URI("http://C.lf.lll:8888/metricsDump"))
-                            .GET()
-                            .build(), HttpResponse.BodyHandlers.ofString())
-                map.put("C.lf.lll", responseC.get().body());
-
-                val responseD: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                            .uri(URI("http://D.lf.lll:8888/metricsDump"))
-                            .GET()
-                            .build(), HttpResponse.BodyHandlers.ofString())
-                map.put("D.lf.lll", responseD.get().body());
-
-                val responseE: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                            .uri(URI("http://E.lf.lll:8888/metricsDump"))
-                            .GET()
-                            .build(), HttpResponse.BodyHandlers.ofString())
-                map.put("E.lf.lll", responseE.get().body());
-
-                call.respondText(ObjectMapper().writeValueAsString(map))
-            }
+//
+//            get("/metricsDump") {
+//                //jedis.scan('0 MATCH '17*' COUNT 1000');
+//                var out = mutableMapOf<String, String>()
+//                val scanParams = ScanParams().count(1000).match("17*")
+//                var cur = SCAN_POINTER_START
+//                do {
+//                    val scanResult = jedis.scan(cur, scanParams)
+//
+//                    scanResult.result.stream().forEach { item: String? ->
+//                        out.put(item.toString(), jedis.get(item))
+//                    }
+//
+//                    cur = scanResult.cursor
+//                } while (cur != SCAN_POINTER_START)
+//
+//                call.respondText(ObjectMapper().writeValueAsString(out))
+//            }
+//
+//            get("/metrics") {
+//                val map = mutableMapOf<String, String>();
+//
+//
+//                val responseA: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
+//                    .executor(executorService)
+//                    .build()
+//                    .sendAsync(
+//                        HttpRequest.newBuilder()
+//                        .uri(URI("http://A.lf.lll:8888/metricsDump"))
+//                        .GET()
+//                        .build(), HttpResponse.BodyHandlers.ofString())
+//                map.put("A.lf.lll", responseA.get().body());
+//
+//                val responseB: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
+//                    .executor(executorService)
+//                    .build()
+//                    .sendAsync(
+//                        HttpRequest.newBuilder()
+//                            .uri(URI("http://B.lf.lll:8888/metricsDump"))
+//                            .GET()
+//                            .build(), HttpResponse.BodyHandlers.ofString())
+//                map.put("B.lf.lll", responseB.get().body());
+//
+//                val responseC: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
+//                    .executor(executorService)
+//                    .build()
+//                    .sendAsync(
+//                        HttpRequest.newBuilder()
+//                            .uri(URI("http://C.lf.lll:8888/metricsDump"))
+//                            .GET()
+//                            .build(), HttpResponse.BodyHandlers.ofString())
+//                map.put("C.lf.lll", responseC.get().body());
+//
+//                val responseD: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
+//                    .executor(executorService)
+//                    .build()
+//                    .sendAsync(
+//                        HttpRequest.newBuilder()
+//                            .uri(URI("http://D.lf.lll:8888/metricsDump"))
+//                            .GET()
+//                            .build(), HttpResponse.BodyHandlers.ofString())
+//                map.put("D.lf.lll", responseD.get().body());
+//
+//                val responseE: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
+//                    .executor(executorService)
+//                    .build()
+//                    .sendAsync(
+//                        HttpRequest.newBuilder()
+//                            .uri(URI("http://E.lf.lll:8888/metricsDump"))
+//                            .GET()
+//                            .build(), HttpResponse.BodyHandlers.ofString())
+//                map.put("E.lf.lll", responseE.get().body());
+//
+//                call.respondText(ObjectMapper().writeValueAsString(map))
+//            }
 
             // todo : select only json data, this will contain number of coordinates to make
 
