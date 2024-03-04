@@ -1,13 +1,15 @@
 #!/usr/bin/python3
 
-# simple python script that does 1 request to environment netoxena.com and then makes sure it responds adequately
+# Integration test - should run continually
 
 import requests
 import time
 import curses
 
-
 def main(stdscr):
+
+    scheduled = {}
+
     stdscr = curses.initscr()
 
     curses.noecho()
@@ -30,20 +32,41 @@ def main(stdscr):
     BBB = ''
     BBBB = ''
     while(True):
-        time.sleep(.1)
         stdscr.clear()
+
+        printdictA = sorted(scheduled, key=lambda _: (scheduled[_]['timeStart']))
+        printdictA.reverse()
+        #stdscr.addstr(13,13,'asdf') # str(printdictA))
+        for n in range(0,min(len(printdictA),30)):
+            stdscr.addstr(0 + n, 60,
+                str(printdictA[n]) +
+                ': TimeStart:' +
+                str(scheduled[printdictA[n]]['timeStart']) +
+                ': TimeEnd:' +
+                str(scheduled[printdictA[n]]['timeEnd']) +
+                ': TimeToComplete:' +
+                str(scheduled[printdictA[n]]['timeToComplete']))
+ 
+
+        time.sleep(1)
         stdscr.addstr(10,10,'Last: ' + str(last))
         stdscr.addstr(11,10,'Next: ' + str(time.time()))
         stdscr.addstr(0,3,A)
         stdscr.addstr(1,3,B, curses.color_pair(1))
         stdscr.addstr(1,4,BBB)
         stdscr.addstr(1,5,BBBB)
-        if ( retry or last + 1 < time.time() ):
+        if ( retry or last + 9 < time.time() ):
 
             try:
                 A = str(requests.get('http://netty.netoxena.com/startKmeans/000.png').json()['schedule_uuid'])
             except:
                 pass
+
+            scheduledEntry = {}
+            scheduledEntry['timeStart'] = time.time()
+            scheduledEntry['timeEnd'] = None
+            scheduledEntry['timeToComplete'] = None
+            scheduled[A] = scheduledEntry
             retry = False
             B = 'NOT FOUND'
             BBB = ''
@@ -56,13 +79,27 @@ def main(stdscr):
     #        time.sleep(1)
         try:
             for i in requests.get('http://netty.netoxena.com/getAllSchedules').json():
-                if i['schedule_uuid'] == A:
-                
-                    if 'finished' in i['jsonData']:
+                #stdscr.addstr(7, 55, str('finished' in i['jsonData']))  # ucla rocneck you want buy above the neck surgery? california lobe clear you want buy missile
+                # we are insured using our 6 million investors chronic
+                #stdscr.addstr(8, 56, str(i['schedule_uuid'] in scheduled))
+                #stdscr.addstr(9, 57, str(i['schedule_uuid']))
+                #stdscr.addstr(10, 58, str(scheduled.keys()))
+                if i['schedule_uuid'] in scheduled:
 
-                        B = 'FOUND' 
-                        BBB = str(A) 
-                        BBBB = str(i['schedule_uuid'])
+                    #stdscr.addstr(11, 59, 'asdf')#json.loads(i['jsonData']))
+                    #scheduled[i['schedule_uuid']]['timeEnd'] = 111
+                    if 'True' == str('finished' in i['jsonData']): # 'finished' in i['jsonData']:    # == json.loads(i['jsonData'])['status']:
+                        #stdscr.addstr(13, 60, i['jsonData'])
+                        #stdscr.addstr(14, 61, scheduled[i['schedule_uuid']])
+                        #stdscr.addstr(15, 62, scheduled[i['schedule_uuid']]['timeEnd'])
+                        if (scheduled[i['schedule_uuid']]['timeEnd'] == None):
+                            scheduled[i['schedule_uuid']]['timeEnd'] = time.time()
+
+                            scheduled[i['schedule_uuid']]['timeToComplete'] = scheduled[i['schedule_uuid']]['timeEnd'] - scheduled[i['schedule_uuid']]['timeStart']
+
+                        #B = 'FOUND'
+                        #BBB = str(A)
+                        #BBBB = str(i['schedule_uuid'])
         except:
             pass
         #stdscr.addstr(0,0,str(res))
