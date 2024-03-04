@@ -110,6 +110,7 @@ suspend fun listenAndPublish(
     )
 }
 
+val executorService = Executors.newFixedThreadPool(5)
 
 private operator fun SolrDocument.component1(): SolrDocument {
     return this;
@@ -300,7 +301,7 @@ fun main() {
 
             get("/metrics") {
                 val map = mutableMapOf<String, String>();
-                val executorService = Executors.newFixedThreadPool(5)
+
 
                 val responseA: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
                     .executor(executorService)
