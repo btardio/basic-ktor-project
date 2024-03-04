@@ -41,10 +41,12 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocument
 import org.slf4j.LoggerFactory
+import redis.clients.jedis.JedisPooled
+import redis.clients.jedis.params.ScanParams
+import redis.clients.jedis.params.ScanParams.SCAN_POINTER_START
 import java.util.*
 import kotlin.jvm.optionals.getOrElse
-import redis.clients.jedis.JedisPooled
-import java.util.Map
+
 
 // WebServer -> Collector -> Analyzer -> WebServer
 
@@ -272,7 +274,26 @@ fun main() {
                 }
             }
 
+            get("/metricsDump") {
+                //jedis.scan('0 MATCH '17*' COUNT 1000');
+                var out = mutableMapOf<String, String>()
+                val scanParams = ScanParams().count(1000).match("17*")
+                var cur = SCAN_POINTER_START
+                do {
+                    val scanResult = jedis.scan(cur, scanParams)
 
+                    scanResult.result.stream().forEach { item: String? ->
+                        out.put(item.toString(), jedis.get(item))
+                    }
+
+                    cur = scanResult.cursor
+                } while (cur != SCAN_POINTER_START)
+
+
+
+
+                call.respondText(ObjectMapper().writeValueAsString(out))
+            }
 
             // todo : select only json data, this will contain number of coordinates to make
 
