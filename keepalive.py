@@ -56,7 +56,7 @@ def main(stdscr):
         if ( last + sendInterval < time.time() ):
 
             try:
-                A = str(requests.get('http://netty.netoxena.com/startKmeans/000.png').json()['schedule_uuid'])
+                A = str(requests.get('http://netty.netoxena.com/startKmeans/013.png').json()['schedule_uuid'])
             except:
                 pass
 

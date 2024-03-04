@@ -282,6 +282,9 @@ public class CollectorCsmr implements Consumer {
 			//counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
 			if (envelope != null) {
 				this.ch.basicAck(envelope.getDeliveryTag(), false);
+				timestamp = String.valueOf(new Date().getTime() / 10L);
+				jedis.set(timestamp, "Success CollectorCsmr");
+				jedis.expire(timestamp, 900);
 			}
 			;
 

@@ -114,9 +114,6 @@ public class AnalyzerCsmr  implements Consumer {
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
-		//log.error(new String(body, StandardCharsets.UTF_8));
-
-
 
 		if (body != null) {
 
@@ -241,15 +238,6 @@ public class AnalyzerCsmr  implements Consumer {
                         };
                         return;
 					}
-//					try {
-//						cfA.close();
-//					} catch (TimeoutException ee) {
-//
-//					}
-//					if (envelope != null) {
-//						this.ch.basicAck(envelope.getDeliveryTag(), false);
-//					};
-					//counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
                     if (envelope != null) {
                         this.ch.basicAck(envelope.getDeliveryTag(), false);
                     }
@@ -257,8 +245,6 @@ public class AnalyzerCsmr  implements Consumer {
 				} finally {
                     solrClient.close();
                 }
-
-
 
 				// publish to webserver exchange
 				LazyInitializedSingleton.getInstance(connectionFactory).basicPublish(
@@ -269,14 +255,7 @@ public class AnalyzerCsmr  implements Consumer {
 				);
 			}
 
-//			try {
-//				cfA.close();
-//			} catch (TimeoutException e) {
-//
-//			}
-
-
-			// start delete coordinates from collector collection, no longer needed
+// start delete coordinates from collector collection, no longer needed
 //
 //			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
 //			 solrClient = new HttpSolrClient.Builder(
@@ -319,123 +298,14 @@ public class AnalyzerCsmr  implements Consumer {
 
 			if (envelope != null) {
 				this.ch.basicAck(envelope.getDeliveryTag(), false);
+				timestamp = String.valueOf(new Date().getTime() / 10L);
+				jedis.set(timestamp, "Success AnalyzerCsmr");
+				jedis.expire(timestamp, 900);
 			}
-			;
 
-
-
-
-
-
-
-				//Path f = new kmeans.analyzer.Path();
-				//log.error(f.process().apply("som input")); //prints processed
-
-						//new IndexedColorFilter(coordinateList.getCoordinates()).getResult());
-
-//				Random r = new Random();
-//
-//				List<Coordinate> listOfNewCoordinates = new ArrayList<>();
-//
-//				for ( int i = 0; i < coordinates.getNumPoints(); i ++ ){
-//					listOfNewCoordinates.add(new Coordinate(
-//							100 * r.nextDouble(),
-//							100 * r.nextDouble(),
-//							100 * r.nextDouble()));
-//				}
-//
-////				double randomValue 100 * r.nextDouble()
-//				coordinateList.setCoordinates(listOfNewCoordinates);
-//
-//				// save coordinate
-//				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
-//				try {
-//					solrClient.addBean(
-//							new SolrEntity(
-//									rabbitMessageStartRun.getSolrEntityScheduledRun_UUID(),
-//									rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID(),
-//									new ObjectMapper().writeValueAsString(coordinateList)
-//							)
-//					);
-//					solrClient.commit();
-//				} catch (SolrServerException e) {
-//					int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
-//					if (numTries < 100) {
-//						rabbitMessageStartRun.setNumTriesFindingSolrRecord(numTries + 1);
-//						cfA.basicPublish(
-//								COLLECTOR_EXCHANGE,
-//								UUID.randomUUID().toString(),
-//								MessageProperties.PERSISTENT_BASIC,
-//								objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
-//						);
-//					}
-//					try {
-//						cfA.close();
-//					} catch (TimeoutException ee) {
-//
-//					}
-//					if (envelope != null) {
-//						this.ch.basicAck(envelope.getDeliveryTag(), false);
-//					}
-//					;
-//					return;
-//				}
-//
-//
-//				// do some processing with the coordinates
-//
-//				response.getResults().get(0).get("jsonData");
-//
-//				// save back to solr
-//
-//
-//				// signal that we're done and next goes
-//
-//				cfA.basicPublish(
-//						exchangeName,
-//						UUID.randomUUID().toString(),
-//						MessageProperties.PERSISTENT_BASIC,
-//						objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
-//				);
-//			}
-//
-//			try {
-//				cfA.close();
-//			} catch (TimeoutException e) {
-//
-//			}
-//
-//
-//			if (envelope != null) {
-//				this.ch.basicAck(envelope.getDeliveryTag(), false);
-//			}
-//			;
 			jedis.set("analyzer", "OK");
 			jedis.expire("analyzer", 180);
 
 		}
-//
-//
-////
-//
-//
-////        var numPointsAsInt = Integer.parseInt(numberPoints)
-////
-////        var coordinateList = SolrEntityCoordinate()
-////
-////        var scheduledRun = SolrEntityScheduledRun(coordinateList)
-////
-////        scheduledRun.setStartTime(Timestamp(Date().time))
-////        scheduledRun.setNumberPoints(numPointsAsInt)
-////        scheduledRun.setStatus("started");
-////        coordinateList.setSchedule_uuid(scheduledRun.getSchedule_uuid())
-////
-////        var sendingMessage: RabbitMessageStartRun = RabbitMessageStartRun(scheduledRun, coordinateList);
-//
-//
-//			if (envelope != null) {
-//				ch.basicAck(envelope.getDeliveryTag(), false)
-//			};
-
 	}
 }
