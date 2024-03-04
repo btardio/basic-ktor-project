@@ -1,23 +1,5 @@
 package kmeans.webserver
 
-//////
-
-
-////// TODO /////////
-
-
-
-/// solve this:
-// restart application/service if messages ready gets to large
-// curl -i -u guest:guest
-// http://localhost:15672/api/queues/%2f/collector-queue-ip-10-0-1-119.us-west-1.compute.internal-b
-// docker container restart
-
-
-///// app hangs after it cant find a replica, need to restart it if solr isnt ready
-//Exception in thread "main" org.apache.solr.client.solrj.impl.HttpSolrClient$RemoteSolrException: Error from server at http://10.0.1.119:8983/solr/coordinates_after_webserver: No active replicas found for collection: coordinates_after_webserver
-////////////////////////////////////////////////////////////////
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
@@ -42,14 +24,7 @@ import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.SolrDocument
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.JedisPooled
-import redis.clients.jedis.params.ScanParams
-import redis.clients.jedis.params.ScanParams.SCAN_POINTER_START
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import kotlin.jvm.optionals.getOrElse
 
