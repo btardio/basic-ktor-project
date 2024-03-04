@@ -183,6 +183,15 @@ average experience.
 
 ```
 
+### Production monitoring instrumenting
+
+I saw a significant degredation in the system after implementing prometheus and 
+it led me to remove the logger and prometheus in exchange for a redis expiring
+log entries. This can be seen at url http://netty.netoxena.com/metrics and 
+http://netty.netoxena.com/metricsDump. This is a general observation that whenever
+the system comes under a lot of load these monitoring instruments aren't reachable.
+
+
 ### Continuous Deploy
 
 The application uses AWS CI/CD Code Deploy. The github action that triggers this is
