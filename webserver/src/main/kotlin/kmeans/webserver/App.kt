@@ -307,8 +307,7 @@ fun main() {
                     .build()
                     .sendAsync(
                         HttpRequest.newBuilder()
-                        .uri(URI("http://A.lf.lll:8888"))
-                        .headers("key1", "value1", "key2", "value2")
+                        .uri(URI("http://A.lf.lll:8888/metricsDump"))
                         .GET()
                         .build(), HttpResponse.BodyHandlers.ofString())
                 map.put("A.lf.lll", responseA.get().body());
@@ -318,8 +317,7 @@ fun main() {
                     .build()
                     .sendAsync(
                         HttpRequest.newBuilder()
-                            .uri(URI("http://B.lf.lll:8888"))
-                            .headers("key1", "value1", "key2", "value2")
+                            .uri(URI("http://B.lf.lll:8888/metricsDump"))
                             .GET()
                             .build(), HttpResponse.BodyHandlers.ofString())
                 map.put("B.lf.lll", responseB.get().body());
@@ -329,7 +327,7 @@ fun main() {
                     .build()
                     .sendAsync(
                         HttpRequest.newBuilder()
-                            .uri(URI("http://C.lf.lll:8888"))
+                            .uri(URI("http://C.lf.lll:8888/metricsDump"))
                             .GET()
                             .build(), HttpResponse.BodyHandlers.ofString())
                 map.put("C.lf.lll", responseC.get().body());
@@ -339,7 +337,7 @@ fun main() {
                     .build()
                     .sendAsync(
                         HttpRequest.newBuilder()
-                            .uri(URI("http://D.lf.lll:8888"))
+                            .uri(URI("http://D.lf.lll:8888/metricsDump"))
                             .GET()
                             .build(), HttpResponse.BodyHandlers.ofString())
                 map.put("D.lf.lll", responseD.get().body());
@@ -349,7 +347,7 @@ fun main() {
                     .build()
                     .sendAsync(
                         HttpRequest.newBuilder()
-                            .uri(URI("http://E.lf.lll:8888"))
+                            .uri(URI("http://E.lf.lll:8888/metricsDump"))
                             .GET()
                             .build(), HttpResponse.BodyHandlers.ofString())
                 map.put("E.lf.lll", responseE.get().body());
