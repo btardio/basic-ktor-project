@@ -1,3 +1,71 @@
+###
+
+### Project: Netoxena.com
+
+### Author: Brandon Tardio
+
+### Github: https://github.com/btardio/basic-ktor-project
+
+###
+
+This project demonstrates an implementation of the KMeans algorithm using
+microservices. The solution is horizontally scalable. The biggest lesson learned
+at the completion of this assignment is that this architectural style
+is susceptible to / can lead to scope creep and failure.
+###
+This project was very ambitious and I only found success using the MVP 
+methodology taught by the professor. I am satisfied with the results. There
+is a lot of interest in discovery of how this could be done better but
+without a set computing goal the five weeks that I had to complete this 
+has taught me a lot about large systems. Some of the key takeaways include
+don't take rabbit to the prom, keep mr. potato head out of rags and work 
+at load.
+###
+Don't take Rabbit to the Prom is my summary of the logging troubles that 
+Prometheus caused. Once I added Prometheus it did not like scraping from
+5 difference medium size AWS machines and brought everything to a halt. 
+My solution was to use Redis and I started implementing that solution but
+did not have the time to finish.
+###
+Keep Mr. Potato head out of rags is my analogy of the work that can be thrown
+away if you don't check first that a schedule can write or that a task can 
+complete. I think this is one of the most important rules because companies
+can throw money at problems but the system still has a tremendous amount
+of waste that is hidden. This is also a lesson to keep things small.
+###
+Work at load is another important lesson. I noticed in the system that 
+it would require 16s for some tasks to complete that were the first few
+tasks but then after a few tasks it would respond pretty consistently at 3
+seconds. This was an important observation because I would make assumptions
+that something didn't work too early.
+###
+I saw very early that the docker compose file was limiting. The network 
+trickery required to get the machines communicating makes me look forward
+to taking a network class. I chose not to go even larger for this project
+but in the future I would like to see Docker Swarm or Rancher. I chose Docker
+compose because it is probably easier than working with swarm or rancher,
+requires less set up, can be mimicked locally for local development, and
+is a commonly used technology. In the future I would like to do something that is auto scalable, with
+live configuration file updates or env var changes, this is not something 
+docker compose offers but docker swarm does.
+###
+Areas of improvement include but are not limited to, stronger unit testing,
+a better serialization format for points, integration testing with larger
+images, separating the docker compose services onto separate machines, 
+a more robust frontend skin for logging, better connection handling and 
+quite a few other items that I currently can't remember. 
+###
+In conclusion, I found that the project taught me a lot about CAP.
+I see where consistency finding the next record is a problem. I also
+see the importance of availability and partition tolerance. I look forward
+to being considered to join the Master program at Colorado Boulder and
+taking some more courses.
+
+
+
+
+
+
 # Project K-Means
 
 ## Set up
@@ -33,7 +101,7 @@ gradle -p /collector/ build  && java -jar /collector/collector/build/libs/collec
 #
 
 Each of the three: collector, analyzer and webserver is started in an infinite
-loop to keep them from restarting. 
+loop to keep them from restarting.
 
 ```
 while true; do echo 'ACK'; sleep 1; done"
@@ -99,12 +167,12 @@ This endpoint sends a request to the back end to return all jobs in the last 15 
 
 #### Solr
 The application uses Solr, a document database to store the pixel values of the images.
-This is a horizontally scaling database and uses Zookeeper for coordination of replicas 
-shards and collections. 
+This is a horizontally scaling database and uses Zookeeper for coordination of replicas
+shards and collections.
 
 Observations working with Solr were that it doesn't work anymore once a replica or shard isn't
 available, and it doesn't recover. It was my observation that it likes many replicas and many
-shards and the larger the better. This is a repeated observation working with 
+shards and the larger the better. This is a repeated observation working with
 Rabbit, Solr and Zookeeper.
 
 There are three collections, one collection for each the collector, the analyzer and the webserver.
@@ -114,15 +182,15 @@ save the a vertically scaling database.
 
 #### Redis
 Redis is also used in the project, chosen because it has an EXPIRE instruction and is fairly
-straightforward and simple to work with. This is used to keep the individual rabbit queues 
+straightforward and simple to work with. This is used to keep the individual rabbit queues
 going, it was observed that they sometimes fail and their queues get backed up. The collector
 analyzer and webserver send a SET request to redis that expires in 60 seconds, if the collector
 analyzer and webserver aren't succeeding consuming records on their queue they are restarted.
 
-This strategy seems to work very well and further improvements could be made to have more than 1 
+This strategy seems to work very well and further improvements could be made to have more than 1
 analyzer collector webserver ready for failures.
 
-It is my guess that Solr is implemented keeping it highly available by periodically dumping long 
+It is my guess that Solr is implemented keeping it highly available by periodically dumping long
 lasting or stale connections.
 
 ### Unit tests
@@ -135,12 +203,12 @@ This is an area that could be further worked on and need improvement.
 
 ### Analyzer, Collector, Server
 
-The analyzer collector and server share a similar architecture. Read from the previous 
-exchange the schedule, read from solr the RGB coordinates, perform some processing on the 
+The analyzer collector and server share a similar architecture. Read from the previous
+exchange the schedule, read from solr the RGB coordinates, perform some processing on the
 RGB coordinates and write to the next Solr collection.
 
 Rabbit messages pass through the system starting at the data server, progressing to the collector
-and then the analyzer and finally back to the data server. 
+and then the analyzer and finally back to the data server.
 
 Consistency is handled in all three by simply publishing back to the same queue that was consumed
 the message that didn't yet have the coordinates available on the Solr database.
@@ -175,7 +243,7 @@ Improvements to this include building it bigger to see how the system handles at
 
 The continuous integration uses github actions. The definition is:
 
-One of the goals of this project was to make a docker-compose.yml that local development and production versions 
+One of the goals of this project was to make a docker-compose.yml that local development and production versions
 were very similar. This goal was accomplished using docker compose and environment files. Local development was an above
 average experience.
 
@@ -200,9 +268,9 @@ average experience.
 
 ### Production monitoring instrumenting
 
-I saw a significant degredation in the system after implementing prometheus and 
+I saw a significant degredation in the system after implementing prometheus and
 it led me to remove the logger and prometheus in exchange for a redis expiring
-log entries. This can be seen at url http://netty.netoxena.com/metrics and 
+log entries. This can be seen at url http://netty.netoxena.com/metrics and
 http://netty.netoxena.com/metricsDump. This is a general observation that whenever
 the system comes under a lot of load these monitoring instruments aren't reachable.
 

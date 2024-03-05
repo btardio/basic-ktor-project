@@ -1,8 +1,6 @@
 package kmeans.analyzer;
 
 
-//import ch.qos.logback.classic.Level;
-//import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 
