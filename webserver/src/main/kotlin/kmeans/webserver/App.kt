@@ -40,8 +40,6 @@ val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
 val SOLR_CONNECT_IP = getEnvStr("SOLR_CONNECT_IP", "solr1:8983")
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-webserver-app")
 
-//val EMBEDDED_NETTY_PORT = getEnvInt("BASIC_SERVER_PORT_MAP", 8888)
-
 val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
 val ZOO_LOCAL = getEnvStr("ZOO_LOCAL", "zoo1:2181")
 val RABBIT_URL = getEnvStr("RABBIT_URL", "rabbit")
@@ -255,6 +253,7 @@ fun main() {
                     //counter.labelValues("get_finished_schedule_fail").labelValues("default").inc()
                 }
             }
+// note: this is commented out but can be uncommented, it's a little bit of a drain on the system
 //
 //            get("/metricsDump") {
 //                //jedis.scan('0 MATCH '17*' COUNT 1000');
@@ -330,19 +329,6 @@ fun main() {
 //
 //                call.respondText(ObjectMapper().writeValueAsString(map))
 //            }
-
-            // todo : select only json data, this will contain number of coordinates to make
-
-            // todo : select only json data, this will contain number of coordinates to make
-
-            // todo: add ajax endpoint for all running jobs and their status
-
-
-            // todo: add click a done job and return the points
-
-
-            // todo: add start a job given a picture
-
         }
     }.start(wait = false)
 
@@ -380,9 +366,7 @@ fun main() {
 
         listenAndPublish(
             connectionFactory = connectionFactory,
-//        queueName = REGISTRATION_REQUEST_QUEUE,
             queueName = WEBSERVER_QUEUE,
-            //exchangeName = NOTIFICATION_EXCHANGE,
             exchangeName = null,
             jedis = jedis
         )

@@ -58,9 +58,6 @@ public class WebserverCsmr implements Consumer {
 		this.jedis = jedis;
 	}
 
-//	java.util.List<Coordinate> convert(Object seq) {
-//		return null;
-//	}
 
 	@Override
 	public void handleConsumeOk(String consumerTag) {
@@ -100,13 +97,9 @@ public class WebserverCsmr implements Consumer {
 			RabbitMessageStartRun rabbitMessageStartRun = objectMapper.readValue(body, RabbitMessageStartRun.class);
 			//log.error(rabbitMessageStartRun.toString());
 			Channel cfA = LazyInitializedSingleton.getInstance(connectionFactory);
-			//log.error(rabbitMessageStartRun.toString());
 
-
-			// get coordinates entry in solr
 			SolrQuery query = new SolrQuery();
 
-			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
 			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build();
 
@@ -209,13 +202,6 @@ public class WebserverCsmr implements Consumer {
 							objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 					);
 
-
-//					try {
-//						cfA.close();
-//					} catch (TimeoutException ee) {
-//
-//					}
-					//counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
 					if (envelope != null) {
 						this.ch.basicAck(envelope.getDeliveryTag(), false);
 					};

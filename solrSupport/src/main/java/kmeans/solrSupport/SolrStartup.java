@@ -48,27 +48,11 @@ public class SolrStartup {
 			1 : Integer.parseInt(System.getenv("SCHEDULES_REPLICAS"));
 	
 	
-	
-	
-	// note: delete all {'delete': {'query': '*:*'}}
 
 	static public void createCollection(int numShards, int numReplicas, String collectionName, String zooHost) {
 		SolrClient solr = null;
 		try {
 			solr = new CloudSolrClient.Builder().withZkHost(zooHost).build();
-
-//			SolrPingResponse pingResponse = null;
-//			try {
-////				pingResponse = solr.ping();
-//			} catch (Exception e) {
-//				log.error("Unable to ping zk host.", e);
-////				closeContextExit(-1);
-//			}
-//			if (pingResponse.getStatus() != 0){
-//				log.error("Unable to ping zk host." + pingResponse.getStatus());
-////				closeContextExit(-1);
-//			};
-
 		} catch ( Exception e ) {
 			//log.error("exiting create collection" + e);
 			closeContextExit(-1);
@@ -167,8 +151,6 @@ public class SolrStartup {
 			);
 			solrClient.commit();
 
-//            // not sane            .withCql("CREATE TABLE sanity (uuid varchar, value varchar, PRIMARY KEY (uuid));")
-
 			// we can read
 			SolrQuery query = new SolrQuery();
 			query.set("q", "schedule_uuid:" + currentTime);
@@ -196,8 +178,6 @@ public class SolrStartup {
 		createCollection(SCHEDULES_SHARDS,SCHEDULES_REPLICAS, "schedules", zooHost);
 		solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
 		createSchema(solrClient);
-
-
 
 	}
 }

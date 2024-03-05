@@ -92,30 +92,24 @@ public class CollectorCsmr implements Consumer {
 
 	@Override
 	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-		//counter.get("rabbits_consumed").labelValues("default").inc();
+
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		if (body != null) {
 
-			// read the message
-
 			RabbitMessageStartRun rabbitMessageStartRun = objectMapper.readValue(body, RabbitMessageStartRun.class);
-			//log.error(rabbitMessageStartRun.toString());
+
 			Channel cfA = LazyInitializedSingleton.getInstance(connectionFactory);
-			//log.error(rabbitMessageStartRun.toString());
 
-
-			// get coordinates entry in solr
 			SolrQuery query = new SolrQuery();
 
-			// todo : select only json data, this will contain number of coordinates to make
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
 			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_webserver").build();
 
 			SolrUtility.pingCollection(solrClient, "coordinates_after_webserver");
 
 			QueryResponse response = null;
-			//log.error(String.valueOf(response));
+
 			try {
 				response = solrClient.query(query);
 			} catch (SolrServerException | SolrException e) {
@@ -189,17 +183,14 @@ public class CollectorCsmr implements Consumer {
 
 				BufferedImage image = null;
 
-				// goal of this evening : instead of random, read a thumbnail url using java client and convert png to 0 to 1 double rgb format
 				try {
 					image = ImageIO.read(new URL("http://apache/" + coordinates.getFilename()));
 				} catch (Exception e) {
-					//log.error(e.getMessage(), e);
+
 				}
 
 				int height = image.getHeight();
 				int width = image.getWidth();
-
-
 
 				for ( int i = 0; i < height; i++ ) {
 					for ( int j = 0 ; j < width; j++ ) {

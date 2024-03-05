@@ -1,7 +1,4 @@
 #!/bin/bash
-# sudo yum install -y java-17-amazon-corretto-headless
-# sudo /application/gradlew build
-#docker build  /application/ -t kotlin-ktor-starter --no-cache
 
 source /ipaddr
 
@@ -13,7 +10,7 @@ export IPADDRC=$IPADDRC
 rm -f /env
 
 sh /application/environment-aws/$(echo ${IPADDRA})
-# cp -f "/application/environment-aws/$IPADDRA" "/env"
+
 
 docker-compose -f /application/docker-compose.aws.yml --env-file /env down
 docker-compose -f /application/docker-compose.aws.yml --env-file /env build

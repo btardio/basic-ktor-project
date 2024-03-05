@@ -6,8 +6,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-//import io.prometheus.metrics.core.metrics.Counter
-//import io.prometheus.metrics.exporter.httpserver.HTTPServer
 import kmeans.solrSupport.SolrStartup.solrInitialize
 import kmeans.support.ContextCloseExit
 import kmeans.support.getEnvInt
@@ -22,8 +20,6 @@ import java.util.Map
 import java.util.Objects.isNull
 
 // WebServer -> Collector -> Analyzer -> WebServer
-
-
 val WEBSERVER_EXCHANGE = getEnvStr("WEBSERVER_EXCHANGE", "webserver-exchange")
 val WEBSERVER_QUEUE = getEnvStr("WEBSERVER_QUEUE", "webserver-queue-analyzer-app")
 
@@ -39,25 +35,6 @@ val SOLR_CONNECT_IP = getEnvStr("SOLR_CONNECT_IP", "solr1:8983")
 
 private val logger = LoggerFactory.getLogger("kmeans.analyzer.App")
 
-//log.error(new String(body, StandardCharsets.UTF_8));
-//var analyzerCounter: kotlin.collections.Map<String, Counter> = Map.of(
-//    "rabbits_consumed",
-//    Counter.builder().name("rabbits_consumed").help("~").labelNames("sum").register(),
-//    "rabbits_acknowledged",
-//    Counter.builder().name("rabbits_acknowledged").help("~").labelNames("sum").register(),
-//    "rabbits_published",
-//    Counter.builder().name("rabbits_published").help("~").labelNames("sum").register(),
-//    "not_found_expected_coordinates",
-//    Counter.builder().name("not_found_expected_coordinates").help("~").labelNames("sum").register(),
-//    "exception_unknown_republish",
-//    Counter.builder().name("exception_unknown_republish").help("~").labelNames("sum").register(),
-//    "processed_coordinates_after_read",
-//    Counter.builder().name("processed_coordinates_after_read").help("~").labelNames("sum").register(),
-//    "failed_writing_coordinates_after_read",
-//    Counter.builder().name("failed_writing_coordinates_after_read").help("~").labelNames("sum").register(),
-//    "succeeded_writing_coordinates_after_read",
-//    Counter.builder().name("succeeded_writing_coordinates_after_read").help("~").labelNames("sum").register(),
-//)
 private fun listenForNotificationRequests(
     connectionFactory: ConnectionFactory,
     queueName: String,
@@ -98,17 +75,9 @@ suspend fun listenAndPublish(
 
 fun main() {
 
-
-
-
     val jedis = JedisPooled("redis", 6379)
     jedis.set("analyzer", "OK")
     jedis.expire("analyzer", 180);
-//    JvmMetrics.builder().register();
-//    val prometheus: HTTPServer = HTTPServer.builder()
-//        .port(Integer.valueOf("65400"))
-//        .buildAndStart()
-
 
     runBlocking {
 

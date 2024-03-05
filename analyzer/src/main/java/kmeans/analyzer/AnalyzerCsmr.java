@@ -1,13 +1,9 @@
 package kmeans.analyzer;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
-
-
 import kmeans.rabbitSupport.LazyInitializedSingleton;
 import kmeans.rabbitSupport.RabbitMessageStartRun;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -17,30 +13,16 @@ import java.util.concurrent.TimeoutException;
 import kmeans.scalasupport.IndexedColorFilter;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import kmeans.solrSupport.SolrEntity;
-
 import kmeans.solrSupport.SolrEntityCoordinateJsonData;
-//import kmeans.scalasupport.IndexedColorFilter;
-//import kmeans.analyzer.IndexedColorFilter;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrException;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 import kmeans.solrSupport.SolrUtility;
-
-
-
-
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPooled;
-
-//import org.slf4j.LoggerFactory;
-
-
-
 import static java.lang.System.exit;
 
 
@@ -51,10 +33,6 @@ public class AnalyzerCsmr  implements Consumer {
 	public static final String ANALYZER_QUEUE = System.getenv("ANALYZER_QUEUE") == null || System.getenv("ANALYZER_QUEUE").isEmpty() ?
 			"analyzer-queue" : System.getenv("ANALYZER_QUEUE");
 
-	// TODO change the connect ip to round robin
-//	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-//			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
-
 	private final Channel ch;
 	private final String exchangeName;
 	private final ConnectionFactory connectionFactory;
@@ -63,7 +41,6 @@ public class AnalyzerCsmr  implements Consumer {
 	private final JedisPooled jedis;
 
 	private String routingKey;
-
 
 	public AnalyzerCsmr(Channel ch,
 						String exchangeName,
@@ -79,10 +56,6 @@ public class AnalyzerCsmr  implements Consumer {
 		this.routingKey = routingKey;
 		this.jedis = jedis;
 	}
-
-//	java.util.List<Coordinate> convert(Object seq) {
-//		return null;
-//	}
 
 	@Override
 	public void handleConsumeOk(String consumerTag) {
@@ -253,6 +226,8 @@ public class AnalyzerCsmr  implements Consumer {
 				);
 			}
 
+// this can go wrong and cause a lot of waste
+//
 // start delete coordinates from collector collection, no longer needed
 //
 //			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
@@ -290,9 +265,6 @@ public class AnalyzerCsmr  implements Consumer {
 //			}
 
 			// end delete coordinates from collector collection, no longer needed
-
-
-
 
 			if (envelope != null) {
 				this.ch.basicAck(envelope.getDeliveryTag(), false);

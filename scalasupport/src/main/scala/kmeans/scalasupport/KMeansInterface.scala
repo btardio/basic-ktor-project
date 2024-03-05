@@ -1,8 +1,5 @@
 package kmeans.scalasupport
 
-//import scala.collection.{Map, Seq}
-//import scala.collection.parallel.{Map, Seq}
-
 /**
  * The interface used by the grading infrastructure. Do not change signatures
  * or your submission will fail with a NoSuchMethodError.

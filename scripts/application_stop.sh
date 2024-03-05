@@ -1,7 +1,4 @@
 #!/bin/bash
-# docker-compose down
-
-#trap 'pkill -P $$; exit' SIGINT SIGTERM
 
 docker container stop application-httpdproxy-1 &>/dev/null || true
 docker container stop httpd &>/dev/null  || true
@@ -30,4 +27,3 @@ docker container rm solr1 &>/dev/null || true
 docker container rm prometheus &>/dev/null || true
 docker container rm grafana &>/dev/null || true
 docker container rm application-python-1 &>/dev/null || true
-#wait

@@ -30,16 +30,6 @@ public class RabbitMessageStartRun {
 		this.solrEntityScheduledRun_UUID = solrEntityScheduledRun_UUID;
 		this.solrEntityCoordinatesList_UUID = solrEntityCoordinatesList_UUID;
 	}
-
-
-//	public RabbitMessageStartRun(SolrEntityScheduledRunJsonData scheduledRun, SolrEntityCoordinateJsonData coordinatesList) {
-//
-//		assert(scheduledRun.getCoordinate_uuid() == coordinatesList.getCoordinate_uuid());
-//
-//		this.solrEntityScheduledRun_UUID = scheduledRun.getSchedule_uuid().toString();
-//		this.solrEntityCoordinatesList_UUID = coordinatesList.getCoordinate_uuid().toString();
-//	}
-
 	public String getSolrEntityScheduledRun_UUID() {
 		return solrEntityScheduledRun_UUID;
 	}

@@ -28,7 +28,6 @@ import java.util.Map
 val ANALYZER_EXCHANGE = getEnvStr("ANALYZER_EXCHANGE", "collector-exchange")
 val ANALYZER_QUEUE = getEnvStr("ANALYZER_QUEUE", "collector-queue-webserver-app")
 
-// TODO: are these needed?
 val COLLECTOR_EXCHANGE = getEnvStr("COLLECTOR_EXCHANGE", "webserver-exchange")
 val COLLECTOR_QUEUE = getEnvStr("COLLECTOR_QUEUE", "webserver-queue-webserver-app")
 
@@ -81,11 +80,6 @@ fun main() {
     val jedis = JedisPooled("redis", 6379)
     jedis.set("collector", "OK")
     jedis.expire("collector", 180);
-    //JvmMetrics.builder().register();
-
-//    val prometheus: HTTPServer = HTTPServer.builder()
-//        .port(Integer.valueOf("65409"))
-//        .buildAndStart()
 
     runBlocking {
 

@@ -25,7 +25,6 @@ public class LazyInitializedSingleton {
                 connection.get().addShutdownListener(new ShutdownListener() {
                     @Override
                     public void shutdownCompleted(ShutdownSignalException e) {
-                        //log.error("Connection shutdown unexpectedly.", e);
 //                        String timestamp = String.valueOf(new Date().getTime() / 10L);
 //                        jedis.set(timestamp, "Coordinates after collector commit failure." + e.getMessage());
 //                        jedis.expire(timestamp, 900);

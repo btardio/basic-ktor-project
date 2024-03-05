@@ -49,11 +49,6 @@ public class SolrEntity {
 		this.jsonData = jsonData;
 	}
 
-//	public SolrEntity(UUID schedule_uuid, String jsonData) {
-//		this.schedule_uuid = schedule_uuid.toString();
-//		this.jsonData = jsonData;
-//	}
-
 	public String getCoordinate_uuid() {
 		return coordinate_uuid;
 	}

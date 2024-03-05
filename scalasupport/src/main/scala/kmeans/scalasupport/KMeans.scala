@@ -1,14 +1,9 @@
 package kmeans.scalasupport
 
 import scala.annotation.tailrec
-//import scala.collection.{Map, Seq, mutable}
-//import scala.collection.parallel.CollectionConverters.*
-//import scala.collection.parallel.{ForkJoinTaskSupport, Map, Seq}
 import scala.util.Random
-//import org.scalameter.*
 
 import java.util.concurrent.ForkJoinPool
-//import scala.collection.parallel.immutable.ParVector
 
 class KMeans extends KMeansInterface:
 
@@ -82,17 +77,6 @@ class KMeans extends KMeansInterface:
     else {
       out
     }
-    //
-    //    points.map((point) => {
-    //      // find the means that this point is closest to
-    //      (findClosest(point, means), point)
-    //    }).groupBy(_._1).map(item => {
-    //      (item._1, item._2.map(items => {
-    //        items._2
-    //      }))
-    //    })
-    //.mapValues(_.seq.view.map(_._2).toSeq.par)
-
   }
 
   def findAverage(oldMean: Point, points: Seq[Point]): Point = if points.isEmpty then oldMean else
@@ -108,20 +92,6 @@ class KMeans extends KMeansInterface:
 
 
   def update(classified: Map[Point, Seq[Point]], oldMeans: Seq[Point]): Seq[Point] = {
-    //    val previous = ""
-    //    (0 to 1000).foreach(i => {
-    //      val a = classified.map(point => {
-    //        point._2.foldLeft(Point(0.0, 0.0, 0.0))((s, r) => {
-    //          Point(s.x + r.x, s.y + r.y, s.z + r.z)
-    //        })
-    //      }).toString
-    //      if (!previous.equals("") && !previous.equals(a)) {
-    //        println(a)
-    //        println(previous)
-    //      }
-    //    })
-
-
     classified.map(point => {
       var lst = Option(point._2)
       if (lst.isEmpty) {

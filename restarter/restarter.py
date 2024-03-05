@@ -25,9 +25,6 @@ while (True):
     analyzerkeyvalue = r.get(analyzerkey)
     collectorkeyvalue = r.get(collectorkey)
     webserverkeyvalue = r.get(webserverkey)
-#    print(analyzerkeyvalue)
-#    print(collectorkeyvalue)
-#    print(webserverkeyvalue)
 
     if ( analyzerkeyvalue == None ):
         analyzer.restart(timeout=3)
