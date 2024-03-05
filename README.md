@@ -13,9 +13,30 @@
 The local.env file should be sufficient to start up the necessary services in
 the docker-compose.yml file. Start up these services using the command:
 
-```
+### Quick Start
+Note: For Quick Start it's likely that one will exit before the schema is made, simply re-run the jar command.
+``` 
 docker compose --env-file=./local.env up --detach
 ```
+Terminal 1
+```
+docker container exec -it kotlin-ktor-server /bin/bash
+gradle -p /webserver/ build  && java -jar /webserver/webserver/build/libs/webserver.jar
+```
+Terminal 2
+```
+docker container exec -it kotlin-ktor-analyzer /bin/bash
+gradle -p /analyzer/ build  && java -jar /analyzer/analyzer/build/libs/analyzer.jar
+```
+Terminal 3
+```
+docker container exec -it kotlin-ktor-collector /bin/bash
+gradle -p /collector/ build  && java -jar /collector/collector/build/libs/collector.jar
+```
+
+
+
+#
 
 Each of the three: collector, analyzer and webserver is started in an infinite
 loop to keep them from restarting. 

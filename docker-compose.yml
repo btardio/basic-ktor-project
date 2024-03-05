@@ -19,16 +19,11 @@ services:
       - "host.docker.internal:host-gateway"
   basic-server:
     image: gradle:jdk17
-
-#    build:
-#      context: ./
-#      no_cache: true
     restart: always
     container_name: kotlin-ktor-server
     ports:
       - 8888:8888
       - 5000:5005
-#      - ${BASIC_SERVER_PORT_MAP}
     hostname: webserver
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -44,22 +39,15 @@ services:
     command: >
       sh -c "cd /webserver && ./gradlew clean && 
       ./gradlew build && while true; do echo 'ACK'; sleep 1; done"
-    # NOTE: for aws remove the infinite loop and run the jar
     volumes:
       - ./:/webserver
+
 # note : how to develop this ---
 #
 # docker compose --env-file=./local.env up --detach
 # docker container exec -it kotlin-ktor-server /bin/bash
-
 #  ./gradlew clean && ./gradlew build  && java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /webserver/webserver/build/libs/webserver.jar
-#
-#
-#
-# docker compose
-#  java -jar ./webserver/build/libs/webserver.jar"& &&
-# ./gradlew clean && ./gradlew build w && docker run -it --network=host -v ./webserver/build/libs/webserver.jar:/a.jar gradle:jdk17 java -jar /a.jar
-  #./gradlew clean && ./gradlew build w && java -jar /webserver/webserver/build/libs/webserver.jar
+
   data-analyzer:
     image: gradle:jdk17
     restart: always
@@ -83,14 +71,12 @@ services:
       ./gradlew build && while true; do echo 'ACK'; sleep 1; done"
     volumes:
       - ./:/analyzer
+
         # note : how to develop this ---
         #
         # docker compose --env-file=./local.env up --detach
         # docker container exec -it kotlin-ktor-analyzer /bin/bash
         # ./gradlew clean && ./gradlew build  && java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /analyzer/analyzer/build/libs/analyzer.jar
-        #
-
-
 
   data-collector:
     image: gradle:jdk17
@@ -113,15 +99,15 @@ services:
     command: >
       sh -c "cd /collector && ./gradlew clean && 
       ./gradlew build && while true; do echo 'ACK'; sleep 1; done"
-    # NOTE: for aws remove the infinite loop and run the jar
     volumes:
       - ./:/collector
+
   # note : how to develop this ---
   #
   # docker compose --env-file=./local.env up --detach
   # docker container exec -it kotlin-ktor-collector /bin/bash
   # ./gradlew clean && ./gradlew build  && java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 /collector/collector/build/libs/collector.jar
-  #
+
   rabbit:
     network_mode: "host"
     image: rabbitmq:3.12-alpine
@@ -137,7 +123,6 @@ services:
       - "${RABBIT_HOSTC}"
       - "${RABBIT_HOSTD}"
       - "${RABBIT_HOSTE}"
-      # - ${RABBIT_HOSTF}
       - "host.docker.internal:host-gateway"
     command: >
       sh -c "rabbitmq-plugins enable --offline rabbitmq_management &&
@@ -239,3 +224,8 @@ services:
       ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+  redis:
+    image: redis:7.0
+    restart: always
+    ports:
+      - 6379:6379
