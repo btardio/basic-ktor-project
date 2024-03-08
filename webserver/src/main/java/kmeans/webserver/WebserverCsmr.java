@@ -24,22 +24,13 @@ import kmeans.solrSupport.SolrUtility;
 import redis.clients.jedis.JedisPooled;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-
 
 public class WebserverCsmr implements Consumer {
-	public static final String WEBSERVER_EXCHANGE = System.getenv("WEBSERVER_EXCHANGE").isEmpty() ?
+	public static final String WEBSERVER_EXCHANGE = System.getenv("WEBSERVER_EXCHANGE") == null || System.getenv("WEBSERVER_EXCHANGE").isEmpty() ?
 			"webserver-exchange" : System.getenv("WEBSERVER_EXCHANGE");
-
-	public static final String WEBSERVER_QUEUE = System.getenv("WEBSERVER_QUEUE").isEmpty() ? "webserver-queue" : System.getenv("WEBSERVER_QUEUE");
-
-	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 
 	private final Channel ch;
 
@@ -47,8 +38,11 @@ public class WebserverCsmr implements Consumer {
 
 	private final JedisPooled jedis;
 
+	private final String solrUri;
+
 	public WebserverCsmr(Channel ch,
 						 ConnectionFactory connectionFactory,
+						 String solrUri,
 						 JedisPooled jedis) {
 
 
@@ -56,6 +50,7 @@ public class WebserverCsmr implements Consumer {
 		this.ch = ch;
 		this.connectionFactory = connectionFactory;
 		this.jedis = jedis;
+		this.solrUri = solrUri;
 	}
 
 
@@ -101,7 +96,7 @@ public class WebserverCsmr implements Consumer {
 			SolrQuery query = new SolrQuery();
 
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
-			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_analyzer").build();
+			SolrClient solrClient = new HttpSolrClient.Builder("http://" + solrUri + "/solr/coordinates_after_analyzer").build();
 
 			SolrUtility.pingCollection(solrClient, "coordinates_after_analyzer");
 
@@ -158,7 +153,7 @@ public class WebserverCsmr implements Consumer {
 				}
 			} else {
 
-				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/schedules").build();
+				solrClient = new HttpSolrClient.Builder("http://" + solrUri + "/solr/schedules").build();
 				SolrUtility.pingCollection(solrClient, "schedules");
 
 				assert(((List)response.getResults().get(0).getFieldValue("jsonData")).size() == 1);
@@ -193,7 +188,7 @@ public class WebserverCsmr implements Consumer {
 					//counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
 //					counter.get("get_all_schedules_fail").labelValues("default").inc();
 					timestamp = String.valueOf(new Date().getTime() / 10L);
-					jedis.set(timestamp, "failed_writing_coordinates_after_read" + e.getMessage());
+					jedis.set(timestamp, "failed_writing_schedule_complete_after_read" + e.getMessage());
 					jedis.expire(timestamp, 900);
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,
@@ -218,7 +213,6 @@ public class WebserverCsmr implements Consumer {
 				jedis.set(timestamp, "Success WebserverCsmr");
 				jedis.expire(timestamp, 900);
 			};
-
 			jedis.set("webserver", "OK");
 			jedis.expire("webserver", 180);
 

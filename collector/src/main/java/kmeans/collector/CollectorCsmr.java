@@ -38,31 +38,38 @@ import redis.clients.jedis.JedisPooled;
 
 import javax.imageio.ImageIO;
 import java.io.InputStream;
+import java.util.function.Supplier;
 
 public class CollectorCsmr implements Consumer {
+	public static final String COLLECTOR_EXCHANGE = System.getenv("COLLECTOR_EXCHANGE") == null || System.getenv("COLLECTOR_EXCHANGE").isEmpty() ? "webserver-exchange" : System.getenv("COLLECTOR_EXCHANGE");
 
-	public static final String COLLECTOR_EXCHANGE = System.getenv("COLLECTOR_EXCHANGE").isEmpty() ? "webserver-exchange" : System.getenv("COLLECTOR_EXCHANGE");
+//	public static final String COLLECTOR_QUEUE = System.getenv("COLLECTOR_QUEUE").isEmpty() ? "webserver-queue" : System.getenv("COLLECTOR_QUEUE");
 
-	public static final String COLLECTOR_QUEUE = System.getenv("COLLECTOR_QUEUE").isEmpty() ? "webserver-queue" : System.getenv("COLLECTOR_QUEUE");
-
-	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
-			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
+//	public static final String SOLR_CONNECT_IP = System.getenv("SOLR_CONNECT_IP")==null || System.getenv("SOLR_CONNECT_IP").isEmpty() ?
+//			"solr1:8983" : System.getenv("SOLR_CONNECT_IP");
 	private final Channel ch;
 	private final String exchangeName;
 	private final ConnectionFactory connectionFactory;
 
 	private final JedisPooled jedis;
 
+	private final String solrUri;
+
+	private final Supplier<String> routingSupplier;
+
 	public CollectorCsmr(Channel ch,
 						 String exchangeName,
 						 ConnectionFactory connectionFactory,
+						 String solrUri,
+						 Supplier<String> routingSupplier,
 						 JedisPooled jedis) {
-
 
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
 		this.jedis = jedis;
+		this.solrUri = solrUri;
+		this.routingSupplier = routingSupplier;
 	}
 
 	@Override
@@ -104,7 +111,7 @@ public class CollectorCsmr implements Consumer {
 			SolrQuery query = new SolrQuery();
 
 			query.set("q", "coordinate_uuid:" + rabbitMessageStartRun.getSolrEntityCoordinatesList_UUID());
-			SolrClient solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_webserver").build();
+			SolrClient solrClient = new HttpSolrClient.Builder("http://" + solrUri + "/solr/coordinates_after_webserver").build();
 
 			SolrUtility.pingCollection(solrClient, "coordinates_after_webserver");
 
@@ -161,7 +168,7 @@ public class CollectorCsmr implements Consumer {
 				return;
 			} else {
 
-				solrClient = new HttpSolrClient.Builder("http://" + SOLR_CONNECT_IP + "/solr/coordinates_after_collector").build();
+				solrClient = new HttpSolrClient.Builder("http://" + solrUri + "/solr/coordinates_after_collector").build();
 				SolrUtility.pingCollection(solrClient, "coordinates_after_collector");
 
 				assert(((List)response.getResults().get(0).getFieldValue("jsonData")).size() == 1);
@@ -186,7 +193,7 @@ public class CollectorCsmr implements Consumer {
 				try {
 					image = ImageIO.read(new URL("http://apache/" + coordinates.getFilename()));
 				} catch (Exception e) {
-
+					image = new BufferedImage(3,3, BufferedImage.TYPE_INT_RGB);
 				}
 
 				int height = image.getHeight();
@@ -252,34 +259,20 @@ public class CollectorCsmr implements Consumer {
                     solrClient.close();
                 }
 
-
-				// do some processing with the coordinates
-
-				response.getResults().get(0).get("jsonData");
-
-				// save back to solr
-
-
-				// signal that we're done and next goes
-
 				cfA.basicPublish(
 						exchangeName,
-						UUID.randomUUID().toString(),
+						routingSupplier.get(),
 						MessageProperties.PERSISTENT_BASIC,
 						objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 				);
 			}
 
-			//counter.get("succeeded_writing_coordinates_after_read").labelValues("default").inc();
 			if (envelope != null) {
 				this.ch.basicAck(envelope.getDeliveryTag(), false);
 				timestamp = String.valueOf(new Date().getTime() / 10L);
 				jedis.set(timestamp, "Success CollectorCsmr");
 				jedis.expire(timestamp, 900);
 			}
-			;
-
-
 		}
 		jedis.set("collector", "OK");
 		jedis.expire("collector", 180);

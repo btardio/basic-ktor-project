@@ -28,4 +28,5 @@ include('scalasupport',
         'webserver',
         'envsupport',
         'solrSupport',
-        'rabbitSupport')
+        'rabbitSupport',
+        'testSupport')

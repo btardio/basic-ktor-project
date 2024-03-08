@@ -63,6 +63,7 @@ private fun listenForNotificationRequests(
         WebserverCsmr(
             channel,
             connectionFactory,
+            SOLR_CONNECT_IP,
             jedis)
     );
 }

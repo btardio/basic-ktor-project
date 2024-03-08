@@ -1,4 +1,4 @@
-package kmeans.analyzer;
+package kmeans.collector;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
@@ -16,7 +16,8 @@ import org.junit.jupiter.api.Test;
 import redis.clients.jedis.JedisPooled;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.Thread.sleep;
 import static kmeans.solrSupport.SolrStartup.createSchema;
@@ -24,9 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.containers.SolrClientUtils.createCollection;
 
-//import kmeans.testSupport.*;
 
-public class AnalyzerCsmrUnitTest extends ContainerUtility {
+public class CollectorCsmrUnitTest extends ContainerUtility {
     private SolrClient client = null;
 
     public static final int DEFAULT_AMQPS_PORT = 5671;
@@ -54,22 +54,6 @@ public class AnalyzerCsmrUnitTest extends ContainerUtility {
     }
 
     @Test
-    public void supplierIsSupplying() {
-        AnalyzerCsmr analyzerCsmr = new AnalyzerCsmr(
-                null,
-                "webserver-exchange",
-                null,
-                solrContainer.getHost() + ":" + solrContainer.getSolrPort(),
-                () -> UUID.randomUUID().toString(),
-                new JedisPooled(redisContainer.getHost(), 6379)
-        );
-
-        System.out.println(analyzerCsmr.routingSupplier.get());
-        System.out.println(analyzerCsmr.routingSupplier.get());
-        System.out.println(analyzerCsmr.routingSupplier.get());
-    }
-
-    @Test
     @Ignore
     public void testContainersLoaded() throws SolrServerException, IOException {
         SolrPingResponse response = getSolrClient().ping("dummy");
@@ -86,16 +70,14 @@ public class AnalyzerCsmrUnitTest extends ContainerUtility {
 
     @Test
     @Ignore
-    public void returnsSuccessToWebServerExchange() throws Exception {
-//        ContainerUtility.rabbitContainer.getHost()
+    public void returnsSuccessToAnalyzerExchange() throws Exception {
 
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setUsername(rabbitContainer.getAdminUsername());
         connectionFactory.setPassword(rabbitContainer.getAdminPassword());
-//        connectionFactory.setPort(5671);
-        //connectionFactory.enableHostnameVerification();
+
         connectionFactory.setUri(rabbitContainer.getAmqpUrl());
-        //connectionFactory.setHost(ContainerUtility.rabbitContainer.getHost());
+
         Connection conn = connectionFactory.newConnection();
         Channel ch = conn.createChannel();
 
@@ -118,8 +100,25 @@ public class AnalyzerCsmrUnitTest extends ContainerUtility {
         solrClient = new HttpSolrClient.Builder("http://" + solrIp + "/solr/schedules").build();
         createSchema(solrClient);
 
-
-        //        (solrContainer.getHost() + ":" + solrContainer.getZookeeperPort());
+        ch.exchangeDeclare(
+                "collector-exchange",
+                "direct",
+                false,
+                false,
+                null
+        );
+        ch.queueDeclare(
+                "collector-queue-collector-app",
+                false,
+                false,
+                false,
+                null
+        );
+        ch.queueBind(
+                "collector-queue-collector-app",
+                "collector-exchange",
+                "86"
+        );
 
         ch.exchangeDeclare(
                 "analyzer-exchange",
@@ -129,47 +128,22 @@ public class AnalyzerCsmrUnitTest extends ContainerUtility {
                 null
         );
         ch.queueDeclare(
-                "analyzer-queue-analyzer-app",
+                "analyzer-queue-collector-app",
                 false,
                 false,
                 false,
                 null
         );
         ch.queueBind(
-                "analyzer-queue-analyzer-app",
+                "analyzer-queue-collector-app",
                 "analyzer-exchange",
-                "83"
-        );
-
-        ch.exchangeDeclare(
-                "webserver-exchange",
-                "direct",
-                false,
-                false,
-                null
-        );
-        ch.queueDeclare(
-                "webserver-queue-analyzer-app",
-                false,
-                false,
-                false,
-                null
-        );
-        ch.queueBind(
-                "webserver-queue-analyzer-app",
-                "webserver-exchange",
-                "81"
+                "80"
         );
 
         SolrEntityCoordinateJsonData coordinateList = new SolrEntityCoordinateJsonData();
-        List<Coordinate> listOfNewCoordinates = new ArrayList<>();
-        listOfNewCoordinates.add(new Coordinate(1.0D,3.0D, 9.0D));
-        coordinateList.setCoordinates(listOfNewCoordinates);
         coordinateList.setFilename("a.png");
-        coordinateList.setWidth(1);
-        coordinateList.setHeight(3);
 
-        solrClient = new HttpSolrClient.Builder("http://" + solrIp + "/solr/coordinates_after_collector").build();
+        solrClient = new HttpSolrClient.Builder("http://" + solrIp + "/solr/coordinates_after_webserver").build();
 
         solrClient.addBean(
                 new SolrEntity(
@@ -180,23 +154,25 @@ public class AnalyzerCsmrUnitTest extends ContainerUtility {
         );
         solrClient.commit();
 
-        AnalyzerCsmr analyzerCsmr = new AnalyzerCsmr(
+        CollectorCsmr collectorCsmr = new CollectorCsmr(
                 ch,
-                "webserver-exchange",
+                "analyzer-exchange",
                 connectionFactory,
                 solrContainer.getHost() + ":" + solrContainer.getSolrPort(),
-                () -> "81",
+                () -> "80",
                 new JedisPooled(redisContainer.getHost(), 6379)
                 );
         ch.basicConsume(
-                "analyzer-queue-analyzer-app",
+                "collector-queue-collector-app",
                 false,
-                analyzerCsmr);
+                collectorCsmr);
+
+        // create a message ( this would be written by the webserver app )
         assertTrue(ContainerUtility.rabbitContainer.execInContainer(
                 "rabbitmqadmin",
                 "publish",
-                "exchange=analyzer-exchange",
-                "routing_key=83",
+                "exchange=collector-exchange",
+                "routing_key=86",
                 //"properties='{\"content_type\":\"application/json\"}'",
                 "payload={\"solrEntityScheduledRun_UUID\":\"111\",\"solrEntityCoordinatesList_UUID\":\"222\",\"numTriesFindingSolrRecord\":333}"
                 //"payload_encoding='string'"
@@ -214,7 +190,7 @@ public class AnalyzerCsmrUnitTest extends ContainerUtility {
 
 
         ;
-        ch.basicConsume("webserver-queue-analyzer-app", false, new DefaultConsumer(ch) {
+        ch.basicConsume("analyzer-queue-collector-app", false, new DefaultConsumer(ch) {
             @Override
             public void handleDelivery(String consumerTag,
                                        Envelope envelope,

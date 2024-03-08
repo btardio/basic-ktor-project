@@ -7,9 +7,9 @@ import kmeans.rabbitSupport.RabbitMessageStartRun;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
+
 import kmeans.scalasupport.IndexedColorFilter;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import kmeans.solrSupport.SolrEntity;
@@ -18,20 +18,14 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrException;
 import kmeans.solrSupport.SolrUtility;
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPooled;
-import static java.lang.System.exit;
 
 
 public class AnalyzerCsmr  implements Consumer {
 	public static final String ANALYZER_EXCHANGE = System.getenv("ANALYZER_EXCHANGE") == null || System.getenv("ANALYZER_EXCHANGE").isEmpty() ?
 			"analyzer-exchange" : System.getenv("ANALYZER_EXCHANGE");
-
-	public static final String ANALYZER_QUEUE = System.getenv("ANALYZER_QUEUE") == null || System.getenv("ANALYZER_QUEUE").isEmpty() ?
-			"analyzer-queue" : System.getenv("ANALYZER_QUEUE");
 
 	private final Channel ch;
 	private final String exchangeName;
@@ -40,20 +34,20 @@ public class AnalyzerCsmr  implements Consumer {
 	private final String solrUri;
 	private final JedisPooled jedis;
 
-	private String routingKey;
+	public Supplier<String> routingSupplier;
 
 	public AnalyzerCsmr(Channel ch,
 						String exchangeName,
 						ConnectionFactory connectionFactory,
 						String solrUri,
-						String routingKey,
+						Supplier<String> routingSupplier,
 						JedisPooled jedis) {
 
 		this.ch = ch;
 		this.exchangeName = exchangeName;
 		this.connectionFactory = connectionFactory;
 		this.solrUri = solrUri;
-		this.routingKey = routingKey;
+		this.routingSupplier = routingSupplier;
 		this.jedis = jedis;
 	}
 
@@ -220,7 +214,7 @@ public class AnalyzerCsmr  implements Consumer {
 				// publish to webserver exchange
 				LazyInitializedSingleton.getInstance(connectionFactory).basicPublish(
 						exchangeName,
-						routingKey,
+						routingSupplier.get(),
 						MessageProperties.PERSISTENT_BASIC,
 						objectMapper.writeValueAsString(rabbitMessageStartRun).getBytes()
 				);

@@ -37,6 +37,8 @@ val CASSANDRA_SEEDS = getEnvStr("CASSANDRA_SEEDS", "127.0.0.1")
 val ZOO_LOCAL = getEnvStr("ZOO_LOCAL", "zoo1:2181")
 val RABBIT_URL = getEnvStr("RABBIT_URL", "127.0.0.1")
 
+val SOLR_CONNECT_IP = getEnvStr("SOLR_CONNECT_IP", "solr1:8983")
+
 private val logger = LoggerFactory.getLogger("kmeans.collector.App")
 
 private fun listenForNotificationRequests(
@@ -53,6 +55,8 @@ private fun listenForNotificationRequests(
             channel,
             exchangeName,
             connectionFactory,
+            SOLR_CONNECT_IP,
+            { UUID.randomUUID().toString() },
             jedis)
     );
 }

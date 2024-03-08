@@ -1,1 +1,0 @@
-// Please see Analyzer Java unit tests for an example of unit tests that could be implemented for the collector.

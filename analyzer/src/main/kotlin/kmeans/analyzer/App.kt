@@ -50,7 +50,7 @@ private fun listenForNotificationRequests(
             exchangeName,
             connectionFactory,
             SOLR_CONNECT_IP,
-            UUID.randomUUID().toString(),
+            { UUID.randomUUID().toString() }, //UUID.randomUUID().toString(),
             jedis)
     );
 

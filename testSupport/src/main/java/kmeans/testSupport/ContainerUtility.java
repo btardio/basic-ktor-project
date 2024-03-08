@@ -1,15 +1,16 @@
-package kmeans.analyzer;
+package kmeans.testSupport;
 
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.containers.SolrContainer;
-import org.testcontainers.images.AbstractImagePullPolicy;
-import org.testcontainers.images.ImageData;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
-abstract class ContainerUtility {
+public abstract class ContainerUtility {
 
     public static final SolrContainer solrContainer;
     public static final RabbitMQContainer rabbitContainer;
+
+    public static final GenericContainer redisContainer;
 
     static {
         solrContainer = new SolrContainer("solr:8.7.0");
@@ -18,6 +19,9 @@ abstract class ContainerUtility {
         rabbitContainer = new RabbitMQContainer("rabbitmq:3.12-management-alpine");
         rabbitContainer.addExposedPort(15672);
         rabbitContainer.start();
+
+        redisContainer = new GenericContainer(DockerImageName.parse("redis:5.0.3-alpine"))
+                .withExposedPorts(6379);
     }
 
 }
