@@ -90,6 +90,12 @@ public class WebserverCsmr implements Consumer {
 			// read the message
 
 			RabbitMessageStartRun rabbitMessageStartRun = objectMapper.readValue(body, RabbitMessageStartRun.class);
+			String timestamp = String.valueOf(new Date().getTime() / 10L);
+			jedis.set(timestamp, "{\"source\":\"webserver\",\"message\":" +
+					"\"Started WebserverCsmr\"" +
+					",\"scheduleid\":" + "\"" + rabbitMessageStartRun.getSolrEntityScheduledRun_UUID() + "\"}");
+			jedis.expire(timestamp, 900);
+
 			//log.error(rabbitMessageStartRun.toString());
 			Channel cfA = LazyInitializedSingleton.getInstance(connectionFactory);
 
@@ -107,8 +113,10 @@ public class WebserverCsmr implements Consumer {
 			} catch (SolrServerException | SolrException e) {
 				//counter.get("exception_unknown_republish").labelValues("default").inc();
 				//log.error("Exception querying coordinates_after_analyzer.", e);
-				String timestamp = String.valueOf(new Date().getTime() / 10L);
-				jedis.set(timestamp, "Exception querying coordinates_after_analyzer." + e.getMessage());
+				timestamp = String.valueOf(new Date().getTime() / 10L);
+				jedis.set(timestamp, "{\"source\":\"webserver\",\"message\":" +
+						"\"Exception querying coordinates_after_analyzer." + e.getMessage() + "\"" +
+						",\"scheduleid\":" + "\"" + rabbitMessageStartRun.getSolrEntityScheduledRun_UUID() + "\"}");
 				jedis.expire(timestamp, 900);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -127,8 +135,8 @@ public class WebserverCsmr implements Consumer {
 				solrClient.close();
 			}
 
-			String timestamp = String.valueOf(new Date().getTime() / 10L);
-			jedis.set(timestamp, "Records found on coordinates_after_analyzer." + response.getResults().getNumFound());
+			timestamp = String.valueOf(new Date().getTime() / 10L);
+
 			jedis.expire(timestamp, 900);
 
 			// if its not fuond it will be
@@ -136,7 +144,11 @@ public class WebserverCsmr implements Consumer {
 				//counter.get("not_found_expected_coordinates").labelValues("default").inc();
 				//log.error(response.getResults().getNumFound() + "Records found on coordinates_after_analyzer.");
 				timestamp = String.valueOf(new Date().getTime() / 10L);
-				jedis.set(timestamp, "Records not found on coordinates_after_analyzer.");
+
+				jedis.set(timestamp, "{\"source\":\"webserver\",\"message\":" +
+						"\"Records not found on coordinates_after_analyzer." + "" + "\"" +
+						",\"scheduleid\":" + "\"" + rabbitMessageStartRun.getSolrEntityScheduledRun_UUID() + "\"}");
+
 				jedis.expire(timestamp, 900);
 				int numTries = rabbitMessageStartRun.getNumTriesFindingSolrRecord();
 				if (numTries < 100) {
@@ -188,7 +200,11 @@ public class WebserverCsmr implements Consumer {
 					//counter.get("failed_writing_coordinates_after_read").labelValues("default").inc();
 //					counter.get("get_all_schedules_fail").labelValues("default").inc();
 					timestamp = String.valueOf(new Date().getTime() / 10L);
-					jedis.set(timestamp, "failed_writing_schedule_complete_after_read" + e.getMessage());
+
+					jedis.set(timestamp, "{\"source\":\"webserver\",\"message\":" +
+							"\"failed_writing_schedule_complete_after_read." + e.getMessage() + "\"" +
+							",\"scheduleid\":" + "\"" + rabbitMessageStartRun.getSolrEntityScheduledRun_UUID() + "\"}");
+
 					jedis.expire(timestamp, 900);
 					cfA.basicPublish(
 							WEBSERVER_EXCHANGE,
@@ -210,7 +226,9 @@ public class WebserverCsmr implements Consumer {
 			if (envelope != null) {
 				this.ch.basicAck(envelope.getDeliveryTag(), false);
 				timestamp = String.valueOf(new Date().getTime() / 10L);
-				jedis.set(timestamp, "Success WebserverCsmr");
+				jedis.set(timestamp, "{\"source\":\"webserver\",\"message\":" +
+						"\"Finished WebserverCsmr\"" +
+						",\"scheduleid\":" + "\"" + rabbitMessageStartRun.getSolrEntityScheduledRun_UUID() + "\"}");
 				jedis.expire(timestamp, 900);
 			};
 			jedis.set("webserver", "OK");
