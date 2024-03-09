@@ -27,9 +27,11 @@ import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.params.ScanParams
 import redis.clients.jedis.params.ScanParams.SCAN_POINTER_START
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
@@ -278,7 +280,7 @@ fun main() {
                     cur = scanResult.cursor
                 } while (cur != SCAN_POINTER_START)
 
-                call.respondText(ObjectMapper().writeValueAsString(out))
+                call.respondText(URLEncoder.encode(ObjectMapper().writeValueAsString(out), StandardCharsets.UTF_8.toString()))
             }
 
             get("/metrics") {
