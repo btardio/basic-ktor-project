@@ -32,6 +32,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
@@ -285,58 +286,90 @@ fun main() {
 
             get("/metrics") {
                 val map = mutableMapOf<String, String>();
+                val responseA: CompletableFuture<HttpResponse<String>> = null
+                val responseB: CompletableFuture<HttpResponse<String>> = null
+                val responseC: CompletableFuture<HttpResponse<String>> = null
+                val responseD: CompletableFuture<HttpResponse<String>> = null
+                val responseE: CompletableFuture<HttpResponse<String>> = null
 
+                try {
 
-                val responseA: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                        .uri(URI("http://A.lf.lll:8888/metricsDump"))
-                        .GET()
-                        .build(), HttpResponse.BodyHandlers.ofString())
+                    responseA = HttpClient.newBuilder()
+                        .executor(executorService)
+                        .connectTimeout(Duration.ofSeconds(1))
+                        .build()
+                        .sendAsync(
+                            HttpRequest.newBuilder()
+                                .uri(URI("http://A.lf.lll:8888/metricsDump"))
+                                .GET()
+                                .build(), HttpResponse.BodyHandlers.ofString()
+                        )
+                } catch (e: Exception) {
 
-                val responseB: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                            .uri(URI("http://B.lf.lll:8888/metricsDump"))
-                            .GET()
-                            .build(), HttpResponse.BodyHandlers.ofString())
+                }
 
-                val responseC: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                            .uri(URI("http://C.lf.lll:8888/metricsDump"))
-                            .GET()
-                            .build(), HttpResponse.BodyHandlers.ofString())
+                try {
+                    responseB = HttpClient.newBuilder()
+                        .executor(executorService)
+                        .connectTimeout(Duration.ofSeconds(1))
+                        .build()
+                        .sendAsync(
+                            HttpRequest.newBuilder()
+                                .uri(URI("http://B.lf.lll:8888/metricsDump"))
+                                .GET()
+                                .build(), HttpResponse.BodyHandlers.ofString())
+                } catch (e: Exception) {
 
-                val responseD: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                            .uri(URI("http://D.lf.lll:8888/metricsDump"))
-                            .GET()
-                            .build(), HttpResponse.BodyHandlers.ofString())
+                }
 
-                val responseE: CompletableFuture<HttpResponse<String>> = HttpClient.newBuilder()
-                    .executor(executorService)
-                    .build()
-                    .sendAsync(
-                        HttpRequest.newBuilder()
-                            .uri(URI("http://E.lf.lll:8888/metricsDump"))
-                            .GET()
-                            .build(), HttpResponse.BodyHandlers.ofString())
+                try {
+                    responseC = HttpClient.newBuilder()
+                        .executor(executorService)
+                        .connectTimeout(Duration.ofSeconds(1))
+                        .build()
+                        .sendAsync(
+                            HttpRequest.newBuilder()
+                                .uri(URI("http://C.lf.lll:8888/metricsDump"))
+                                .GET()
+                                .build(), HttpResponse.BodyHandlers.ofString())
+                } catch (e: Exception) {
 
-                map.put("A.lf.lll", responseA.get().body());
-                map.put("B.lf.lll", responseB.get().body());
-                map.put("C.lf.lll", responseC.get().body());
-                map.put("D.lf.lll", responseD.get().body());
-                map.put("E.lf.lll", responseE.get().body());
+                }
+
+                try {
+                    responseD = HttpClient.newBuilder()
+                        .executor(executorService)
+                        .connectTimeout(Duration.ofSeconds(1))
+                        .build()
+                        .sendAsync(
+                            HttpRequest.newBuilder()
+                                .uri(URI("http://D.lf.lll:8888/metricsDump"))
+                                .GET()
+                                .build(), HttpResponse.BodyHandlers.ofString())
+                } catch (e: Exception) {
+
+                }
+
+                try {
+                    responseE = HttpClient.newBuilder()
+                        .executor(executorService)
+                        .connectTimeout(Duration.ofSeconds(1))
+                        .build()
+                        .sendAsync(
+                            HttpRequest.newBuilder()
+                                .uri(URI("http://E.lf.lll:8888/metricsDump"))
+                                .GET()
+                                .build(), HttpResponse.BodyHandlers.ofString()
+                        )
+                } catch (e: Exception) {
+
+                }
+
+                try { map.put("A.lf.lll", responseA.get().body()); } catch (e: Exception) { }
+                try { map.put("B.lf.lll", responseB.get().body()); } catch (e: Exception) { }
+                try { map.put("C.lf.lll", responseC.get().body()); } catch (e: Exception) { }
+                try { map.put("D.lf.lll", responseD.get().body()); } catch (e: Exception) { }
+                try { map.put("E.lf.lll", responseE.get().body()); } catch (e: Exception) { }
 
                 call.respondText(ObjectMapper().writeValueAsString(map))
             }
