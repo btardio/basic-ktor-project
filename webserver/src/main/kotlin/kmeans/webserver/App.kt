@@ -286,11 +286,11 @@ fun main() {
 
             get("/metrics") {
                 val map = mutableMapOf<String, String>();
-                val responseA: CompletableFuture<HttpResponse<String>> = null
-                val responseB: CompletableFuture<HttpResponse<String>> = null
-                val responseC: CompletableFuture<HttpResponse<String>> = null
-                val responseD: CompletableFuture<HttpResponse<String>> = null
-                val responseE: CompletableFuture<HttpResponse<String>> = null
+                var responseA: CompletableFuture<HttpResponse<String>>? = null
+                var responseB: CompletableFuture<HttpResponse<String>>? = null
+                var responseC: CompletableFuture<HttpResponse<String>>? = null
+                var responseD: CompletableFuture<HttpResponse<String>>? = null
+                var responseE: CompletableFuture<HttpResponse<String>>? = null
 
                 try {
 
@@ -365,11 +365,26 @@ fun main() {
 
                 }
 
-                try { map.put("A.lf.lll", responseA.get().body()); } catch (e: Exception) { }
-                try { map.put("B.lf.lll", responseB.get().body()); } catch (e: Exception) { }
-                try { map.put("C.lf.lll", responseC.get().body()); } catch (e: Exception) { }
-                try { map.put("D.lf.lll", responseD.get().body()); } catch (e: Exception) { }
-                try { map.put("E.lf.lll", responseE.get().body()); } catch (e: Exception) { }
+                try {
+                    if (responseA != null) {
+                        map.put("A.lf.lll", responseA.get().body())
+                    }; } catch (e: Exception) { }
+                try {
+                    if (responseB != null) {
+                        map.put("B.lf.lll", responseB.get().body())
+                    }; } catch (e: Exception) { }
+                try {
+                    if (responseC != null) {
+                        map.put("C.lf.lll", responseC.get().body())
+                    }; } catch (e: Exception) { }
+                try {
+                    if (responseD != null) {
+                        map.put("D.lf.lll", responseD.get().body())
+                    }; } catch (e: Exception) { }
+                try {
+                    if (responseE != null) {
+                        map.put("E.lf.lll", responseE.get().body())
+                    }; } catch (e: Exception) { }
 
                 call.respondText(ObjectMapper().writeValueAsString(map))
             }
