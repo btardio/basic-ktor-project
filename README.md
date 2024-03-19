@@ -280,3 +280,63 @@ Delete all from Solr
 ```
 {'delete': {'query': '*:*'}}
 ```
+
+
+### Scratch Misc
+
+#### Proxy load balancer example machine 1
+
+ServerName netoxena.com
+
+<Proxy balancer://AWSN/>
+    BalancerMember http://52.9.141.114:8181/
+    BalancerMember http://54.176.31.146:8181/
+    BalancerMember http://13.56.7.58:8181/
+    BalancerMember http://52.52.171.199:8181/
+    BalancerMember http://54.176.6.18:8181/
+</Proxy>
+
+ProxyPass / balancer://AWSN/
+ProxyPassReverse / balancer://AWSN/
+
+ProxyPassReverse / http://52.9.141.114:8181/
+ProxyPassReverse / http://54.176.31.146:8181/
+ProxyPassReverse / http://13.56.7.58:8181/
+ProxyPassReverse / http://52.52.171.199:8181/
+ProxyPassReverse / http://54.176.6.18:8181/
+
+
+Header append Access-Control-Allow-Origin "*"
+Header append Origin "netoxena.com"
+
+ProxyPass /8000 http://netoxena.com:8000
+ProxyPassReverse /8000 http://netoxena.com:8000
+
+ProxyPreserveHost on
+
+Header set Access-Control-Allow-Headers "*"
+
+Header set Access-Control-Allow-Origin "http://netoxena.com"
+
+Header set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+
+
+#### Proxy load balancer example machine 2
+
+<Proxy balancer://AWS/>
+    BalancerMember http://52.9.141.114:8888/
+    BalancerMember http://54.176.31.146:8888/
+    BalancerMember http://13.56.7.58:8888/
+    BalancerMember http://52.52.171.199:8888/
+    BalancerMember http://54.176.6.18:8888/
+</Proxy>
+
+ProxyPassReverse / http://52.9.141.114:8888/
+ProxyPassReverse / http://54.176.31.146:8888/
+ProxyPassReverse / http://13.56.7.58:8888/
+ProxyPassReverse / http://52.52.171.199:8888/
+ProxyPassReverse / http://54.176.6.18:8888/
+
+ProxyPass / balancer://AWS/
+ProxyPassReverse / balancer://AWS/
+Header append Access-Control-Allow-Origin "http://netoxena.com"
